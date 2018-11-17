@@ -3,6 +3,6 @@ git config --global user.email "danisales.es@gmail.com"
 git rm --cached -r ./
 #echo "/bin/" > .gitignore
 git add --all
-git commit -m "commit2"
+git commit -m "commit3"
 git push master
-git push master private
+git push -u master private
