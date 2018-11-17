@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import tasks.LoopTask;
 
-public abstract class FileSavableAdapter extends FileAdapter implements FileSavable {
+public abstract class FileSavableAdapterAbstract extends FileAdapterAbstract implements FileSavable {
 	protected AtomicBoolean _dirty, _autosaving;
 	
-	public FileSavableAdapter(String folder, String fn, String ext) {
+	public FileSavableAdapterAbstract(String folder, String fn, String ext) {
 		super(folder, fn, ext);
 		
 		_dirty = new AtomicBoolean(false);
@@ -51,7 +51,7 @@ public abstract class FileSavableAdapter extends FileAdapter implements FileSava
 
 		});
 
-		threads.run( false );
+		threads.run();
 	}
 
 	@Override

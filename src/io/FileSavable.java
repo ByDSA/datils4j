@@ -1,11 +1,9 @@
 package io;
 
-import java.util.List;
-
 import tasks.TaskManager;
 
 public interface FileSavable extends File {
-	final TaskManager threads = new TaskManager(100);
+	final TaskManager threads = new TaskManager();
 	
 	boolean save();
 	

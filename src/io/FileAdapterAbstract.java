@@ -1,14 +1,11 @@
 package io;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import tasks.LoopTask;
-
-public abstract class FileAdapter implements FileSavable {
+public abstract class FileAdapterAbstract implements File {
 	protected AtomicReference<String> _filename,  _extension, _folder;
 	
-	public FileAdapter(String folder, String fn, String ext) {
+	public FileAdapterAbstract(String folder, String fn, String ext) {
 		_filename = new AtomicReference<>();
 		_extension = new AtomicReference<String>();
 		_folder = new AtomicReference<String>();

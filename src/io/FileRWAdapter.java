@@ -2,7 +2,7 @@ package io;
 
 import concurrency.Lockable;
 
-public abstract class FileRWAdapter extends FileSavableAdapter implements FileReadable, Lockable {
+public abstract class FileRWAdapter extends FileSavableAdapterAbstract implements FileReadable, Lockable {
 	final Object _lock = new Object();
 	
 	public FileRWAdapter(final String folder, final String fn, final String ext) {
