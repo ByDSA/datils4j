@@ -9,5 +9,5 @@ echo "*.gitignore
 git add ./
 git commit -m "commit44"
 git push master
-git push -u public/master master
+git push -u public master
 mv temp.gitignore .gitignore
