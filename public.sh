@@ -1,8 +1,5 @@
+./private.sh $1
 git rm --cached -r ./
-git add --all
-git commit -m $1
-git push -u private master
-
 mv .gitignore temp.gitignore
 echo "*.gitignore
 /bin/
