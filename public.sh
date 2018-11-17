@@ -7,7 +7,7 @@ echo "*.gitignore
 /.classpath
 *.sh" > .gitignore
 git add ./
-git commit -m "commit2"
+git commit -m "commit33"
 git push master
-git push public
+git push -u public master
 mv temp.gitignore .gitignore
