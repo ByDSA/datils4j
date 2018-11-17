@@ -1,6 +1,0 @@
-*.gitignore
-/bin/
-/.settings
-/.project
-/.classpath
-*.sh
