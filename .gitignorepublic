@@ -1,0 +1,7 @@
+.gitignore
+.gitignorepublic
+/bin/
+/.settings
+/.project
+/.classpath
+test
