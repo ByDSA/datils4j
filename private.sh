@@ -5,4 +5,4 @@ git rm --cached -r ./
 git add --all
 git commit -m "commit3"
 git push master
-git push -u master private
+git push -u private master
