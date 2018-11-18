@@ -25,7 +25,7 @@ public final class StringBin extends TypeBin<String> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		buff.put( get().getBytes( charset ) );
 		buff.put( (byte) 0 );
 	}

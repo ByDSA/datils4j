@@ -36,10 +36,10 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		buff.putInt( get().length );
 		for(T t : varBin)
-			t.addBuff( buff );
+			t.write( buff );
 	}
 
 	@Override

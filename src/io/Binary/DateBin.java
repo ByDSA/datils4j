@@ -18,7 +18,7 @@ public class DateBin extends TypeBin<Long> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		buff.putLong( get() );
 	}
 	

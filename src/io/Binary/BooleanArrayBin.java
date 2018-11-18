@@ -37,7 +37,7 @@ public final class BooleanArrayBin extends TypeBin<List<Boolean>> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		int n = -1;
 		byte[] encodedBytes = new byte[size()];
 		for (boolean b : get()) {

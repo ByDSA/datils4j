@@ -71,11 +71,11 @@ public interface BinaryElement extends Binary {
 		}
 	}
 
-	default void addBuff(ByteBuffer buff) {
+	default void write(ByteBuffer buff) {
 		it((Binary b) -> {
-			b.addBuff( buff );
+			b.write( buff );
 		}, (BooleanArrayBin bab) -> {
-			bab.addBuff( buff );
+			bab.write( buff );
 		});
 	}
 

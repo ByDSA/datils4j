@@ -23,7 +23,7 @@ public final class IntegerBin extends TypeBin<Integer> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		buff.putInt( get() );
 	}
 

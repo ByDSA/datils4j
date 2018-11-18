@@ -38,11 +38,11 @@ public class FileBinary extends FileRWAdapter implements BinaryElement, FileWrit
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		it((Binary b) -> {
-			b.addBuff( buff );
+			b.write( buff );
 		}, (BooleanArrayBin bab) -> {
-			bab.addBuff( buff );
+			bab.write( buff );
 		});
 	}
 

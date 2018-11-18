@@ -64,9 +64,9 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends File
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		for(L l : lines)
-			l.addBuff( buff );
+			l.write( buff );
 	}
 
 	@Override

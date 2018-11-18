@@ -13,7 +13,7 @@ public final class BooleanBin extends TypeBin<Boolean> {
 	}
 
 	@Override
-	public void addBuff(ByteBuffer buff) {
+	public void write(ByteBuffer buff) {
 		buff.put( (byte) (get() ? 0x1 : 0x0));
 	}
 	
