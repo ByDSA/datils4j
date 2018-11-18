@@ -1,15 +1,14 @@
 package io;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import tasks.LoopTask;
 
 public abstract class FileSavableAdapterAbstract extends FileAdapterAbstract implements FileSavable {
 	protected AtomicBoolean _dirty, _autosaving;
 	
-	public FileSavableAdapterAbstract(String folder, String fn, String ext) {
-		super(folder, fn, ext);
+	public FileSavableAdapterAbstract(String folder, String filename, String extension) {
+		super(folder, filename, extension);
 		
 		_dirty = new AtomicBoolean(false);
 		_autosaving = new AtomicBoolean( false );

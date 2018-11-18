@@ -1,4 +1,4 @@
-package io.Binary;
+package binary;
 
 import java.nio.ByteBuffer;
 

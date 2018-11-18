@@ -1,4 +1,4 @@
-package io.Binary;
+package binary;
 
 public abstract class TypeBin<T> implements Binary {
 	private T var;

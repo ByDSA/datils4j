@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import io.Binary.BooleanBin;
-import io.Binary.FileBinary;
-import io.Binary.IntegerBin;
+import binary.BooleanBin;
+import binary.IntegerBin;
+import io.Binary.BinaryFileAutoBin;
 
 public class IoBinaryTests {
-	class TestBin extends FileBinary {
+	class TestBin extends BinaryFileAutoBin {
 		public BooleanBin b1, b2, b3, b4, b5, b6, b7, b8;
 		public IntegerBin tt;
 		

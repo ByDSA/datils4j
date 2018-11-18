@@ -19,8 +19,8 @@ public abstract class TextFile<L extends CharSequence> extends FileRWAdapter imp
 	protected String lineSeparator = "\r\n";
 	protected List<L> lines;
 
-	public TextFile(String folder, String fn, String ext) {
-		super( folder, fn, ext );
+	public TextFile(String folder, String filename, String extension) {
+		super( folder, filename, extension );
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package io.Binary;
+package binary;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -9,6 +9,7 @@ import Log.String.Logging;
 public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 	T[] varBin;
 	Class<T> tClass;
+	
 	public ArrayBin(Class<T> c, U... v) {
 		super(v);
 
@@ -20,7 +21,6 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 				varBin[i] = c.getDeclaredConstructor( c ).newInstance( v[i] );
 			} catch ( InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e ) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Logging.fatalError();
 			}

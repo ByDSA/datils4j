@@ -1,8 +1,7 @@
-package io.Binary;
+package binary;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import Log.String.Logging;

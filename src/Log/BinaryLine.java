@@ -4,12 +4,12 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.List;
 
-import io.Binary.BinaryElement;
-import io.Binary.DateBin;
-import io.Binary.IntegerBin;
+import binary.DateBin;
+import binary.IntegerBin;
+import binary.auto.AutoBin;
 import others.Codeable;
 
-public abstract class BinaryLine<A extends Codeable> implements BinaryElement, Codeable {
+public abstract class BinaryLine<A extends Codeable> implements AutoBin, Codeable {
 	private DateBin date;
 	private IntegerBin actionCode;
 

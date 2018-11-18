@@ -1,15 +1,10 @@
-package io.Binary;
+package binary;
 
 import java.nio.ByteBuffer;
-import java.util.Date;
 
-public class DateBin extends TypeBin<Long> {
-	public DateBin(Long v) {
-		super( v );
-	}
-	
-	public DateBin(Date v) {
-		super( v.getTime() );
+public final class LongBin extends TypeBin<Long> {
+	public LongBin(Long v) {
+		super(v);
 	}
 
 	@Override
@@ -22,13 +17,8 @@ public class DateBin extends TypeBin<Long> {
 		buff.putLong( get() );
 	}
 	
-	public Date getDate() {
-		return new Date( get() );
-	}
-	
 	@Override
 	public void read(ByteBuffer buff) {
 		set( buff.getLong() );
 	}
-
 }

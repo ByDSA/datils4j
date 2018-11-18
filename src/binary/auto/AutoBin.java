@@ -1,21 +1,21 @@
-package io.Binary;
+package binary.auto;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import Log.String.Logging;
+import binary.Binary;
+import binary.BooleanArrayBin;
+import binary.BooleanBin;
 
-public interface BinaryElement extends Binary {
+public interface AutoBin extends Binary {
 	List<Field> binaryFields= new ArrayList<Field>(), booleanFields = new ArrayList<Field>();
 
 	default void initializeNull() {
@@ -29,7 +29,6 @@ public interface BinaryElement extends Binary {
 					f.set( this, clazz.newInstance() );
 				}
 			} catch ( IllegalArgumentException | IllegalAccessException | SecurityException e ) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Logging.fatalError();
 			} catch ( InstantiationException e ) {

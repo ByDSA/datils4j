@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import Log.String.Logging;
+import binary.Binary;
 import io.FileAppendable;
 import io.FileWritable;
-import io.Binary.Binary;
-import io.Binary.FileBinary;
+import io.Binary.BinaryFile;
 import others.Codeable;
 
-public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends FileBinary implements Log<L>, FileWritable, FileAppendable<L> {
+public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileWritable, FileAppendable<L> {
 	CopyOnWriteArrayList<L> _buffer;
 	protected List<L> lines;
 
