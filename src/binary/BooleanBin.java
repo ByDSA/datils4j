@@ -8,7 +8,7 @@ public final class BooleanBin extends TypeBin<Boolean> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		return 1;
 	}
 

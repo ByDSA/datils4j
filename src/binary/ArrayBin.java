@@ -24,19 +24,23 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 				e.printStackTrace();
 				Logging.fatalError();
 			}
-
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		int s = Integer.BYTES;
 		for(T t : varBin)
-			s += t.size();
+			s += t.sizeBytes();
 		return s;
 	}
 
 	@Override
 	public void write(ByteBuffer buff) {
+		super.write( buff );
+		
+		if (putType)
+			Binary.writeId( tClass, buff );
+		
 		buff.putInt( get().length );
 		for(T t : varBin)
 			t.write( buff );
@@ -45,8 +49,14 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 	@Override
 	public void read(ByteBuffer buff) {
 		try {
+			super.read(buff);
+			Class c;
+			if (putType)
+				c = Binary.readId( buff );
+			else
+				c = tClass;
 			int length = buff.getInt();
-			varBin = (T[])Array.newInstance( tClass, length);
+			varBin = (T[])Array.newInstance( c, length);
 			for (int i = 0; i < length ; i++) {
 
 				varBin[i] = tClass.newInstance();

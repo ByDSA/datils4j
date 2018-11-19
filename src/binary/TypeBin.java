@@ -1,10 +1,17 @@
 package binary;
 
+import java.nio.ByteBuffer;
+
 public abstract class TypeBin<T> implements Binary {
-	private T var;
+	T var;
+	protected Class type;
+	
+	boolean putType;
 	
 	public TypeBin(T v) {
 		var = v;
+		setPutType(false);
+		type = var.getClass();
 	}
 	
 	public TypeBin() {
@@ -22,5 +29,25 @@ public abstract class TypeBin<T> implements Binary {
 	@Override
 	public String toString() {
 		return var.toString();
+	}
+	
+	@Override
+	public void write(ByteBuffer buff) {
+		if (putType)
+			Binary.writeId( getClass(), buff );
+	}
+	
+	@Override
+	public void read(ByteBuffer buff) {
+		if (putType)
+			type = Binary.getClass( buff.getInt() );
+	}
+	
+	public void setPutType(boolean b) {
+		putType = b;
+	}
+	
+	public boolean getPutType() {
+		return putType;
 	}
 }

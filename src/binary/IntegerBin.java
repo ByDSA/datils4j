@@ -18,7 +18,7 @@ public final class IntegerBin extends TypeBin<Integer> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		return Integer.BYTES;
 	}
 

@@ -167,14 +167,14 @@ public interface AutoBin extends Binary {
 		}
 	}
 
-	default int size() {
+	default int sizeBytes() {
 		initializeNull();
 
 		AtomicInteger s = new AtomicInteger(0);
 		it((Binary b)-> {
-			s.set( s.addAndGet( b.size() ) );
+			s.set( s.addAndGet( b.sizeBytes() ) );
 		}, (BooleanArrayBin bab) -> {
-			s.set( s.addAndGet( bab.size() ) );
+			s.set( s.addAndGet( bab.sizeBytes() ) );
 		});
 
 		return s.get();

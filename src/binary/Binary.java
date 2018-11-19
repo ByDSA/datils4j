@@ -1,19 +1,29 @@
 package binary;
 
+import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 /**
  * Class which implements this interface could be turned into a byte array.
  */
-public interface Binary {
+public interface Binary extends Serializable {
+	public enum IdTypeEnum {
+		Integer, Long, Short;
+	}
+
+	static IdTypeEnum ID_TYPE = IdTypeEnum.Integer;
+	static final String ID_VARNAME = "serialVersionUID";
 	/**
 	 * Size in bytes of binary data composed in function getBytes.
 	 * 
 	 * @return size
 	 */
-	int size();
+	int sizeBytes();
 
 	/**
 	 * Turns the object information into a byte array.
@@ -21,7 +31,7 @@ public interface Binary {
 	 * @return byte array
 	 */
 	default byte[] getBytes() {
-		ByteBuffer buff = ByteBuffer.allocate( size() );
+		ByteBuffer buff = ByteBuffer.allocate( sizeBytes() );
 		write(buff);
 
 		return buff.array();
@@ -48,10 +58,10 @@ public interface Binary {
 	 * @param list List
 	 * @return size in bytes
 	 */
-	public static <L extends Binary> int size(List<L> list) {
+	public static <L extends Binary> int sizeBytes(List<L> list) {
 		int s = 0;
 		for (L b : list)
-			s += b.size();
+			s += b.sizeBytes();
 
 		return s;
 	}
@@ -81,5 +91,45 @@ public interface Binary {
 			ret[i] = buff.get();
 
 		return ret;
+	}
+
+	public static Object getId(Class<? extends Binary> c) {
+		try {
+			Field myField = c.getDeclaredField(ID_VARNAME);
+			return myField.get(null);
+		} catch ( Exception e ) {
+			return -1;
+		}
+	}
+
+	public static <B extends Binary> void writeId(Class<B> b, ByteBuffer buff) {
+		Object id = getId(b);
+		if (ID_TYPE == IdTypeEnum.Long)
+			buff.putLong( (long)id);
+		else if (ID_TYPE == IdTypeEnum.Integer)
+			buff.putInt( (int)id);
+		else if (ID_TYPE == IdTypeEnum.Integer)
+			buff.putShort( (short)id);
+	}
+	
+	public static <B extends Binary> void writeId(B b, ByteBuffer buff) {
+		writeId(b.getClass(), buff);
+	}
+	
+	public static Class readId( ByteBuffer buff ) {
+		long id = -1;
+		if (ID_TYPE == IdTypeEnum.Long)
+			id = buff.getLong();
+		else if (ID_TYPE == IdTypeEnum.Integer)
+			id = buff.getInt();
+		else if (ID_TYPE == IdTypeEnum.Integer)
+			id = buff.getShort();
+		return getClass(id);
+	}
+	
+	static Map<Long, Class> classes = new HashMap();
+	
+	public static Class getClass(long id) {
+		return classes.get( id );
 	}
 }

@@ -13,7 +13,7 @@ public class DateBin extends TypeBin<Long> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		return Long.BYTES;
 	}
 

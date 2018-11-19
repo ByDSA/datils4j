@@ -8,7 +8,7 @@ public final class LongBin extends TypeBin<Long> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		return Long.BYTES;
 	}
 

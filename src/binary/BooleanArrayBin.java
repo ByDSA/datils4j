@@ -30,7 +30,7 @@ public final class BooleanArrayBin extends TypeBin<List<Boolean>> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		int s = get().size();
 		return s == 0 ? 0 : s/8+1;
 	}
@@ -38,7 +38,7 @@ public final class BooleanArrayBin extends TypeBin<List<Boolean>> {
 	@Override
 	public void write(ByteBuffer buff) {
 		int n = -1;
-		byte[] encodedBytes = new byte[size()];
+		byte[] encodedBytes = new byte[sizeBytes()];
 		for (boolean b : get()) {
 			n++;
 			if (!b)

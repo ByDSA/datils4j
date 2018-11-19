@@ -40,7 +40,7 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends Bina
 
 	@Override
 	public boolean append(List<L> f) {
-		ByteBuffer buff = ByteBuffer.allocate( (int) Binary.size( f ) );
+		ByteBuffer buff = ByteBuffer.allocate( (int) Binary.sizeBytes( f ) );
 		for(L l : f)
 			buff.put( l.getBytes() );
 		try {
@@ -59,8 +59,8 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends Bina
 	}
 
 	@Override
-	public int size() {
-		return Binary.size( lines );
+	public int sizeBytes() {
+		return Binary.sizeBytes( lines );
 	}
 
 	@Override

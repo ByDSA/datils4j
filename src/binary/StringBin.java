@@ -20,7 +20,7 @@ public final class StringBin extends TypeBin<String> {
 	}
 
 	@Override
-	public int size() {
+	public int sizeBytes() {
 		return get().getBytes( charset ).length + 1;
 	}
 
