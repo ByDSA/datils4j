@@ -1,11 +1,13 @@
 package io.Text;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Function;
@@ -21,6 +23,7 @@ public abstract class TextFile<L extends CharSequence> extends FileRWAdapter imp
 
 	public TextFile(String folder, String filename, String extension) {
 		super( folder, filename, extension );
+		lines = new ArrayList();
 	}
 
 	@Override
@@ -30,13 +33,14 @@ public abstract class TextFile<L extends CharSequence> extends FileRWAdapter imp
 			StringBuilder sb = new StringBuilder();
 			for (L l : f) {
 				sb.append( l );
+				lines.add( l );
 				sb.append( lineSeparator );
 			}
-			
+
 			Files.write(
-			      path, 
-			      sb.toString().getBytes(), 
-			      StandardOpenOption.APPEND);
+				path, 
+				sb.toString().getBytes(), 
+				StandardOpenOption.APPEND);
 			return true;
 		} catch ( IOException e ) {
 			return false;
@@ -44,7 +48,7 @@ public abstract class TextFile<L extends CharSequence> extends FileRWAdapter imp
 	}
 
 	@Override
-	public boolean write() {
+	public boolean save() {
 		Path path = path();
 		try {
 			Files.write(path, lines, StandardCharsets.UTF_8);
@@ -71,21 +75,33 @@ public abstract class TextFile<L extends CharSequence> extends FileRWAdapter imp
 	public boolean load() {
 		return readLarge((line) -> {
 			lines.add( stringToLine(line) );
-			
+
 			return true;
 		});
 	}
-	
+
 	abstract protected L stringToLine(String l);
 
 	@Override
 	public boolean append(L f) {
+		
 		Path path = path();
+		
 		try {
-			Files.write(
-			      path, 
-			      f.toString().getBytes(), 
-			      StandardOpenOption.APPEND);
+			lines.add( f );
+
+			byte[] bytes = (f.toString() + lineSeparator).getBytes();
+			if (exists())
+				Files.write(
+					path, 
+					bytes, 
+					StandardOpenOption.APPEND);
+			else
+				Files.write(
+					path, 
+					bytes, 
+					StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+
 			return true;
 		} catch ( IOException e ) {
 			return false;

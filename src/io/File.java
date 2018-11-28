@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -21,11 +22,17 @@ public interface File {
 	public String folder();
 	void setFolder(String fn);
 	
+	default boolean exists() {
+		java.io.File f = path().toFile();
+		return f.exists();
+	}
+	
 	default Path path() {
 		return Paths.get( DATA_FOLDER + folder() + "/" + filename() + "." + extension() );
 	}
 	
 	public static final String DATA_FOLDER = "data/";
+	
 	public static ArrayList<java.io.File> finderRecursive(String dirName, String ext){
 		java.io.File dir = new java.io.File(dirName);
 
@@ -46,6 +53,24 @@ public interface File {
 					ret.add(file);
 			} else if (file.isDirectory()) {
 				ret.addAll( finderRecursive(file, ext) );
+			}
+		}
+
+		return ret;
+	}
+	
+	public static ArrayList<java.io.File> find(java.io.File dir, String ext){
+		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
+
+		java.io.File[] files = dir.listFiles(); 
+		if (files == null) {
+			error("El directorio no existe: " + dir.getPath());
+			return null;
+		}
+		for (java.io.File file : files) {
+			if (file.isFile()) {
+				if (file.getName().endsWith("." + ext))
+					ret.add(file);
 			}
 		}
 

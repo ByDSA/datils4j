@@ -1,5 +1,6 @@
 package binary.auto;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -94,10 +95,14 @@ public interface AutoBin extends Binary {
 
 			for(Field f : binaryFields) {
 				c = f.getType();
-				
+
 				f.setAccessible(true);
-				
-				f.set( this, c.newInstance() );
+
+				Constructor constructor;
+				constructor = c.getDeclaredConstructor();
+				constructor.setAccessible(true);
+
+				f.set( this, constructor.newInstance() );
 
 				Method readMethod = c.getDeclaredMethod( "read", ByteBuffer.class );
 				readMethod.invoke( f.get( this ), buff );
@@ -120,6 +125,7 @@ public interface AutoBin extends Binary {
 			}
 
 		} catch ( NoSuchMethodException e) {
+			e.printStackTrace();
 			Logging.fatalError("La clase " + c + " no tiene el método read.");
 		} catch(InstantiationException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
 			e.printStackTrace();

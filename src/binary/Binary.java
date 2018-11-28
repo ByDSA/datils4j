@@ -108,7 +108,7 @@ public interface Binary extends Serializable {
 			buff.putLong( (long)id);
 		else if (ID_TYPE == IdTypeEnum.Integer)
 			buff.putInt( (int)id);
-		else if (ID_TYPE == IdTypeEnum.Integer)
+		else if (ID_TYPE == IdTypeEnum.Short)
 			buff.putShort( (short)id);
 	}
 	
@@ -122,14 +122,30 @@ public interface Binary extends Serializable {
 			id = buff.getLong();
 		else if (ID_TYPE == IdTypeEnum.Integer)
 			id = buff.getInt();
-		else if (ID_TYPE == IdTypeEnum.Integer)
+		else if (ID_TYPE == IdTypeEnum.Short)
 			id = buff.getShort();
 		return getClass(id);
 	}
 	
 	static Map<Long, Class> classes = new HashMap();
+	static Map<Class<Object>, Class<TypeBin>> c2b = new HashMap();
 	
 	public static Class getClass(long id) {
 		return classes.get( id );
+	}
+	
+	public static Class<? extends TypeBin> getBinaryClass(Class c) {
+		return c2b.get( c );
+	}
+
+	public static int idSizeBytes() {
+		if (ID_TYPE == IdTypeEnum.Long)
+			return Long.BYTES;
+		else if (ID_TYPE == IdTypeEnum.Integer)
+			return Integer.BYTES;
+		else if (ID_TYPE == IdTypeEnum.Short)
+			return Short.BYTES;
+		else
+			return 0;
 	}
 }

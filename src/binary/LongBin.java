@@ -6,6 +6,10 @@ public final class LongBin extends TypeBin<Long> {
 	public LongBin(Long v) {
 		super(v);
 	}
+	
+	protected LongBin() {
+		super();
+	}
 
 	@Override
 	public int sizeBytes() {

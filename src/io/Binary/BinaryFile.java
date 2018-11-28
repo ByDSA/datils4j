@@ -28,10 +28,10 @@ public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWr
 	}
 
 	/* (non-Javadoc)
-	 * @see io.FileWritable#write()
+	 * @see io.FileSavable#save()
 	 */
 	@Override
-	public boolean write() {
+	public boolean save() {
 		try {
 			Logging.info( "write: " + path().toAbsolutePath() );
 			Files.createDirectories( path().getParent() );
@@ -41,14 +41,6 @@ public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWr
 			e.printStackTrace();
 			return false;
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see io.FileSavable#save()
-	 */
-	@Override
-	public boolean save() {
-		return write();
 	}
 
 	/* (non-Javadoc)

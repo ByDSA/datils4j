@@ -3,16 +3,49 @@ package binary;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
-public class MapBin extends TypeBin<Map<? extends Binary, ? extends Binary>> implements Binary {
+public class MapBin<K extends Binary, V extends Binary> extends TypeBin<Map<K, V>> implements Binary, Map<K, V> {
+	Class<? extends Binary> keyClass;
+	Class<? extends Binary> valueClass;
+	
+	public MapBin(Map m) {
+		super(null);
+		
+		ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
 
+		Type key = type.getActualTypeArguments()[0];
+		Type value = type.getActualTypeArguments()[1];
+		
+		keyClass = (Class<? extends Binary>) key.getClass();
+		valueClass = (Class<? extends Binary>) value.getClass();
+		
+		try {
+			Map m2 = m.getClass().newInstance();
+			set(m2);
+		} catch ( InstantiationException | IllegalAccessException e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public int sizeBytes() {
-		// TODO Auto-generated method stub
-		return 0;
+		int s = super.sizeBytes();
+		
+		if (getPutType()) {
+			s += Binary.idSizeBytes();
+		}
+		
+		for(Entry<K, V> e : get().entrySet()) {
+			s += e.getKey().sizeBytes();
+			s += e.getValue().sizeBytes();
+		}
+		
+		return s;
 	}
 
 	@Override
@@ -25,47 +58,28 @@ public class MapBin extends TypeBin<Map<? extends Binary, ? extends Binary>> imp
 			Type key = type.getActualTypeArguments()[0];
 			Type value = type.getActualTypeArguments()[1];
 
-			Binary.writeId( (Class<? extends Binary>)key.getClass(), buff );
-			Binary.writeId( (Class<? extends Binary>)value.getClass(), buff );
+			Binary.writeId( keyClass, buff );
+			Binary.writeId( valueClass, buff );
 		}
 
 		new IntegerBin(get().size()).write(buff);
 
-		for(Entry<? extends Binary, ? extends Binary> e : get().entrySet()) {
-			e.getKey().write( buff );
-			e.getValue().write( buff );
+		for(Entry<K, V> e : get().entrySet()) {
+			 e.getKey().write( buff );
+			 e.getValue().write( buff );
 		}
-	}
-
-	Class<? extends Binary>[] getGenericClasses() {
-		ParameterizedType type = (ParameterizedType) getClass().getGenericSuperclass();
-
-		Type key = type.getActualTypeArguments()[0];
-		Type value = type.getActualTypeArguments()[1];
-
-		Class<? extends Binary> keyClass = (Class<? extends Binary>)key.getClass();
-		Class<? extends Binary> valueClass = (Class<? extends Binary>)key.getClass();
-
-		return new Class[] {keyClass, valueClass};
 	}
 
 	@Override
 	public void read(ByteBuffer buff) {
 		super.read(buff);
 
-		Class<? extends Binary> key, value;
-
 		if (getPutType()) {
 			long keyId = buff.getInt();
 			long valueId = buff.getInt();
 
-			key = Binary.getClass( keyId );
-			value = Binary.getClass( valueId );
-
-		} else {
-			Class[] cs = getGenericClasses();
-			key = cs[0];
-			value = cs[1];
+			keyClass = Binary.getClass( keyId );
+			valueClass = Binary.getClass( valueId );
 		}
 
 		int size = buff.getInt();
@@ -76,9 +90,9 @@ public class MapBin extends TypeBin<Map<? extends Binary, ? extends Binary>> imp
 			for(int i = 0; i < size; i++) {
 				Binary keyInstance;
 
-				keyInstance = key.newInstance();
+				keyInstance = keyClass.newInstance();
 				keyInstance.read( buff );
-				Binary valueInstance = key.newInstance();
+				Binary valueInstance = keyClass.newInstance();
 				valueInstance.read( buff );
 				map.put(keyInstance, valueInstance);
 			}
@@ -89,5 +103,63 @@ public class MapBin extends TypeBin<Map<? extends Binary, ? extends Binary>> imp
 
 		set(map);
 	}
-
+	@Override
+	public void clear() {
+		get().clear();
+	}
+	
+	@Override
+	public boolean containsKey(Object key) {
+		return get().containsKey(key);
+	}
+	
+	@Override
+	public boolean containsValue(Object value) {
+		return get().containsValue( value );
+	}
+	
+	@Override
+	public Set<Entry<K,V>> entrySet() {
+		return get().entrySet();
+	}
+	
+	@Override
+	public V get(Object key) {
+		return get().get( key );
+	}
+	
+	@Override
+	public boolean isEmpty() {
+		return get().isEmpty();
+	}
+	
+	@Override
+	public Set<K> keySet() {
+		return get().keySet();
+	}
+	
+	@Override
+	public V put(K key, V value) {
+		return get().put( key, value );
+	}
+	
+	@Override
+	public void putAll(Map m) {
+		get().putAll( m );
+	}
+	
+	@Override
+	public V remove(Object key) {
+		return get().remove( key );
+	}
+	
+	@Override
+	public int size() {
+		return get().size();
+	}
+	
+	@Override
+	public Collection values() {
+		return get().values();
+	}
 }

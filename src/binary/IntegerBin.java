@@ -13,8 +13,8 @@ public final class IntegerBin extends TypeBin<Integer> {
 		super(v.getCode());
 	}
 	
-	public IntegerBin() {
-		this(0);
+	protected IntegerBin() {
+		super();
 	}
 
 	@Override
@@ -24,6 +24,7 @@ public final class IntegerBin extends TypeBin<Integer> {
 
 	@Override
 	public void write(ByteBuffer buff) {
+		assert get() != null;
 		buff.putInt( get() );
 	}
 

@@ -51,7 +51,7 @@ public class IoBinaryTests {
 		TestBin2 t = new TestBin2( "", "test", "bin" );
 		t.assign();
 		//assertEquals(Integer.BYTES, t.size());
-		t.write();
+		t.save();
 		
 		TestBin2 t2 = new TestBin2( "", "test", "bin" );
 		t2.load();
