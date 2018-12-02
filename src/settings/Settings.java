@@ -14,13 +14,15 @@ import io.Binary.BinaryFile;
 
 public class Settings extends BinaryFile implements Map<String, Object> {
 	private static final long serialVersionUID = 781110217776323164L;
+	
+	public static String defaultSettingsPath = "data/main.settings";
 
 	DateBin date;
 	Map<String, Object> map;
 	MapBin mapBin;
 
-	public Settings(String folder, String filename) {
-		super(folder, filename, "settings");
+	public Settings(String path) {
+		super(path);
 		map = new HashMap();
 	}
 
@@ -101,7 +103,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 
 	private static void loadIfNotExists() {
 		if (_settings == null) {
-			_settings = new Settings("data", "main");
+			_settings = new Settings(defaultSettingsPath);
 			_settings.load();
 		}
 	}

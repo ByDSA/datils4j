@@ -10,7 +10,7 @@ import io.Binary.BinaryFileAutoBin;
 public class IntegerBinTest {
 	class FileTest extends BinaryFileAutoBin {
 		public FileTest() {
-			super( "test", "IntegerBin", "bin" );
+			super( "test/IntegerBin.bin" );
 		}
 		IntegerBin ib = new IntegerBin( 0 );
 		IntegerBin ib2 = new IntegerBin( 16 );

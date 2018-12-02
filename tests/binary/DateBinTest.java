@@ -13,7 +13,7 @@ import io.Binary.BinaryFileAutoBin;
 public class DateBinTest {
 	class FileTest extends BinaryFileAutoBin {
 		public FileTest() {
-			super( "test", "DateBin", "bin" );
+			super( "test/DateBin.bin" );
 		}
 		DateBin ib = DateBin.of( 1970, 1, 1 , DateBin.GMT);
 		DateBin ib2 = new DateBin( 16L );

@@ -13,8 +13,8 @@ public class IoBinaryTests {
 		public BooleanBin b1, b2, b3, b4, b5, b6, b7, b8;
 		public IntegerBin tt;
 		
-		public TestBin(String folder, String fn, String ext) {
-			super( folder, fn, ext );
+		public TestBin(String path) {
+			super( path );
 		}
 		
 		public void assign() {
@@ -33,8 +33,8 @@ public class IoBinaryTests {
 	class TestBin2 extends TestBin {
 		public IntegerBin subInteger;
 		public BooleanBin b9;
-		public TestBin2(String folder, String fn, String ext) {
-			super( folder, fn, ext );
+		public TestBin2(String path) {
+			super( path );
 		}
 		
 		public void assign() {
@@ -48,12 +48,12 @@ public class IoBinaryTests {
 
 	@Test
 	public void integer() {
-		TestBin2 t = new TestBin2( "", "test", "bin" );
+		TestBin2 t = new TestBin2( "test.bin" );
 		t.assign();
 		//assertEquals(Integer.BYTES, t.size());
 		t.save();
 		
-		TestBin2 t2 = new TestBin2( "", "test", "bin" );
+		TestBin2 t2 = new TestBin2( "test.bin" );
 		t2.load();
 		assertEquals((Integer)5, t2.tt.get());
 		assertEquals(true, t2.b1.get());

@@ -9,8 +9,8 @@ import io.Text.TextFile;
 public abstract class StringLog<L extends CharSequence> extends TextFile<L> implements Log<L> {
 	CopyOnWriteArrayList<L> _buffer;
 	
-	public StringLog(String fn) {
-		super( "log", fn, "log" );
+	public StringLog(String path) {
+		super( path );
 
 		_buffer = new CopyOnWriteArrayList<>();
 	}

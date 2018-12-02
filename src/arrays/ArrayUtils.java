@@ -49,4 +49,15 @@ public class ArrayUtils {
 				return true;
 		return false;
 	}
+	
+	public static Byte[] byteBoxing(byte[] bytes) {
+		Byte[] byteObjects = new Byte[bytes.length];
+
+		int i=0;    
+		// Associating Byte array values with bytes. (byte[] to Byte[])
+		for(byte b: bytes)
+		   byteObjects[i++] = b;  // Autoboxing.
+		
+		return byteObjects;
+	}
 }

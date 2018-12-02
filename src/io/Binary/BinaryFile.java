@@ -6,15 +6,13 @@ import java.nio.file.Files;
 
 import Log.String.Logging;
 import binary.Binary;
-import concurrency.Lockable;
-import io.FileRWAdapter;
+import io.FileAutosavable;
 import io.FileReadable;
-import io.FileWritable;
 
 /**
  * A readable/writable binary File
  */
-public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWritable, FileReadable, Lockable {	
+public abstract class BinaryFile extends FileAutosavable implements Binary, FileReadable {	
 	
 	/**
 	 * Instantiates a new file binary.
@@ -23,8 +21,8 @@ public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWr
 	 * @param filename
 	 * @param extension
 	 */
-	public BinaryFile(String folder, String filename, String extension) {
-		super( folder, filename, extension );
+	public BinaryFile(String str) {
+		super( str );
 	}
 
 	/* (non-Javadoc)
@@ -33,9 +31,9 @@ public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWr
 	@Override
 	public boolean save() {
 		try {
-			Logging.info( "write: " + path().toAbsolutePath() );
-			Files.createDirectories( path().getParent() );
-			Files.write( path(), getBytes());
+			Logging.info( "write: " + toPath().toAbsolutePath() );
+			getParentFile().mkdirs();
+			Files.write( toPath(), getBytes());
 			return true;
 		} catch ( IOException e ) {
 			e.printStackTrace();
@@ -50,7 +48,7 @@ public abstract class BinaryFile extends FileRWAdapter implements Binary, FileWr
 	public boolean load() {
 		ByteBuffer buff;
 		try {
-			buff = ByteBuffer.wrap( Files.readAllBytes(path()) );
+			buff = ByteBuffer.wrap( Files.readAllBytes(toPath()) );
 		} catch ( IOException e ) {
 			return false;
 		}

@@ -10,7 +10,7 @@ import io.Binary.BinaryFileAutoBin;
 public class LongBinTest {
 	class FileTest extends BinaryFileAutoBin {
 		public FileTest() {
-			super( "test", "LongBin", "bin" );
+			super( "test/LongBin.bin" );
 		}
 		LongBin ib = new LongBin( 0L );
 		LongBin ib2 = new LongBin( 16L );

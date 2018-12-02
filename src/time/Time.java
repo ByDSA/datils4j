@@ -13,7 +13,6 @@ public class Time {
 		return dayOfMonth(now());
 	}
 
-
 	public static int dayOfWeek(Date d) {
 		return dayOfWeek(dateToCalendar(d));
 	}

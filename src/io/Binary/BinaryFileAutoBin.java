@@ -13,7 +13,7 @@ public class BinaryFileAutoBin extends BinaryFile implements AutoBin {
 	 * @param fn the filename
 	 * @param ext the extension
 	 */
-	public BinaryFileAutoBin(String folder, String fn, String ext) {
-		super( folder, fn, ext );
+	public BinaryFileAutoBin(String path) {
+		super( path );
 	}
 }

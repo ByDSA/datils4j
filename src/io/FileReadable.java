@@ -1,5 +1,5 @@
 package io;
 
-public interface FileReadable extends File {
+public interface FileReadable {
 	boolean load();
 }

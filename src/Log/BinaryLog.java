@@ -10,16 +10,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import Log.String.Logging;
 import binary.Binary;
 import io.FileAppendable;
-import io.FileWritable;
+import io.FileReadable;
 import io.Binary.BinaryFile;
 import others.Codeable;
 
-public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileWritable, FileAppendable<L> {
+public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {
 	CopyOnWriteArrayList<L> _buffer;
 	protected List<L> lines;
 
-	public BinaryLog(String fn) {
-		super( "log", fn, "binlog" );
+	public BinaryLog(String path) {
+		super( path );
 	}
 
 	@Override
@@ -30,8 +30,8 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends Bina
 	@Override
 	public boolean append(L f) {
 		try {
-			Logging.info( "append: " + path() );
-			Files.write( path(),  f.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
+			Logging.info( "append: " +this );
+			Files.write( toPath(),  f.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
 			return true;
 		} catch ( IOException e ) {
 			return false;
@@ -44,8 +44,8 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends Bina
 		for(L l : f)
 			buff.put( l.getBytes() );
 		try {
-			Logging.info( "append list: " + path() );
-			Files.write( path(), buff.array(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
+			Logging.info( "append list: " + this );
+			Files.write( toPath(), buff.array(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
 			return true;
 		} catch ( IOException e ) {
 			return false;
