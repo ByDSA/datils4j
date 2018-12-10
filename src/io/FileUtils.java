@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import arrays.ArrayUtils;
+import arrays.ArrayWrapper;
 import crypt.CryptUtils;
-import datastructures.ArrayWrapper;
 import functions.ThrowingConsumer;
 
 public final class FileUtils {

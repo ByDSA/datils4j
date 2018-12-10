@@ -148,4 +148,25 @@ public interface Binary extends Serializable {
 		else
 			return 0;
 	}
+	
+	public static Binary toBinary(byte[] bytes) {
+		return new Binary() {
+
+			@Override
+			public int sizeBytes() {
+				return bytes.length;
+			}
+
+			@Override
+			public void write(ByteBuffer buff) {
+				buff.put( bytes );
+			}
+
+			@Override
+			public void read(ByteBuffer buff) {
+				// TODO Auto-generated method stub
+			}
+			
+		};
+	}
 }

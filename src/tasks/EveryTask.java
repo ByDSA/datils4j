@@ -2,7 +2,7 @@ package tasks;
 
 import java.util.Date;
 
-public abstract class EveryTask extends TaskAdapter {
+public abstract class EveryTask extends Action {
 	protected Date lastApply = new Date(0);
 	protected Long every;
 	
@@ -12,8 +12,6 @@ public abstract class EveryTask extends TaskAdapter {
 	
 	@Override
 	public boolean check() {
-		return lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
+		return super.check() && lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
 	}
-	
-	abstract protected boolean internalApply(int n);
 }

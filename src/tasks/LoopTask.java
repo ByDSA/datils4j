@@ -1,12 +1,8 @@
 package tasks;
 
-import java.util.Date;
-
-public abstract class LoopTask extends TaskAdapter {
+public abstract class LoopTask extends Action {
 	@Override
 	public boolean check() {
 		return true;
 	}
-	
-	abstract public boolean innerApply(int n);
 }

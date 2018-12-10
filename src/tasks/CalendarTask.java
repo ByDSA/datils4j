@@ -9,7 +9,7 @@ import rules.Rule;
 import time.Calendar;
 import time.CalendarInterface;
 
-public abstract class CalendarTask extends TaskAdapter implements CalendarInterface {
+public abstract class CalendarTask extends Action implements CalendarInterface {
 	Calendar calendar = new Calendar();
 	
 	@Override

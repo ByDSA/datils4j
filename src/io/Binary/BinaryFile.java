@@ -13,7 +13,7 @@ import io.FileReadable;
  * A readable/writable binary File
  */
 public abstract class BinaryFile extends FileAutosavable implements Binary, FileReadable {	
-	
+
 	/**
 	 * Instantiates a new file binary.
 	 *
@@ -32,7 +32,8 @@ public abstract class BinaryFile extends FileAutosavable implements Binary, File
 	public boolean save() {
 		try {
 			Logging.info( "write: " + toPath().toAbsolutePath() );
-			getParentFile().mkdirs();
+			if (getParentFile() != null)
+				getParentFile().mkdirs();
 			Files.write( toPath(), getBytes());
 			return true;
 		} catch ( IOException e ) {

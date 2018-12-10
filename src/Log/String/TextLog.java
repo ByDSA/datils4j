@@ -6,10 +6,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import Log.Log;
 import io.Text.TextFile;
 
-public abstract class StringLog<L extends CharSequence> extends TextFile<L> implements Log<L> {
+public abstract class TextLog<L extends CharSequence> extends TextFile<L> implements Log<L> {
 	CopyOnWriteArrayList<L> _buffer;
 	
-	public StringLog(String path) {
+	public TextLog(String path) {
 		super( path );
 
 		_buffer = new CopyOnWriteArrayList<>();

@@ -88,10 +88,8 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		return readLargeTextFile((lineStr) -> {
 			try {
 				L l = stringToLine(i.getAndIncrement(), lineStr);
-				if (l == null)
-					return false;
-
-				lines.add( l );
+				if (l != null)
+					lines.add( l );
 				return true;
 			} catch(SkipLineException e) {
 				return true;
@@ -109,17 +107,18 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	@Override
 	public boolean add(L f) {
 		// Crea las carpetas si no existe
-		this.getParentFile().mkdirs();
+		File parent = getParentFile();
+		if (parent != null)
+			parent.mkdirs();
 
 		lines.add( f );
 
 		try {
 			byte[] bytes = (f.toString() + lineSeparator).getBytes();
-			if (exists())
-				Files.write(
-					toPath(), 
-					bytes, 
-					StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			Files.write(
+				toPath(), 
+				bytes, 
+				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
 			return true;
 		} catch ( IOException e ) {
@@ -130,7 +129,9 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	@Override
 	public void add(int index, L f) {
 		// Crea las carpetas si no existe
-		this.getParentFile().mkdirs();
+		File parent = getParentFile();
+		if (parent != null)
+			parent.mkdirs();
 
 		lines.add( index, f );
 

@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 
+import Log.String.Logging;
+
 public class ProcessUtils {
 	public static int execute(String fname, List<String> params) {
 		String[] paramsArray = new String[params.size()];
@@ -25,7 +27,7 @@ public class ProcessUtils {
 
 		int result = 1;
 		try {
-			System.out.println("Executing " + fname + " " + paramsStr.toString());
+			Logging.log("Executing " + fname + " " + paramsStr.toString());
 			final Process p = Runtime.getRuntime().exec(paramsWithName);
 			Thread thread = new Thread() {
 				public void run() {
@@ -36,7 +38,7 @@ public class ProcessUtils {
 								(new InputStreamReader(p.getInputStream()));
 
 						while ((line = input.readLine()) != null)
-							System.out.println(line);
+							Logging.log(line);
 
 
 						input.close();
@@ -52,7 +54,7 @@ public class ProcessUtils {
 								(new InputStreamReader(p.getErrorStream()));
 
 						while ((line = input.readLine()) != null)
-							System.err.println(line);
+							Logging.error(line);
 
 
 						input.close();
@@ -64,9 +66,9 @@ public class ProcessUtils {
 			result = p.waitFor();
 			thread.join();
 			if (result != 0) {
-				System.out.println("Process failed with status: " + result);
+				Logging.error("Process failed with status: " + result);
 			}
-		} catch (IOException | InterruptedException e) {System.out.println(" procccess not read"+e);}
+		} catch (IOException | InterruptedException e) {Logging.log(" procccess not read"+e);}
 
 		return result;
 	}

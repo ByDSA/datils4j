@@ -8,11 +8,7 @@ public abstract class EveryIniTask extends EveryTask {
 	}
 
 	@Override
-	public boolean apply(int n) {
-		applying.set( true );
+	public void innerRun() {
 		lastApply.setTime( new Date().getTime() );
-		boolean ret = internalApply(n);
-		applying.set( false );
-		return ret;
 	}
 }
