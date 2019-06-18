@@ -1,2 +1,16 @@
+/gradle
+.gradle
+.idea
+/.settings
+build
+/out
+gradlew
+gradlew.bat
+*.gitignore
 /bin/
-/target/
+/.es.danisales.settings
+/.project
+/.classpath
+/screens
+*.sh
+*.iml
