@@ -1,13 +1,13 @@
-package es.danisales.io.Binary;
+package es.danisales.io.binary;
 
-import es.danisales.binary.auto.AutoBin;
+import es.danisales.io.binary.types.auto.AutoBin;
 
 /**
- * A readable/writeable es.danisales.binary File auto es.danisales.binary
+ * A readable/writeable es.danisales.io.binary.types File auto es.danisales.io.binary.types
  */
 public class BinaryFileAutoBin extends BinaryFile implements AutoBin {	
 	/**
-	 * Instantiates a new file es.danisales.binary.
+	 * Instantiates a new file es.danisales.io.binary.types.
 	 *
 	 * @param folder the folder
 	 * @param fn the filename

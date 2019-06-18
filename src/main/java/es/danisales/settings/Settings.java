@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 import es.danisales.log.string.Logging;
-import es.danisales.binary.DateBin;
-import es.danisales.binary.MapBin;
-import es.danisales.io.Binary.BinaryFile;
+import es.danisales.io.binary.types.DateBin;
+import es.danisales.io.binary.types.MapBin;
+import es.danisales.io.binary.BinaryFile;
 
 public class Settings extends BinaryFile implements Map<String, Object> {
 	private static final long serialVersionUID = 781110217776323164L;
@@ -63,7 +63,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 					sb.append( in.readChar() );
 
 				string key = sb.toString();
-				Binary value = in.readObject();
+				types value = in.readObject();
 
 				put(key, value);
 			}

@@ -1,4 +1,4 @@
-package es.danisales.binary;
+package es.danisales.io.binary.types;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -12,14 +12,10 @@ import java.util.Map;
  * Class which implements this interface could be turned into a byte array.
  */
 public interface Binary extends Serializable {
-	public enum IdTypeEnum {
-		Integer, Long, Short;
-	}
-
 	static IdTypeEnum ID_TYPE = IdTypeEnum.Integer;
 	static final String ID_VARNAME = "serialVersionUID";
 	/**
-	 * Size in bytes of es.danisales.binary data composed in function getBytes.
+	 * Size in bytes of es.danisales.io.binary.types data composed in function getBytes.
 	 * 
 	 * @return size
 	 */
@@ -40,19 +36,19 @@ public interface Binary extends Serializable {
 	/**
 	 * Writes into buffer buff the contained data in the object.
 	 *
-	 * @param buff Buffer in which es.danisales.binary data will be added
+	 * @param buff Buffer in which es.danisales.io.binary.types data will be added
 	 */
 	public void write(ByteBuffer buff);
 
 	/**
-	 * Reads from buffer buff the es.danisales.binary data and stores it into the object.
+	 * Reads from buffer buff the es.danisales.io.binary.types data and stores it into the object.
 	 *
-	 * @param buff Buffer from which es.danisales.binary data will be read
+	 * @param buff Buffer from which es.danisales.io.binary.types data will be read
 	 */
 	public void read(ByteBuffer buff);
 
 	/**
-	 * Gets total sum up size of es.danisales.binary objects' list.
+	 * Gets total sum up size of es.danisales.io.binary.types objects' list.
 	 *
 	 * @param <L> the generic type
 	 * @param list List
@@ -67,7 +63,7 @@ public interface Binary extends Serializable {
 	}
 
 	/**
-	 * Write the es.danisales.binary objects contained in list into a buffer.
+	 * Write the es.danisales.io.binary.types objects contained in list into a buffer.
 	 *
 	 * @param buff the buffer
 	 * @param list the list

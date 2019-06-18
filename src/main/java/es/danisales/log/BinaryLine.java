@@ -2,9 +2,9 @@ package es.danisales.log;
 
 import java.util.Date;
 
-import es.danisales.binary.DateBin;
-import es.danisales.binary.IntegerBin;
-import es.danisales.binary.auto.AutoBin;
+import es.danisales.io.binary.types.DateBin;
+import es.danisales.io.binary.types.IntegerBin;
+import es.danisales.io.binary.types.auto.AutoBin;
 import es.danisales.others.Codeable;
 
 public abstract class BinaryLine<A extends Codeable> implements AutoBin, Codeable {

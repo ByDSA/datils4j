@@ -1,4 +1,4 @@
-package es.danisales.binary;
+package es.danisales.io.binary.types;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;

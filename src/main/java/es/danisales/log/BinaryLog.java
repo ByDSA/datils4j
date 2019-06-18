@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import es.danisales.log.string.Logging;
-import es.danisales.binary.Binary;
+import es.danisales.io.binary.types.Binary;
 import es.danisales.io.FileAppendable;
 import es.danisales.io.FileReadable;
-import es.danisales.io.Binary.BinaryFile;
+import es.danisales.io.binary.BinaryFile;
 import es.danisales.others.Codeable;
 
 public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {

@@ -1,14 +1,11 @@
-package es.danisales.binary;
+package es.danisales.io.binary.types;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import org.junit.Test;
 
-import es.danisales.io.Binary.BinaryFileAutoBin;
+import es.danisales.io.binary.BinaryFileAutoBin;
 
 public class DateBinTest {
 	class FileTest extends BinaryFileAutoBin {

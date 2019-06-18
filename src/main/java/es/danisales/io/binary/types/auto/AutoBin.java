@@ -1,4 +1,4 @@
-package es.danisales.binary.auto;
+package es.danisales.io.binary.types.auto;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import es.danisales.log.string.Logging;
-import es.danisales.binary.Binary;
-import es.danisales.binary.BooleanArrayBin;
-import es.danisales.binary.BooleanBin;
+import es.danisales.io.binary.types.Binary;
+import es.danisales.io.binary.types.BooleanArrayBin;
+import es.danisales.io.binary.types.BooleanBin;
 
 public interface AutoBin extends Binary {
 	List<Field> binaryFields= new ArrayList<Field>(), booleanFields = new ArrayList<Field>();

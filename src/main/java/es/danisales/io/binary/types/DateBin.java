@@ -1,4 +1,4 @@
-package es.danisales.binary;
+package es.danisales.io.binary.types;
 
 import java.nio.ByteBuffer;
 import java.util.Calendar;

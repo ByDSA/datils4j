@@ -2,9 +2,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import es.danisales.binary.BooleanBin;
-import es.danisales.binary.IntegerBin;
-import es.danisales.io.Binary.BinaryFileAutoBin;
+import es.danisales.io.binary.types.BooleanBin;
+import es.danisales.io.binary.types.IntegerBin;
+import es.danisales.io.binary.BinaryFileAutoBin;
 
 public class IoBinaryTests {
 	class TestBin extends BinaryFileAutoBin {
