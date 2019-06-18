@@ -1,4 +1,4 @@
-package es.danisales.io.Text;
+package es.danisales.io.text;
 
 import java.io.IOException;
 import java.nio.file.Files;

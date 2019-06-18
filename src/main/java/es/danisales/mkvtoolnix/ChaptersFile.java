@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.danisales.io.Text.TextFile;
+import es.danisales.io.text.TextFile;
 import es.danisales.strings.StringUtils;
 
 public class ChaptersFile extends TextFile<String> {
