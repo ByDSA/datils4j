@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
+//sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
 
 repositories {
     mavenCentral()
@@ -41,13 +41,16 @@ jar {
         //clear();
     }
 
-    baseName project.baseName
+    if (JavaVersion.current().isJava7())
+        baseName (project.baseName + "-v7")
+    else
+        baseName project.baseName
 }
 
 sourceSets {
     main {
         java {
-            if (targetJavaVersion == "1.8")
+            if (JavaVersion.current().isJava8())
                 exclude("java")
         }
     }
