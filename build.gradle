@@ -29,13 +29,26 @@ void moveLib(String outDir) {
 jar {
     manifest {
         attributes('Implementation-Title': project.name,
-                   'Implementation-Version': project.version)
+                'Implementation-Version': project.version)
     }
-	
-	doLast {
-		//moveLib("${projectDir}/..");
-		//clear();
+
+    doFirst {
+
+    }
+
+    doLast {
+        //moveLib("${projectDir}/..");
+        //clear();
     }
 
     baseName project.baseName
+}
+
+sourceSets {
+    main {
+        java {
+            if (targetJavaVersion == "1.8")
+                exclude("java")
+        }
+    }
 }
