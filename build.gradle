@@ -42,7 +42,7 @@ jar {
     }
 
     if (JavaVersion.current().isJava7())
-        baseName (project.baseName + "-v7")
+        baseName (project.baseName + "-jdk7")
     else
         baseName project.baseName
 }
