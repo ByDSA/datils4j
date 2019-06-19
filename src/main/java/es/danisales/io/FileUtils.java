@@ -1,12 +1,6 @@
 package es.danisales.io;
 
-import static es.danisales.log.string.Logging.error;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,9 +27,9 @@ public final class FileUtils {
 	public static ArrayList<java.io.File> finderRecursive(Path dir, String ext){
 		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
 
-		java.io.File[] files = dir.toFile().listFiles(); 
+		java.io.File[] files = dir.toFile().listFiles();
 		if (files == null) {
-			error("El directorio no existe: " + dir);
+			//error("El directorio no existe: " + dir);
 			return null;
 		}
 		for (java.io.File file : files) {
@@ -53,9 +47,9 @@ public final class FileUtils {
 	public static ArrayList<java.io.File> find(Path dir, String ext){
 		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
 
-		java.io.File[] files = dir.toFile().listFiles(); 
+		java.io.File[] files = dir.toFile().listFiles();
 		if (files == null) {
-			error("El directorio no existe: " + dir);
+			//error("El directorio no existe: " + dir);
 			return null;
 		}
 		for (java.io.File file : files) {
@@ -162,9 +156,9 @@ public final class FileUtils {
 	public static List<java.io.File> findFilesRecursive(Path dir, Function<java.io.File, Boolean> funcFile, Function<java.io.File, Boolean> funcFolder) {
 		List<java.io.File> ret = new ArrayList<java.io.File>();
 
-		java.io.File[] files = dir.toFile().listFiles(); 
+		java.io.File[] files = dir.toFile().listFiles();
 		if (files == null) {
-			error("El directorio no existe: " + dir);
+			//error("El directorio no existe: " + dir);
 			return null;
 		}
 		for (java.io.File file : files) {
@@ -181,9 +175,9 @@ public final class FileUtils {
 	public static List<java.io.File> findRecursive(Path dir, Function<java.io.File, Boolean> funcFile, Function<java.io.File, Boolean> funcFolder) {
 		List<java.io.File> ret = new ArrayList<java.io.File>();
 
-		java.io.File[] files = dir.toFile().listFiles(); 
+		java.io.File[] files = dir.toFile().listFiles();
 		if (files == null) {
-			error("El directorio no existe: " + dir);
+			//error("El directorio no existe: " + dir);
 			return null;
 		}
 		for (java.io.File file : files) {
@@ -243,9 +237,12 @@ public final class FileUtils {
 	static List<List<java.io.File>> duplicatedFilesInsecure(Map<ArrayWrapper<Byte>, List<java.io.File>> hash2filesMap) {
 		List<List<java.io.File>> ret = new ArrayList<>();
 
-		hash2filesMap.forEach( (hash, list) -> {
+		for (Map.Entry<ArrayWrapper<Byte>, List<File>> e : hash2filesMap.entrySet()) {
+			ArrayWrapper<Byte> hash = e.getKey();
+			List<File> list = e.getValue();
+
 			ret.add( list );
-		});
+		}
 
 		return ret;
 	}
@@ -255,27 +252,35 @@ public final class FileUtils {
 	}
 
 	public static List<java.io.File> getEmptyFolders(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive( p, (java.io.File f) -> {
-			return f.isDirectory() && f.list().length == 0;
+		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive(p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				return f.isDirectory() && f.list().length == 0;
+			}
 		}, null );
 
 		return files;
 	}
 
 	public static List<java.io.File> getEmptyFiles(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findFilesRecursive( p, (java.io.File f) -> {
-			return f.length() == 0;
+		List<java.io.File> files = es.danisales.io.FileUtils.findFilesRecursive( p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				return f.length() == 0;
+			}
 		}, null );
 
 		return files;
 	}
 
 	public static List<java.io.File> getEmptyElements(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive( p, (java.io.File f) -> {
-			assert f != null;
-			//assert f.exists() && (f.isDirectory() && f.list() != null || f.isFile()) : f;
-			return f.exists() && (f.isDirectory() && f.listFiles() != null && f.list().length == 0 || f.isFile() && f.length() == 0);
-		}, null );
+		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive( p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				assert f != null;
+				//assert f.exists() && (f.isDirectory() && f.list() != null || f.isFile()) : f;
+				return f.exists() && (f.isDirectory() && f.listFiles() != null && f.list().length == 0 || f.isFile() && f.length() == 0);
+			}}, null );
 
 		return files;
 	}
@@ -315,30 +320,39 @@ public final class FileUtils {
 	}
 
 	public static List<java.io.File> getUniqueElements(Path p) {
-		List<java.io.File> folders = findRecursive(p, (java.io.File f) -> {
-			java.io.File parent = f.getParentFile();
-			return parent.listFiles().length == 1;
+		List<java.io.File> folders = findRecursive(p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				java.io.File parent = f.getParentFile();
+				return parent.listFiles().length == 1;
+			}
 		}, null);
 
 		return folders;
 	}
 
 	public static List<java.io.File> getUniqueFiles(Path p) {
-		List<java.io.File> files = findFilesRecursive(p, (java.io.File f) -> {
-			java.io.File parent = f.getParentFile();
-			return parent.listFiles().length == 1;
+		List<java.io.File> files = findFilesRecursive(p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				java.io.File parent = f.getParentFile();
+				return parent.listFiles().length == 1;
+			}
 		}, null);
 
 		return files;
 	}
 
 	public static List<java.io.File> getUniqueFolders(Path p) {
-		List<java.io.File> folders = findRecursive(p, (java.io.File f) -> {
-			if (f.isDirectory()) {
-				java.io.File parent = f.getParentFile();
-				return parent.listFiles().length == 1;
-			} else
-				return false;
+		List<java.io.File> folders = findRecursive(p, new Function<File, Boolean>() {
+			@Override
+			public Boolean apply(File f) {
+				if (f.isDirectory()) {
+					java.io.File parent = f.getParentFile();
+					return parent.listFiles().length == 1;
+				} else
+					return false;
+			}
 		}, null);
 
 		return folders;

@@ -12,8 +12,8 @@ public class BiConsumerListener<T, U> extends ListWrapper<BiConsumer<T, U>> {
 	}
 	
 	public void call(T t, U u) {
-		forEach( (BiConsumer<T, U> f) -> {
+		for (BiConsumer<T, U> f : this) {
 			f.accept( t, u );
-		});
+		}
 	}
 }

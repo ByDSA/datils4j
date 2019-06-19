@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 
-import es.danisales.log.string.Logging;
-
 public class ProcessUtils {
 	public static int execute(String fname, List<String> params) {
 		String[] paramsArray = new String[params.size()];
@@ -27,7 +25,7 @@ public class ProcessUtils {
 
 		int result = 1;
 		try {
-			Logging.log("Executing " + fname + " " + paramsStr.toString());
+			//Logging.log("Executing " + fname + " " + paramsStr.toString());
 			final Process p = Runtime.getRuntime().exec(paramsWithName);
 			Thread thread = new Thread() {
 				public void run() {
@@ -36,10 +34,10 @@ public class ProcessUtils {
 						BufferedReader input =
 								new BufferedReader
 								(new InputStreamReader(p.getInputStream()));
-
+/*
 						while ((line = input.readLine()) != null)
 							Logging.log(line);
-
+*/
 
 						input.close();
 					} catch(Exception e) {}
@@ -52,10 +50,10 @@ public class ProcessUtils {
 						BufferedReader input =
 								new BufferedReader
 								(new InputStreamReader(p.getErrorStream()));
-
+/*
 						while ((line = input.readLine()) != null)
 							Logging.error(line);
-
+*/
 
 						input.close();
 					} catch(Exception e) {}
@@ -65,10 +63,10 @@ public class ProcessUtils {
 			thread2.start();
 			result = p.waitFor();
 			thread.join();
-			if (result != 0) {
+			/*if (result != 0) {
 				Logging.error("Process failed with status: " + result);
-			}
-		} catch (IOException | InterruptedException e) {Logging.log(" procccess not read"+e);}
+			}*/
+		} catch (IOException | InterruptedException e) {System.err.println(" procccess not read"+e);}
 
 		return result;
 	}

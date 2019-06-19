@@ -12,6 +12,6 @@ public class CosFunction implements Function<Double, Double> {
 	}
 	
 	public Double apply(Double x) {
-		return (Math.cos(x*length/(period)*Math.PI)+1)/2 * 127;
+		return (Math.cos(x*length/(period)* Math.PI)+1)/2 * 127;
 	}
 }

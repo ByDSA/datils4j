@@ -44,9 +44,9 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 			}
 
 			Files.write(
-				path, 
-				sb.toString().getBytes(), 
-				StandardOpenOption.APPEND);
+					path,
+					sb.toString().getBytes(),
+					StandardOpenOption.APPEND);
 			return true;
 		} catch ( IOException e ) {
 			return false;
@@ -57,7 +57,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	public boolean save() {
 		Path path = toPath();
 		try {
-			List<String> linesStr = new ArrayList();			
+			List<String> linesStr = new ArrayList();
 			for (L l : lines) {
 				linesStr.add( l.toString() );
 			}
@@ -84,17 +84,23 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 
 	@Override
 	public boolean load() {
-		AtomicLong i = new AtomicLong(0);
-		return readLargeTextFile((lineStr) -> {
-			try {
-				L l = stringToLine(i.getAndIncrement(), lineStr);
-				if (l != null)
-					lines.add( l );
-				return true;
-			} catch(SkipLineException e) {
-				return true;
-			}
-		});
+		final AtomicLong i = new AtomicLong(0);
+		return readLargeTextFile(
+				new Function<String, Boolean>() {
+					@Override
+					public Boolean apply(String lineStr) {
+						try {
+							L l = stringToLine(i.getAndIncrement(), lineStr);
+							if (l != null)
+								lines.add( l );
+							return true;
+						} catch(SkipLineException e) {
+							return true;
+						}
+					}
+				}
+
+		);
 	}
 
 	abstract protected L stringToLine(long i, String l) throws SkipLineException; // Load. ret null = stop read
@@ -116,9 +122,9 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		try {
 			byte[] bytes = (f.toString() + lineSeparator).getBytes();
 			Files.write(
-				toPath(), 
-				bytes, 
-				StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+					toPath(),
+					bytes,
+					StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
 			return true;
 		} catch ( IOException e ) {

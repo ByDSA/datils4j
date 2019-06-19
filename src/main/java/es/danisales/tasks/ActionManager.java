@@ -64,29 +64,32 @@ public class ActionManager extends CopyOnWriteArrayList<Action> implements Runna
 	protected void loopParallel() {
 		while(size() > 0) {
 			checkAndDoParallel();
-			es.danisales.time.Sleep.sleep( accuracyMs, false );
+			es.danisales.time.Sleep.sleep( accuracyMs );
 		}
 	}
 
 	protected void loopSequential() {
 		while(size() > 0) {
 			checkAndDoSequential();
-			es.danisales.time.Sleep.sleep( accuracyMs, false );
+			es.danisales.time.Sleep.sleep( accuracyMs );
 		}
 	}
 
 	protected void checkAndDoParallel() {
-		assert parallelStream() != null;
-		parallelStream().forEach((task) -> {
-			checkAndDoCommon(task);
-		});
+		for (final Action task : this) {
+			new Thread() {
+				@Override
+				public void run() {
+					checkAndDoCommon(task);
+				}
+			}.start();
+		}
 	}
 
 	protected void checkAndDoSequential() {
-		assert parallelStream() != null;
-		forEach((task) -> {
+		for (final Action task : this) {
 			checkAndDoCommon(task);
-		});
+		}
 	}
 
 	private void checkAndDoCommon(Action task) {
@@ -101,7 +104,9 @@ public class ActionManager extends CopyOnWriteArrayList<Action> implements Runna
 
 		if ( condition ) {
 			assert times != null;
-			Integer n = times.getOrDefault( task, 0 );
+			Integer n = times.get( task );
+			if (n == null)
+				n = 0;
 			task.run();
 			times.put( task, n+1 );
 		}
@@ -109,12 +114,18 @@ public class ActionManager extends CopyOnWriteArrayList<Action> implements Runna
 
 	public void end() {
 		ending.set(true);
-		parallelStream().forEach((task) -> {
-			if (task.isApplying())
-				task.interrupt();
-			else
-				remove(task);
-		});
+		for (final Action task : this) {
+			new Thread() {
+				@Override
+				public void run() {
+					if (task.isApplying())
+						task.interrupt();
+					else
+						remove(task);
+				}
+			};
+		}
+
 		clear();
 	}
 }

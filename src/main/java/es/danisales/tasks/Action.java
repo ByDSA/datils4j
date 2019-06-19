@@ -19,10 +19,13 @@ public abstract class Action implements Runnable, Rule {
 	protected final Thread thread = new Thread() {
 		@Override
 		public void run() {
-			atEndListeners.add( (Action ac) -> {
-				if (ac.next != null)
-					for (Action a : ac.next)
-						a.run();
+			atEndListeners.add(new Consumer<Action>() {
+				@Override
+				public void accept(Action ac) {
+					if (ac.next != null)
+						for (Action a : ac.next)
+							a.run();
+				}
 			});
 			
 			if (previous != null)

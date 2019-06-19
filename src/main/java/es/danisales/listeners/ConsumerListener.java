@@ -10,8 +10,8 @@ public class ConsumerListener<T> extends ListWrapper<Consumer<T>> {
 	}
 	
 	public void call(T t) {
-		forEach( (Consumer<T> f) -> {
+		for (Consumer<T> f : this) {
 			f.accept( t );
-		});
+		}
 	}
 }

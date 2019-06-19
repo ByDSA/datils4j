@@ -7,25 +7,25 @@ import java.util.function.Function;
 
 public class EnumTree<E extends Enum<E>> extends EnumMap<E, EnumTree<E>> {
 	protected EnumTree<E> parent = null;
-	
+
 	public EnumTree(Map<E, ? extends EnumTree<E>> m) {
 		super( m );
 	}
-	
+
 	public Class<E> type() {
-		  try {
-		    Field keyType = EnumMap.class.getDeclaredField("keyType");
-		    keyType.setAccessible(true);
-		    return (Class<E>) keyType.get(this);
-		  } catch (IllegalAccessException | NoSuchFieldException e) {
-		    throw new AssertionError("Could not find EnumMap type", e);
-		  }
+		try {
+			Field keyType = EnumMap.class.getDeclaredField("keyType");
+			keyType.setAccessible(true);
+			return (Class<E>) keyType.get(this);
+		} catch (IllegalAccessException | NoSuchFieldException e) {
+			throw new AssertionError("Could not find EnumMap type", e);
 		}
+	}
 
 	public EnumTree(Class<E> keyType) {
 		super( keyType );
 	}
-	
+
 	public EnumTree(EnumMap<E, ? extends EnumTree<E>> m) {
 		super( m );
 	}
@@ -33,7 +33,7 @@ public class EnumTree<E extends Enum<E>> extends EnumMap<E, EnumTree<E>> {
 	public EnumTree<E> addChildren(E value) {
 		EnumTree<E> child = get( value );
 
-		if (child == null) {			
+		if (child == null) {
 			child = newEmptyNode();
 			child.parent = this;
 			put( value, child );
@@ -51,10 +51,10 @@ public class EnumTree<E extends Enum<E>> extends EnumMap<E, EnumTree<E>> {
 		for (E v : values) {
 			node = node.addChildren( v );
 		}
-		
+
 		return node;
 	}
-	
+
 	public EnumTree<E> getNode(Iterable<E> values) {
 		EnumTree<E> node = this;
 		for (E v : values) {
@@ -62,7 +62,7 @@ public class EnumTree<E extends Enum<E>> extends EnumMap<E, EnumTree<E>> {
 				return null;
 			node = node.get( v );
 		}
-		
+
 		return node;
 	}
 
