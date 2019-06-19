@@ -1,5 +1,7 @@
-import es.danisales.random.target.SimpleTarget;
+package es.danisales.random;
+
 import es.danisales.random.ValueGenerator;
+import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
