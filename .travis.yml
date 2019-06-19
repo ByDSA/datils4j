@@ -3,7 +3,6 @@ install: true
 
 jdk:
   - oraclejdk8
-  - openjdk11
 
 # https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-130860338
 addons:
