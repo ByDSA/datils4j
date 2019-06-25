@@ -1,5 +1,7 @@
 package es.danisales.process;
 
+import es.danisales.log.string.Logging;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,7 +27,7 @@ public class ProcessUtils {
 
 		int result = 1;
 		try {
-			//Logging.log("Executing " + fname + " " + paramsStr.toString());
+			Logging.log("Executing " + fname + " " + paramsStr.toString());
 			final Process p = Runtime.getRuntime().exec(paramsWithName);
 			Thread thread = new Thread() {
 				public void run() {
@@ -34,10 +36,10 @@ public class ProcessUtils {
 						BufferedReader input =
 								new BufferedReader
 								(new InputStreamReader(p.getInputStream()));
-/*
+
 						while ((line = input.readLine()) != null)
 							Logging.log(line);
-*/
+
 
 						input.close();
 					} catch(Exception e) {}
@@ -50,10 +52,10 @@ public class ProcessUtils {
 						BufferedReader input =
 								new BufferedReader
 								(new InputStreamReader(p.getErrorStream()));
-/*
+
 						while ((line = input.readLine()) != null)
 							Logging.error(line);
-*/
+
 
 						input.close();
 					} catch(Exception e) {}
@@ -63,9 +65,9 @@ public class ProcessUtils {
 			thread2.start();
 			result = p.waitFor();
 			thread.join();
-			/*if (result != 0) {
+			if (result != 0) {
 				Logging.error("Process failed with status: " + result);
-			}*/
+			}
 		} catch (IOException | InterruptedException e) {System.err.println(" procccess not read"+e);}
 
 		return result;
