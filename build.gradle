@@ -2,28 +2,16 @@ plugins {
     id 'java-library'
 }
 
-//sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
-
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.es.danisales.io' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-void clear() {
-    println "Delete buildDir ${buildDir}"
-    delete buildDir
-}
-
-void moveLib(String outDir) {
-    def file = "${buildDir}/libs/" + project.baseName + "-${project.version}.jar"
-    println "Moving lib file ${file} to ${outDir}"
-
-    ant.move file: "${file}",
-            todir: "${outDir}"
+    if (JavaVersion.current().isJava7()) {
+        implementation 'com.gitlab.danisales:java8-to-7-wrapper:1.0'
+    }
 }
 
 jar {
@@ -32,26 +20,9 @@ jar {
                 'Implementation-Version': project.version)
     }
 
-    doFirst {
+    baseName project.baseName
 
-    }
-
-    doLast {
-        //moveLib("${projectDir}/..");
-        //clear();
-    }
-
-    if (JavaVersion.current().isJava7())
-        baseName (project.baseName + "-jdk7")
-    else
-        baseName project.baseName
-}
-
-sourceSets {
-    main {
-        java {
-            if (JavaVersion.current().isJava8())
-                exclude("java")
-        }
+    if (JavaVersion.current().isJava7()) {
+        archiveName baseName + (appendix ? "-" + appendix : "") + "-" + version + (classifier ? "-" + classifier : "")+ "-jdk7." + extension
     }
 }
