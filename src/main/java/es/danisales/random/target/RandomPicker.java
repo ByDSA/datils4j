@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
-public class PackTarget<PICK_TYPE extends Target> extends ArrayList<Target> implements Target {
+public class RandomPicker<PICK_TYPE extends Target> extends ArrayList<Target> implements Target {
 	private static Random rand;
 	static {
 		setNormalRandom();
 	}
 
-	public PackTarget() {
+	public RandomPicker() {
 	}
 
     @SuppressWarnings("unused")

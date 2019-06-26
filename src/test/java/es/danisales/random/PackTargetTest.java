@@ -1,6 +1,6 @@
 package es.danisales.random;
 
-import es.danisales.random.target.PackTarget;
+import es.danisales.random.target.RandomPicker;
 import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
 
@@ -22,28 +22,28 @@ public class PackTargetTest {
 
     @Test
     public void defaultSurface() {
-        PackTarget t = new PackTarget();
+        RandomPicker t = new RandomPicker();
 
         assertEquals(0, t.getSurface());
     }
 
-    @Test(expected = PackTarget.EmptyException.class)
+    @Test(expected = RandomPicker.EmptyException.class)
     public void defaultPickException() {
-        PackTarget t = new PackTarget();
+        RandomPicker t = new RandomPicker();
 
         t.pickDart(0);
     }
 
-    @Test(expected = PackTarget.EmptyException.class)
+    @Test(expected = RandomPicker.EmptyException.class)
     public void defaultPickException2() {
-        PackTarget t = new PackTarget();
+        RandomPicker t = new RandomPicker();
 
         t.pick();
     }
 
-    @Test(expected = PackTarget.NoSurfaceException.class)
+    @Test(expected = RandomPicker.NoSurfaceException.class)
     public void surfaceException() {
-        PackTarget t = new PackTarget();
+        RandomPicker t = new RandomPicker();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(0);
         t.add(st);
@@ -53,7 +53,7 @@ public class PackTargetTest {
 
     @Test
     public void surfaceNoException() {
-        PackTarget t = new PackTarget();
+        RandomPicker t = new RandomPicker();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(-1);
         t.add(st);
