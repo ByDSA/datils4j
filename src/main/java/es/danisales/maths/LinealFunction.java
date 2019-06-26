@@ -9,7 +9,8 @@ public class LinealFunction implements Function<Double, Double> {
 		this.a = a;
 		this.b = b;
 	}
-	
+
+	@Override
 	public Double apply(Double x) {
 		return a + b*x;
 	}
