@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import es.danisales.concurrency.Lockable;
 import es.danisales.tasks.LoopTask;
-import es.danisales.tasks.ActionManager;
+import es.danisales.tasks.ActionList;
 
 public abstract class FileAutosavable extends File implements Lockable {
-	final static ActionManager threads = new ActionManager();
+	final static ActionList threads = new ActionList();
 	
 	protected AtomicBoolean _dirty = new AtomicBoolean(false);
 	protected AtomicBoolean _autosaving = new AtomicBoolean( false );

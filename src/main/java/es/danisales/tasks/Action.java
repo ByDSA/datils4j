@@ -9,23 +9,20 @@ import es.danisales.listeners.ConsumerListener;
 import es.danisales.rules.Rule;
 
 public abstract class Action implements Runnable, Rule {
-	protected final AtomicBoolean done = new AtomicBoolean(false);;
+	protected final AtomicBoolean done = new AtomicBoolean(false);
 	protected final Object _lock = new Object();
 	protected List<Action> next;
 	protected List<Action> previous;	
-	protected long checkingTime = defaultCheckingTime;
+	protected long checkingTime = ActionList.defaultCheckingTimeMs;
 	protected Object context;
 	protected final Action This = this;
 	protected final Thread thread = new Thread() {
 		@Override
 		public void run() {
-			atEndListeners.add(new Consumer<Action>() {
-				@Override
-				public void accept(Action ac) {
-					if (ac.next != null)
-						for (Action a : ac.next)
-							a.run();
-				}
+			atEndListeners.add(ac -> {
+				if (ac.next != null)
+					for (Action a : ac.next)
+						a.run();
 			});
 			
 			if (previous != null)
@@ -49,8 +46,6 @@ public abstract class Action implements Runnable, Rule {
 	};
 
 	final ConsumerListener<Action> atEndListeners = new ConsumerListener();
-
-	public static long defaultCheckingTime = 100;
 
 	public final boolean isApplying() {
 		return thread.isAlive();
