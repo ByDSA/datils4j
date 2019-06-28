@@ -11,7 +11,11 @@ import es.danisales.time.CalendarInterface;
 
 public abstract class CalendarTask extends Action implements CalendarInterface {
 	Calendar calendar = new Calendar();
-	
+
+	public CalendarTask(Mode m) {
+		super(m);
+	}
+
 	@Override
 	public boolean add(Rule e) {
 		return calendar.add( e );

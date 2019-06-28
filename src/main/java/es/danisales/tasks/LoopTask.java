@@ -5,4 +5,8 @@ public abstract class LoopTask extends Action {
 	public boolean check() {
 		return true;
 	}
+
+	public LoopTask(Mode m) {
+		super(m);
+	}
 }

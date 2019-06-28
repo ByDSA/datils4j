@@ -3,8 +3,8 @@ package es.danisales.tasks;
 import java.util.Date;
 
 public abstract class EveryIniTask extends EveryTask {		
-	public EveryIniTask(long e) {
-		super( e );
+	public EveryIniTask(long e, Mode m) {
+		super( e, m );
 	}
 
 	@Override

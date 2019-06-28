@@ -3,122 +3,74 @@ package es.danisales.tasks;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-public class ActionList extends Action implements Runnable, List<Action> {
+public class ActionList extends Action implements List<Action> {
 	CopyOnWriteArrayList<Action> list = new CopyOnWriteArrayList<>();
 
-	public static int defaultCheckingTimeMs = 100;
-
 	ConcurrentHashMap<Action, Integer> times;
-	long checkingEveryMs;
-	AtomicBoolean running, parallel, sameThread, ending;
 
-	public ActionList(long checkingEveryMs, boolean doingParallel) {
-		super();
+	public ActionList(Mode m) {
+		super(m);
 		times = new ConcurrentHashMap<>();
-		running = new AtomicBoolean(false);
-		parallel = new AtomicBoolean(doingParallel);
-		sameThread = new AtomicBoolean(doingParallel);
-		ending = new AtomicBoolean(false);
-
-		this.checkingEveryMs = checkingEveryMs;
 	}
 
 	@Override
 	protected void innerRun() {
-		if (running.getAndSet( true ))
-			return;
-
-		if (sameThread.get())
-			loop();
+		if (isConcurrent())
+			new Thread(() -> {
+				for (final Action action : this) {
+					checkAndDoCommon(action);
+				}
+			}).start();
 		else {
-			Thread thread = new Thread(() -> loop());
+			for (final Action action : this) {
+				checkAndDoCommon(action);
+			}
 
-			thread.start();
+			for (final Action action : this) {
+				try {
+					action.joinAll();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
-	private void loop() {
-		if (ending.get())
-			return;
-		if (isParallel())
-			loopParallel();
-		else
-			loopSequential();
-	}
-
-	public boolean isParallel() {
-		return parallel.get();
-	}
-
-	public boolean isSameThread() {
-		return sameThread.get();
-	}
-
-	public ActionList() {
-		this(defaultCheckingTimeMs, true);
-	}
-
-	protected void loopParallel() {
-		while(size() > 0) {
-			checkAndDoParallel();
-			es.danisales.time.Sleep.sleep(checkingEveryMs);
-		}
-	}
-
-	protected void loopSequential() {
-		while(size() > 0) {
-			checkAndDoSequential();
-			es.danisales.time.Sleep.sleep(checkingEveryMs);
-		}
-	}
-
-	protected void checkAndDoParallel() {
-		for (final Action task : this) {
-			new Thread(() -> checkAndDoCommon(task)).start();
-		}
-	}
-
-	protected void checkAndDoSequential() {
-		for (final Action task : this) {
-			checkAndDoCommon(task);
-		}
-	}
-
-	private void checkAndDoCommon(Action task) {
-		assert task != null;
+	private void checkAndDoCommon(Action action) {
+		assert action != null;
 		if (ending.get())
 			return;
 
 		boolean condition = true;
-		task.setContext(this);
-		condition &= task.check();
-		condition &= !task.isApplying();
+		action.setContext(this);
+		condition &= action.check();
+		condition &= !action.isRunning();
 
 		if ( condition ) {
 			assert times != null;
-			Integer n = times.get( task );
+			Integer n = times.get( action );
 			if (n == null)
 				n = 0;
-			task.run();
-			times.put( task, n+1 );
+			action.run();
+			times.put( action, n+1 );
 		}
 	}
 
-	public void end() {
-		ending.set(true);
+	@Override
+	public void interrupt() {
+		super.interrupt();
 		for (final Action task : this) {
 			new Thread(() -> {
-				if (task.isApplying())
+				if (task.isRunning())
 					task.interrupt();
 				else
 					remove(task);
-			});
+			}).start();
 		}
 
 		clear();
@@ -161,6 +113,9 @@ public class ActionList extends Action implements Runnable, List<Action> {
 
 	@Override
 	public boolean add(Action action) {
+		for (Action a : this)
+			if (a == action)
+				throw new AddedException(action);
 		return list.add(action);
 	}
 
@@ -272,5 +227,11 @@ public class ActionList extends Action implements Runnable, List<Action> {
 	@Override
 	public Stream<Action> parallelStream() {
 		return list.parallelStream();
+	}
+
+	class AddedException extends RuntimeException {
+		public AddedException(Action a) {
+			super("Action " + a + " already added in this list");
+		}
 	}
 }

@@ -8,49 +8,61 @@ import java.util.function.Consumer;
 import es.danisales.listeners.ConsumerListener;
 import es.danisales.rules.Rule;
 
-public abstract class Action implements Runnable, Rule {
-	protected final AtomicBoolean done = new AtomicBoolean(false);
-	protected final Object _lock = new Object();
+public abstract class Action implements Runnable, Rule, Cloneable {
+	protected AtomicBoolean done;
+	protected AtomicBoolean running;
+	protected Object _lock;
 	protected List<Action> next;
-	protected List<Action> previous;	
-	protected long checkingTime = ActionList.defaultCheckingTimeMs;
+	protected List<Action> previous;
+	protected long checkingTime = 100;
 	protected Object context;
-	protected final Action This = this;
-	protected final Thread thread = new Thread() {
-		@Override
-		public void run() {
-			atEndListeners.add(ac -> {
-				if (ac.next != null)
-					for (Action a : ac.next)
-						a.run();
-			});
-			
-			if (previous != null)
-				for (Action a : previous)
-					try {
-						a.thread.join();
-					} catch ( InterruptedException e1 ) {
-						e1.printStackTrace();
-					}
-			if (!check()) {
-				do {
-					try {
-						Thread.sleep( checkingTime );
-					} catch ( InterruptedException e ) { }
-				} while(!check());
-			}
-			innerRun();
-			done.set( true );
-			atEndListeners.call( This );
-		}
-	};
-
+	protected Thread thread;
+	AtomicBoolean ending;
+	final Mode mode;
 	final ConsumerListener<Action> atEndListeners = new ConsumerListener();
 
-	public final boolean isApplying() {
-		return thread.isAlive();
+	public enum Mode {
+		CONCURRENT, SEQUENTIAL
+
 	}
-	
+
+	public Action(Mode m) {
+		mode = m;
+		initialize();
+	}
+
+	private void initialize() {
+		ending = new AtomicBoolean(false);
+		done = new AtomicBoolean(false);
+		running = new AtomicBoolean(false);
+
+		if (mode == Mode.CONCURRENT)
+			thread = new Thread(() -> {
+				doAction();
+			});
+
+		_lock = new Object();
+	}
+
+	public Action getCopy() {
+		try {
+			Action a = (Action)clone();
+			a.initialize();
+			return a;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public long getCheckingTime() {
+		return checkingTime;
+	}
+
+	public final boolean isRunning() {
+		return running.get();
+	}
+
 	public final void addAtEndListener(Consumer<Action> f) {
 		atEndListeners.add( f );
 	}
@@ -60,7 +72,25 @@ public abstract class Action implements Runnable, Rule {
 	}
 
 	public synchronized void interrupt() {
+		ending.set(true);
 		Thread.currentThread().interrupt();
+	}
+
+	public boolean equals(Object o) {
+		if (o.getClass().equals(this.getClass()) && o instanceof Action) {
+			Action a = (Action)o;
+			return a._lock == _lock;
+		}
+
+		return false;
+	}
+
+	public boolean isConcurrent() {
+		return mode == Mode.CONCURRENT;
+	}
+
+	public boolean isSequential() {
+		return !isConcurrent();
 	}
 
 	protected abstract void innerRun();
@@ -91,10 +121,46 @@ public abstract class Action implements Runnable, Rule {
 	}
 
 	public synchronized final void run() {
-		if (thread.isAlive() || done.get())
+		if (isRunning())
+			throw new RunningException();
+
+		if (ending.get())
 			return;
 
-		thread.start();
+		running.set(true);
+		if (thread == null)
+			doAction();
+		else {
+			thread.setName("Thread-Action-" + this);
+			thread.start();
+		}
+	}
+
+	private void doAction() {
+		atEndListeners.add(ac -> {
+			if (ac.next != null)
+				for (Action a : ac.next)
+					a.run();
+		});
+
+		if (previous != null)
+			for (Action a : previous) {
+				try {
+					a.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+		while (!check()) {
+			try {
+				Thread.sleep( checkingTime );
+			} catch ( InterruptedException e ) { }
+		}
+		innerRun();
+		running.set(false);
+		done.set( true );
+		atEndListeners.call( this );
 	}
 
 	public synchronized boolean check() {
@@ -115,7 +181,14 @@ public abstract class Action implements Runnable, Rule {
 	}
 
 	public void join() throws InterruptedException {
-		thread.join();
+		if (thread != null)
+			thread.join();
+		else
+			while (!isDone()) {
+				try {
+					Thread.sleep( checkingTime );
+				} catch ( InterruptedException e ) { }
+			}
 	}
 
 	public void joinAll() throws InterruptedException {

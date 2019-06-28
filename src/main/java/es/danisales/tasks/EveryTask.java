@@ -6,7 +6,8 @@ public abstract class EveryTask extends Action {
 	protected Date lastApply = new Date(0);
 	protected Long every;
 	
-	public EveryTask(long e) {
+	public EveryTask(long e, Mode m) {
+		super(m);
 		every = e;
 	}
 	
