@@ -9,9 +9,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class ActionList extends Action implements List<Action> {
-	CopyOnWriteArrayList<Action> list = new CopyOnWriteArrayList<>();
-
-	ConcurrentHashMap<Action, Integer> times;
+	private CopyOnWriteArrayList<Action> list = new CopyOnWriteArrayList<>();
+	private ConcurrentHashMap<Action, Integer> times;
 
 	public ActionList(Mode m) {
 		super(m);
@@ -35,11 +34,12 @@ public class ActionList extends Action implements List<Action> {
 		}
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public void joinChild() {
 		for (Action a : this) {
 			try {
 				a.join();
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}
@@ -64,12 +64,11 @@ public class ActionList extends Action implements List<Action> {
 
 	private void checkAndDoCommon(Action action) {
 		assert action != null;
-		if (ending.get())
+		if (isEnding())
 			return;
 
-		boolean condition = true;
-		action.setContext(this);
-		condition &= action.check();
+		action.context = this;
+		boolean condition = action.check();
 		condition &= !action.isRunning();
 
 		if ( condition ) {
@@ -127,6 +126,7 @@ public class ActionList extends Action implements List<Action> {
 		return list.toArray();
 	}
 
+	@SuppressWarnings("SuspiciousToArrayCall")
 	@Override
 	public <T> T[] toArray(T[] a) {
 		return list.toArray(a);
@@ -250,6 +250,7 @@ public class ActionList extends Action implements List<Action> {
 		return list.parallelStream();
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	class AddedException extends RuntimeException {
 		public AddedException(Action a) {
 			super("Action " + a + " already added in this list");
