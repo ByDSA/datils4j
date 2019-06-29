@@ -6,8 +6,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import es.danisales.log.Log;
 import es.danisales.io.text.TextFile;
 
+@SuppressWarnings("unused")
 public abstract class TextLog<L extends CharSequence> extends TextFile<L> implements Log<L> {
-	CopyOnWriteArrayList<L> _buffer;
+	private CopyOnWriteArrayList<L> _buffer;
 	
 	public TextLog(String path) {
 		super( path );

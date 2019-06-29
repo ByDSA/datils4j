@@ -1,5 +1,12 @@
 package es.danisales.log;
 
+import es.danisales.io.FileAppendable;
+import es.danisales.io.FileReadable;
+import es.danisales.io.binary.BinaryFile;
+import es.danisales.io.binary.types.Binary;
+import es.danisales.log.string.Logging;
+import es.danisales.others.Codeable;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -7,16 +14,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import es.danisales.log.string.Logging;
-import es.danisales.io.binary.types.Binary;
-import es.danisales.io.FileAppendable;
-import es.danisales.io.FileReadable;
-import es.danisales.io.binary.BinaryFile;
-import es.danisales.others.Codeable;
-
+@SuppressWarnings("unused")
 public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {
-	CopyOnWriteArrayList<L> _buffer;
-	protected List<L> lines;
+	private CopyOnWriteArrayList<L> _buffer;
+	private List<L> lines;
 
 	public BinaryLog(String path) {
 		super( path );
@@ -40,7 +41,7 @@ public class BinaryLog<A extends Codeable, L extends BinaryLine<A>> extends Bina
 
 	@Override
 	public boolean append(List<L> f) {
-		ByteBuffer buff = ByteBuffer.allocate( (int) Binary.sizeBytes( f ) );
+		ByteBuffer buff = ByteBuffer.allocate(Binary.sizeBytes( f ));
 		for(L l : f)
 			buff.put( l.getBytes() );
 		try {
