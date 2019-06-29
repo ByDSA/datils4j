@@ -1,37 +1,22 @@
 package es.danisales.log.string;
 
+import es.danisales.listeners.BiConsumerListener;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-import es.danisales.listeners.BiConsumerListener;
-
 public class Logging {
-	public static enum SeverityLevel {
-		Emergency(0), Alert(1), Critical(2), Error(3), Warning(4), Notice(5), Informational(6), Debug(7); 
+	private static Map<SeverityLevel, BiConsumerListener<SeverityLevel, String>> map = new ConcurrentHashMap<>();
+	private static final Object lock = new Object();
 
-		int val;
-
-		private SeverityLevel(int v) {
-			val = v;
-		}
-
-		public int value() {
-			return val;
-		}
-	}
-
-	public static int defaultErrorCode = -1;
-
-	static Map<SeverityLevel, BiConsumerListener<SeverityLevel, String>> map = new ConcurrentHashMap();
-	static Object lock = new Object();
-
+	@SuppressWarnings("WeakerAccess")
 	public static void addListener(SeverityLevel sl, BiConsumer<SeverityLevel, String> f) {
 		synchronized(lock) {
 			BiConsumerListener<SeverityLevel, String> l = map.get( sl );
 			if (l == null) {
-				l = new BiConsumerListener();
+				l = new BiConsumerListener<>();
 				map.put( sl, l );
 			}
 
@@ -39,6 +24,7 @@ public class Logging {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public static void addListener(BiConsumer<SeverityLevel, String> f) {
 		synchronized(lock) {
 			addListener(SeverityLevel.Alert, f);
@@ -60,7 +46,7 @@ public class Logging {
 	
 	private static void callListeners(SeverityLevel sl, String msg) {
 		synchronized(lock) {
-			BiConsumerListener<SeverityLevel, String> l = (BiConsumerListener<SeverityLevel, String>)map.get( sl );
+			BiConsumerListener<SeverityLevel, String> l = map.get( sl );
 			if (l != null)
 				l.call( sl, msg );
 		}
@@ -83,9 +69,11 @@ public class Logging {
 	}
 
 	public static void fatalError(String msg) {
-		fatalError( msg, defaultErrorCode );
+		int defaultErrorCode = -1;
+		fatalError( msg, defaultErrorCode);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public static void fatalError(String msg, int code) {
 		error( "(exit=" + code + ") " + msg);
 
@@ -93,46 +81,13 @@ public class Logging {
 		StringBuilder sb = new StringBuilder();
 		for (StackTraceElement elem : Thread.currentThread().getStackTrace()) {
 			if (first || elem.getClassName().equals( Logging.class.getName() )) {
-				first = false; // Elimina l�nea: java.lang.Thread.getStackTrace(Unknown Source)
+				first = false; // Elimina línea: java.lang.Thread.getStackTrace(Unknown Source)
 				continue;
 			}
-			sb.append( elem + "\n");
+			sb.append(elem).append("\n");
 			System.err.println(elem);
 		}
 		error(sb.toString());
 		System.exit( code );
-	}
-
-	public static void fatalErrorIf(boolean check, String msg, int code) {
-		if (check)
-			fatalError(msg, code);
-	}
-
-	public static void fatalErrorIf(boolean check, String msg) {
-		fatalErrorIf(check, msg, defaultErrorCode);
-	}
-
-	public static void fatalErrorIf(boolean check) {
-		fatalErrorIf(check, "La condici�n es falsa");
-	}
-
-	public static void fei(boolean check) {
-		fatalErrorIf(check);
-	}
-
-	public static void fatalErrorIfNull(Object o, String msg, int code) {
-		fatalErrorIf(o == null, msg, code);
-	}
-
-	public static void fatalErrorIfNull(Object o, String msg) {
-		fatalErrorIfNull(o, msg, defaultErrorCode);
-	}
-
-	public static void fatalErrorIfNull(Object o) {
-		fatalErrorIfNull(o, "Objeto nulo", defaultErrorCode);
-	}
-
-	public static void fein(Object o) {
-		fatalErrorIfNull(o);
 	}
 }
