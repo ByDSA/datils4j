@@ -2,6 +2,7 @@ package es.danisales.arrays;
 
 import java.util.Arrays;
 
+@SuppressWarnings("unused")
 public class ArrayWrapperInteger extends ArrayWrapper<Integer> {
 	public ArrayWrapperInteger(Integer... d) {
 		super(d);
