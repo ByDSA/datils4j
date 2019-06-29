@@ -4,12 +4,12 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static es.danisales.time.Sleep.sleep;
+import static org.junit.Assert.*;
 
 public class ActionTest {
-	class Action2 extends Action {
-		AtomicInteger atomicInteger;
+	public static class Action2 extends Action {
+		final AtomicInteger atomicInteger;
 		public Action2(AtomicInteger ai) {
 			super(Action.Mode.CONCURRENT);
 			atomicInteger = ai;
@@ -20,31 +20,7 @@ public class ActionTest {
 		}
 	}
 
-	int N = 10000;
-
-	@Test
-	public void sequential() {
-		ActionList sam = new ActionList(Action.Mode.SEQUENTIAL);
-		AtomicInteger atomicInteger = new AtomicInteger( 0 );
-		for (int i = 0; i < N; i++)
-			sam.add( new Action2(atomicInteger) );
-
-		for (int i = 0; i < N; i++)
-			assertEquals(false, sam.get(i).isDone());
-
-		for (int i = 0; i < N; i++)
-			assertEquals(false, sam.get(i).isRunning());
-
-		sam.run();
-
-		assertEquals(N, atomicInteger.get());
-
-		for(int i = 0; i < N; i++)
-			assertEquals(true, sam.get(i).isDone());
-
-		for(int i = 0; i < N; i++)
-			assertEquals(false, sam.get(i).isRunning());
-	}
+	public static int N = 10000;
 
 	public void recursive(Action2 a, int n, int levels) {
 		if (levels == 0)
@@ -62,7 +38,6 @@ public class ActionTest {
 				b = new Action2(a.atomicInteger) {
 					@Override
 					protected void innerRun() {
-
 					}
 				};
 			a.addNext( b );
@@ -73,15 +48,59 @@ public class ActionTest {
 	@Test
 	public void cloneTest() {
 		final AtomicInteger atomicInteger = new AtomicInteger( 0 );
-		Action a = new Action(Action.Mode.SEQUENTIAL) {
+		Action a = new Action(Action.Mode.CONCURRENT) {
 			@Override
 			protected void innerRun() {
 				atomicInteger.incrementAndGet();
+				sleep(100);
 			}
 		};
-		Action a2 = a.getCopy();
+		a.run();
+		Action a2 = a.newCopy();
+		try {
+			a.join();
+		} catch (InterruptedException e) { }
+		Action a3 = a.newCopy();
 		assertTrue(a != a2);
-		assertEquals(a, a2);
+		assertNotEquals(a, a2);
+		assertEquals(a.isConcurrent(), a2.isConcurrent());
+		assertFalse(a2.isDone());
+		assertFalse(a3.isDone());
+		assertFalse(a2.isRunning());
+		assertNotEquals(a._lock, a2._lock);
+
+		a2.run();
+		try {
+			a2.join();
+		} catch (InterruptedException e) { }
+		assertNotEquals(a, a2);
+
+		a3.run();
+		a3.interrupt();
+		Action a4 = a3.newCopy();
+		assertTrue(a3.ending.get());
+		assertFalse(a4.ending.get());
+	}
+
+	@Test
+	public void nextSimple() {
+		AtomicInteger ai = new AtomicInteger(0);
+		Action first = new Action(Action.Mode.SEQUENTIAL) {
+			@Override
+			protected void innerRun() {
+				ai.incrementAndGet();
+			}
+		};
+		Action root = first;
+		for (int i = 0; i < 10; i++) {
+			Action second = first.newCopy();
+			first.addNext(second);
+			first = second;
+		}
+
+		root.run();
+		root.joinNext();
+		assertEquals(11, ai.get());
 	}
 
 	@Test
@@ -114,12 +133,7 @@ public class ActionTest {
 		final AtomicInteger atomicInteger = new AtomicInteger( 0 );
 		Thread last = null;
 		for(int i = 0; i < N; i++) {
-			Thread t = new Thread() {
-				@Override
-				public void run() {
-					atomicInteger.incrementAndGet();
-				}
-			};
+			Thread t = new Thread(() -> atomicInteger.incrementAndGet());
 			t.start();
 			if (i == N-1)
 				last = t;
@@ -141,17 +155,11 @@ public class ActionTest {
 		Action2 a = new Action2(atomicInteger) {
 			@Override
 			protected void innerRun() {
-
 			}
 		};
 		recursive(a, 10, 4);
 		a.run();
-
-		try {
-			a.joinAll();
-		} catch ( InterruptedException e ) {
-			e.printStackTrace();
-		}
+		a.joinNext();
 
 		assertEquals(N, atomicInteger.get());
 	}

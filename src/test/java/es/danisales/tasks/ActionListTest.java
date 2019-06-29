@@ -147,6 +147,30 @@ public class ActionListTest {
     }
 
     @Test
+    public void sequential() {
+        ActionList sam = new ActionList(Action.Mode.SEQUENTIAL);
+        AtomicInteger atomicInteger = new AtomicInteger( 0 );
+        for (int i = 0; i < ActionTest.N; i++)
+            sam.add( new ActionTest.Action2(atomicInteger) );
+
+        for (int i = 0; i < ActionTest.N; i++)
+            assertFalse(sam.get(i).isDone());
+
+        for (int i = 0; i < ActionTest.N; i++)
+            assertFalse(sam.get(i).isRunning());
+
+        sam.run();
+
+        assertEquals(ActionTest.N, atomicInteger.get());
+
+        for(int i = 0; i < ActionTest.N; i++)
+            assertTrue(sam.get(i).isDone());
+
+        for(int i = 0; i <ActionTest. N; i++)
+            assertFalse(sam.get(i).isRunning());
+    }
+
+    @Test
     public void runSameClonedTaskSequentialy() {
         AtomicInteger ai = new AtomicInteger(0);
 
@@ -159,7 +183,7 @@ public class ActionListTest {
             }
         };
         for (int i = 0; i < 20; i++)
-            al.add(action1.getCopy());
+            al.add(action1.newCopy());
         al.run();
         assertTrue(al.isDone());
         assertFalse(al.isRunning());
@@ -196,7 +220,7 @@ public class ActionListTest {
             }
         };
         for (int i = 0; i < 20; i++)
-            al.add(action1.getCopy());
+            al.add(action1.newCopy());
         assertEquals(20, al.size());
         al.run();
         assertTrue(al.isDone());

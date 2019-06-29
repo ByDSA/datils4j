@@ -31,14 +31,35 @@ public class ActionList extends Action implements List<Action> {
 				checkAndDoCommon(action);
 			}
 
-			for (final Action action : this) {
-				try {
-					action.joinAll();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			joinChild();
+		}
+	}
+
+	public void joinChild() {
+		for (Action a : this) {
+			try {
+				a.join();
+			} catch (InterruptedException e) {
 			}
 		}
+	}
+
+	@Override
+	public void join() {
+		try {
+			super.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void joinNext() {
+		super.joinNext();
+
+
+		for (Action a : this)
+			a.joinNext();
 	}
 
 	private void checkAndDoCommon(Action action) {
@@ -64,12 +85,12 @@ public class ActionList extends Action implements List<Action> {
 	@Override
 	public void interrupt() {
 		super.interrupt();
-		for (final Action task : this) {
+		for (final Action action : this) {
 			new Thread(() -> {
-				if (task.isRunning())
-					task.interrupt();
+				if (action.isRunning())
+					action.interrupt();
 				else
-					remove(task);
+					remove(action);
 			}).start();
 		}
 

@@ -1,29 +1,30 @@
 package es.danisales.tasks;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
-import es.danisales.listeners.ConsumerListener;
 import es.danisales.rules.Rule;
+
+import static es.danisales.time.Sleep.sleep;
 
 public abstract class Action implements Runnable, Rule, Cloneable {
 	protected AtomicBoolean done;
 	protected AtomicBoolean running;
 	protected Object _lock;
-	protected List<Action> next;
-	protected List<Action> previous;
+	protected Thread thread;
+	ActionList next;
+	List<Action> previous;
+	ActionList atEndActions;
+	ActionList onInterruptActions;
+
 	protected long checkingTime = 100;
 	protected Object context;
-	protected Thread thread;
 	AtomicBoolean ending;
 	final Mode mode;
-	final ConsumerListener<Action> atEndListeners = new ConsumerListener();
 
 	public enum Mode {
 		CONCURRENT, SEQUENTIAL
-
 	}
 
 	public Action(Mode m) {
@@ -35,16 +36,22 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 		ending = new AtomicBoolean(false);
 		done = new AtomicBoolean(false);
 		running = new AtomicBoolean(false);
+		_lock = new Object();
+		next = null;
+		previous = new ArrayList<>();
+		atEndActions = null;
+		onInterruptActions = null;
 
 		if (mode == Mode.CONCURRENT)
 			thread = new Thread(() -> {
 				doAction();
 			});
+		else
+			thread = null;
 
-		_lock = new Object();
 	}
 
-	public Action getCopy() {
+	public Action newCopy() {
 		try {
 			Action a = (Action)clone();
 			a.initialize();
@@ -63,8 +70,10 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 		return running.get();
 	}
 
-	public final void addAtEndListener(Consumer<Action> f) {
-		atEndListeners.add( f );
+	public final void addAtEndAction(Action a) {
+		if (atEndActions == null)
+			atEndActions= new ActionList(Mode.SEQUENTIAL);
+		atEndActions.add( a );
 	}
 
 	public final boolean isDone() {
@@ -74,12 +83,16 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 	public synchronized void interrupt() {
 		ending.set(true);
 		Thread.currentThread().interrupt();
+		if (onInterruptActions != null) {
+			onInterruptActions.run();
+			onInterruptActions.joinNext();
+		}
 	}
 
 	public boolean equals(Object o) {
 		if (o.getClass().equals(this.getClass()) && o instanceof Action) {
 			Action a = (Action)o;
-			return a._lock == _lock;
+			return a == this;
 		}
 
 		return false;
@@ -95,27 +108,24 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
 	protected abstract void innerRun();
 
-	private void nextPreviousChecker() {
-		if (next == null)
-			next = new CopyOnWriteArrayList<>();
-		if (previous == null)
-			previous = new CopyOnWriteArrayList<>();
-	}
-
 	public synchronized final void addNext(Action a) {
-		nextPreviousChecker();
+		if (next == null) {
+			next = new ActionList(Mode.CONCURRENT);
+		}
 		if (!next.contains( a ))
 			next.add(a);
-		a.nextPreviousChecker();
+
 		if (!a.previous.contains( this ))
 			a.addPrevious( this );
 	}
 
 	public synchronized final void addPrevious(Action a) {
-		nextPreviousChecker();
 		if (!previous.contains( a ))
 			previous.add(a);
-		a.nextPreviousChecker();
+
+		if (a.next == null) {
+			a.next = new ActionList(Mode.CONCURRENT);
+		}
 		if (!a.next.contains( this ))
 			a.addNext( this );
 	}
@@ -128,39 +138,44 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 			return;
 
 		running.set(true);
-		if (thread == null)
+		if (isSequential())
 			doAction();
 		else {
-			thread.setName("Thread-Action-" + this);
-			thread.start();
+			synchronized (thread) {
+				thread.setName("Thread-Action-" + name);
+				thread.start();
+				assert thread.isAlive();
+			}
 		}
 	}
 
 	private void doAction() {
-		atEndListeners.add(ac -> {
-			if (ac.next != null)
-				for (Action a : ac.next)
-					a.run();
-		});
+		// Wait for previous
+		for (Action a : previous) {
+			try {
+				a.join();
+			} catch (InterruptedException e) {	}
+		}
 
-		if (previous != null)
-			for (Action a : previous) {
-				try {
-					a.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
+		// Wait for conditions
 		while (!check()) {
 			try {
 				Thread.sleep( checkingTime );
 			} catch ( InterruptedException e ) { }
 		}
+
 		innerRun();
+
 		running.set(false);
 		done.set( true );
-		atEndListeners.call( this );
+
+		// End Actions
+		if (next != null) {
+			next.setName("next of " + this);
+			next.run();
+		}
+		if (atEndActions != null)
+			atEndActions.run();
 	}
 
 	public synchronized boolean check() {
@@ -174,27 +189,52 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 	public synchronized final Object getContext() {
 		return context;
 	}
-
-	public synchronized void forceCheck() {
-		if (thread != null)
-			thread.interrupt();
-	}
-
+	/*
+        public synchronized void forceCheck() {
+            if (thread != null)
+                thread.interrupt();
+        }
+    */
 	public void join() throws InterruptedException {
-		if (thread != null)
-			thread.join();
+		if (isConcurrent())
+			synchronized (thread) {
+				thread.join();
+			}
 		else
 			while (!isDone()) {
-				try {
-					Thread.sleep( checkingTime );
-				} catch ( InterruptedException e ) { }
+				Thread.sleep( checkingTime );
 			}
 	}
 
-	public void joinAll() throws InterruptedException {
-		join();
+	public void joinNext() {
+		boolean error = false;
+		do { // Ni idea de por qué a veces falla (en test 'tree'). Si se pone un sleep/println antes del join, no suele lanzar InterrruptedException (a veces aún así, especialmente si el sleep es pequeño)
+			try {
+				if (error)
+					sleep(20);
+				join();
+				error = false;
+			} catch (InterruptedException e) {
+				error = true;
+			}
+		} while (error);
+
+
 		if (next != null)
-			for (Action a : next)
-				a.joinAll();
+			next.joinNext();
+	}
+
+	String name;
+	public void setName(String s) {
+		name = s;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }
