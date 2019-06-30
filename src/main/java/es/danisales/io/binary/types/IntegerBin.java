@@ -1,16 +1,16 @@
 package es.danisales.io.binary.types;
 
-import java.nio.ByteBuffer;
+import es.danisales.enums.EnumValue;
 
-import es.danisales.others.Codeable;
+import java.nio.ByteBuffer;
 
 public final class IntegerBin extends TypeBin<Integer> {
 	public IntegerBin(Integer v) {
 		super(v);
 	}
 	
-	public IntegerBin(Codeable v) {
-		super(v.getCode());
+	public IntegerBin(EnumValue<Integer> v) {
+		super(v.value());
 	}
 	
 	protected IntegerBin() {
@@ -19,8 +19,8 @@ public final class IntegerBin extends TypeBin<Integer> {
 
 	@Override
 	public int sizeBytes() {
-		return 4;
-	} // Integer.BYTES in Java 8
+		return Integer.BYTES;
+	}
 
 	@Override
 	public void write(ByteBuffer buff) {
