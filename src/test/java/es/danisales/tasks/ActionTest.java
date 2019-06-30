@@ -78,8 +78,8 @@ public class ActionTest {
 		a3.run();
 		a3.interrupt();
 		Action a4 = a3.newCopy();
-		assertTrue(a3.ending.get());
-		assertFalse(a4.ending.get());
+		assertTrue(a3.isEnding());
+		assertFalse(a4.isEnding());
 	}
 
 	@Test
