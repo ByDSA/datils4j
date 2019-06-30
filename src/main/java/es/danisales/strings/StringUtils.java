@@ -7,11 +7,11 @@ public class StringUtils {
 			base = new StringBuilder(base).replace(ind, ind+find.length(), replacement).toString();
 		return base;
 	}
-	
+
 	public static String zerosPad(int n, int cifras) {
 		return leftPad(Integer.toString( n ), '0', cifras);
 	}
-	
+
 	public static String leftPad(String base, char padChar, int cifras) {
 		StringBuilder zs = new StringBuilder();
 
@@ -21,5 +21,21 @@ public class StringUtils {
 		zs.append( base );
 
 		return zs.toString();
+	}
+
+	public static String join(String delim, String[] array, int ini) {
+		int end = array.length-1;
+		return join(delim, array, ini, end);
+	}
+
+	public static String join(String delim, String[] array, int ini, int end) {
+		StringBuilder paramsStrBuilder = new StringBuilder();
+		for (int i = ini; i <= end; i++) {
+			paramsStrBuilder.append(array[i]);
+			if (i < end)
+				paramsStrBuilder.append(delim);
+		}
+
+		return paramsStrBuilder.toString();
 	}
 }
