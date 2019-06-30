@@ -9,7 +9,7 @@ public class BinaryFileAutoBin extends BinaryFile implements AutoBin {
 	/**
 	 * Instantiates a new file es.danisales.io.binary.types.
 	 *
-	 * @param path
+	 * @param path path
 	 */
 	public BinaryFileAutoBin(String path) {
 		super( path );

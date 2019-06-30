@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Rm extends ProcessAction {
     public Rm(Path path) {
         this(path, false);
@@ -19,7 +20,7 @@ public class Rm extends ProcessAction {
             paramList.add("-r");
         paramList.add( path.toAbsolutePath().toString() );
 
-        String[] args = paramList.toArray( new String[paramList.size()] );
+        String[] args = paramList.toArray(new String[0]);
 
         constructor("rm", args);
     }

@@ -6,13 +6,14 @@ import java.util.List;
 
 import es.danisales.log.string.Logging;
 
-public final class BooleanArrayBin extends TypeBin<List<Boolean>> {	
+public final class BooleanArrayBin extends TypeBin<List<Boolean>> {
+	@SuppressWarnings("WeakerAccess")
 	public BooleanArrayBin(List<Boolean> v) {
 		super(v);
 	}
 	
 	public BooleanArrayBin() {
-		super(new ArrayList());
+		super(new ArrayList<>());
 	}
 	
 	public static BooleanArrayBin of(List<BooleanBin> v) {

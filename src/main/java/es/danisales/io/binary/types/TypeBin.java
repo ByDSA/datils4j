@@ -3,7 +3,7 @@ package es.danisales.io.binary.types;
 import java.nio.ByteBuffer;
 
 public abstract class TypeBin<T> implements Binary {
-	T var;
+	private T var;
 	protected Class type;
 
 	boolean putType;

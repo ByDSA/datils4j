@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+@SuppressWarnings("WeakerAccess")
 public final class DateBin extends TypeBin<Long> {
 	public static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 	
@@ -28,7 +29,7 @@ public final class DateBin extends TypeBin<Long> {
 		return DateBin.of(y, m, d, TimeZone.getDefault());
 	}
 	
-	DateBin() { }
+	private DateBin() { }
 	
 	public static DateBin of(ByteBuffer buff) {
 		DateBin db = new DateBin();
@@ -39,8 +40,8 @@ public final class DateBin extends TypeBin<Long> {
 
 	@Override
 	public int sizeBytes() {
-		return 8;
-	} // Long.BYTES in Java 8
+		return Long.BYTES;
+	}
 
 	@Override
 	public void write(ByteBuffer buff) {

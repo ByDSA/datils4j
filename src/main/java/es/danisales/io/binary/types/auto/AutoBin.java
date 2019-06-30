@@ -1,5 +1,10 @@
 package es.danisales.io.binary.types.auto;
 
+import es.danisales.io.binary.types.Binary;
+import es.danisales.io.binary.types.BooleanArrayBin;
+import es.danisales.io.binary.types.BooleanBin;
+import es.danisales.log.string.Logging;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -11,13 +16,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import es.danisales.log.string.Logging;
-import es.danisales.io.binary.types.Binary;
-import es.danisales.io.binary.types.BooleanArrayBin;
-import es.danisales.io.binary.types.BooleanBin;
-
 public interface AutoBin extends Binary {
-	List<Field> binaryFields= new ArrayList<Field>(), booleanFields = new ArrayList<Field>();
+	List<Field> binaryFields = new ArrayList<>(), booleanFields = new ArrayList<>();
 
 	default void initializeNull() {
 		updateBinaryFields();
@@ -41,7 +41,7 @@ public interface AutoBin extends Binary {
 	default void updateBinaryFields() {
 		binaryFields.clear();
 		booleanFields.clear();
-		List<Class> inheritance = new ArrayList();
+		List<Class> inheritance = new ArrayList<>();
 
 		Class currentClass = getClass();
 		do {
@@ -72,21 +72,14 @@ public interface AutoBin extends Binary {
 	}
 
 	default void write(ByteBuffer buff) {
-		it(new Consumer<Binary>() {
-			@Override
-			public void accept(Binary b) {
-				b.write(buff);
-			}
-		},new Consumer<BooleanArrayBin>() {
-			@Override
-			public void accept(BooleanArrayBin bab) {
-				bab.write( buff );
-			}
-		});
+		it(
+				b -> b.write(buff),
+				bab -> bab.write( buff )
+		);
 	}
 
 
-	public static byte[] getBytes(ByteBuffer buff, final int N) {
+	static byte[] getBytes(ByteBuffer buff, final int N) {
 		byte[] ret = new byte[N];
 		for(int i = 0; i < N; i++)
 			ret[i] = buff.get();
@@ -183,17 +176,10 @@ public interface AutoBin extends Binary {
 		initializeNull();
 
 		AtomicInteger s = new AtomicInteger(0);
-		it(new Consumer<Binary>() {
-			@Override
-			public void accept(Binary b) {
-				s.set( s.addAndGet( b.sizeBytes() ) );
-			}
-		}, new Consumer<BooleanArrayBin>() {
-			@Override
-			public void accept(BooleanArrayBin bab) {
-				s.set( s.addAndGet( bab.sizeBytes() ) );
-			}
-		});
+		it(
+				b -> s.set( s.addAndGet( b.sizeBytes() ) ),
+				bab -> s.set( s.addAndGet( bab.sizeBytes() ) )
+		);
 
 		return s.get();
 	}

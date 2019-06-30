@@ -1,15 +1,17 @@
-package es.danisales.settings;
+package es.danisales.io.settings;
+
+import es.danisales.io.binary.BinaryFile;
+import es.danisales.io.binary.types.DateBin;
+import es.danisales.io.binary.types.MapBin;
+import es.danisales.log.string.Logging;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import es.danisales.log.string.Logging;
-import es.danisales.io.binary.types.DateBin;
-import es.danisales.io.binary.types.MapBin;
-import es.danisales.io.binary.BinaryFile;
-
+@Deprecated
 public class Settings extends BinaryFile implements Map<String, Object> {
 	private static final long serialVersionUID = 781110217776323164L;
 	

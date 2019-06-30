@@ -12,8 +12,8 @@ import java.util.Map;
  * Class which implements this interface could be turned into a byte array.
  */
 public interface Binary extends Serializable {
-	static IdTypeEnum ID_TYPE = IdTypeEnum.Integer;
-	static final String ID_VARNAME = "serialVersionUID";
+	IdTypeEnum ID_TYPE = IdTypeEnum.Integer;
+	String ID_VARNAME = "serialVersionUID";
 	/**
 	 * Size in bytes of es.danisales.io.binary.types data composed in function getBytes.
 	 * 
@@ -38,14 +38,14 @@ public interface Binary extends Serializable {
 	 *
 	 * @param buff Buffer in which es.danisales.io.binary.types data will be added
 	 */
-	public void write(ByteBuffer buff);
+	void write(ByteBuffer buff);
 
 	/**
 	 * Reads from buffer buff the es.danisales.io.binary.types data and stores it into the object.
 	 *
 	 * @param buff Buffer from which es.danisales.io.binary.types data will be read
 	 */
-	public void read(ByteBuffer buff);
+	void read(ByteBuffer buff);
 
 	/**
 	 * Gets total sum up size of es.danisales.io.binary.types objects' list.
@@ -54,7 +54,7 @@ public interface Binary extends Serializable {
 	 * @param list List
 	 * @return size in bytes
 	 */
-	public static <L extends Binary> int sizeBytes(List<L> list) {
+	static <L extends Binary> int sizeBytes(List<L> list) {
 		int s = 0;
 		for (L b : list)
 			s += b.sizeBytes();
@@ -68,7 +68,7 @@ public interface Binary extends Serializable {
 	 * @param buff the buffer
 	 * @param list the list
 	 */
-	public static void writeList(ByteBuffer buff, List<Binary> list) {
+	static void writeList(ByteBuffer buff, List<Binary> list) {
 		buff.putInt( list.size() );
 		for(Binary b : list)
 			buff.put( b.getBytes() );
@@ -81,7 +81,7 @@ public interface Binary extends Serializable {
 	 * @param N number of bytes to get
 	 * @return the got bytes
 	 */
-	public static byte[] getNBytes(ByteBuffer buff, final int N) {
+	static byte[] getNBytes(ByteBuffer buff, final int N) {
 		byte[] ret = new byte[N];
 		for(int i = 0; i < N; i++)
 			ret[i] = buff.get();
@@ -89,7 +89,7 @@ public interface Binary extends Serializable {
 		return ret;
 	}
 
-	public static Object getId(Class<? extends Binary> c) {
+	static Object getId(Class<? extends Binary> c) {
 		try {
 			Field myField = c.getDeclaredField(ID_VARNAME);
 			return myField.get(null);
@@ -98,7 +98,7 @@ public interface Binary extends Serializable {
 		}
 	}
 
-	public static <B extends Binary> void writeId(Class<B> b, ByteBuffer buff) {
+	static <B extends Binary> void writeId(Class<B> b, ByteBuffer buff) {
 		Object id = getId(b);
 		if (ID_TYPE == IdTypeEnum.Long)
 			buff.putLong( (long)id);
@@ -108,11 +108,11 @@ public interface Binary extends Serializable {
 			buff.putShort( (short)id);
 	}
 	
-	public static <B extends Binary> void writeId(B b, ByteBuffer buff) {
+	static <B extends Binary> void writeId(B b, ByteBuffer buff) {
 		writeId(b.getClass(), buff);
 	}
 	
-	public static Class readId( ByteBuffer buff ) {
+	static Class readId( ByteBuffer buff ) {
 		long id = -1;
 		if (ID_TYPE == IdTypeEnum.Long)
 			id = buff.getLong();
@@ -123,18 +123,18 @@ public interface Binary extends Serializable {
 		return getClass(id);
 	}
 	
-	static Map<Long, Class> classes = new HashMap();
-	static Map<Class<Object>, Class<TypeBin>> c2b = new HashMap();
+	Map<Long, Class> classes = new HashMap<>();
+	Map<Class<Object>, Class<TypeBin>> c2b = new HashMap<>();
 	
-	public static Class getClass(long id) {
+	static Class getClass(long id) {
 		return classes.get( id );
 	}
 	
-	public static Class<? extends TypeBin> getBinaryClass(Class c) {
+	static Class<? extends TypeBin> getBinaryClass(Class c) {
 		return c2b.get( c );
 	}
 
-	public static int idSizeBytes() {
+	static int idSizeBytes() {
 		if (ID_TYPE == IdTypeEnum.Long)
 			return 8; // Long.BYTES in Java 8
 		else if (ID_TYPE == IdTypeEnum.Integer)
@@ -145,7 +145,7 @@ public interface Binary extends Serializable {
 			return 0;
 	}
 	
-	public static Binary toBinary(byte[] bytes) {
+	static Binary toBinary(byte[] bytes) {
 		return new Binary() {
 
 			@Override

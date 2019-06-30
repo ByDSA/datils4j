@@ -7,14 +7,14 @@ import java.nio.ByteBuffer;
 import es.danisales.log.string.Logging;
 
 public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
-	T[] varBin;
-	Class<T> tClass;
-	
+	private T[] varBin;
+	private Class<T> tClass;
+
+	@SuppressWarnings("unchecked")
 	public ArrayBin(Class<T> c, U... v) {
 		super(v);
 
 		tClass = c;
-
 		varBin = (T[]) Array.newInstance(c, v.length);
 		for(int i = 0; i < v.length; i++)
 			try {
@@ -28,7 +28,7 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 
 	@Override
 	public int sizeBytes() {
-		int s = 4; // Integer.BYTES in Java 8
+		int s = Integer.BYTES;
 		for(T t : varBin)
 			s += t.sizeBytes();
 		return s;
@@ -46,6 +46,7 @@ public final class ArrayBin<T extends TypeBin<U>, U> extends TypeBin<U[]> {
 			t.write( buff );
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void read(ByteBuffer buff) {
 		try {

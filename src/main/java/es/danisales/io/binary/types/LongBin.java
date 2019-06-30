@@ -13,8 +13,8 @@ public final class LongBin extends TypeBin<Long> {
 
 	@Override
 	public int sizeBytes() {
-		return 8;
-	} // Long.BYTES in Java 8
+		return Long.BYTES;
+	}
 
 	@Override
 	public void write(ByteBuffer buff) {

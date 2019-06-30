@@ -4,6 +4,7 @@ import es.danisales.enums.EnumValue;
 
 import java.nio.ByteBuffer;
 
+@SuppressWarnings("WeakerAccess")
 public final class IntegerBin extends TypeBin<Integer> {
 	public IntegerBin(Integer v) {
 		super(v);

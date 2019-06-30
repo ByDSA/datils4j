@@ -3,8 +3,9 @@ package es.danisales.io.binary.types;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+@SuppressWarnings("WeakerAccess")
 public final class StringBin extends TypeBin<String> {
-	Charset charset;
+	private Charset charset;
 	
 	public static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 	

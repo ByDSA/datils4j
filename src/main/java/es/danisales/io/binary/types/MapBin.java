@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class MapBin<K extends Binary, V extends Binary> extends TypeBin<Map<K, V>> implements Binary, Map<K, V> {
-	Class<? extends Binary> keyClass;
-	Class<? extends Binary> valueClass;
+	private Class<? extends Binary> keyClass;
+	private Class<? extends Binary> valueClass;
 	
 	public MapBin(Map m) {
 		super(null);
@@ -84,7 +84,7 @@ public class MapBin<K extends Binary, V extends Binary> extends TypeBin<Map<K, V
 
 		int size = buff.getInt();
 
-		Map map = new HashMap();
+		Map<K, V> map = new HashMap<>();
 
 		try {
 			for(int i = 0; i < size; i++) {
@@ -94,7 +94,7 @@ public class MapBin<K extends Binary, V extends Binary> extends TypeBin<Map<K, V
 				keyInstance.read( buff );
 				Binary valueInstance = keyClass.newInstance();
 				valueInstance.read( buff );
-				map.put(keyInstance, valueInstance);
+				map.put((K)keyInstance, (V)valueInstance);
 			}
 		} catch ( InstantiationException | IllegalAccessException e ) {
 			// TODO Auto-generated catch block
