@@ -1,6 +1,6 @@
 package es.danisales.log;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 import es.danisales.io.FileAppendable;
 import es.danisales.io.FileReadable;
 import es.danisales.io.binary.BinaryFile;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("unused")
-public class BinaryLog<A extends EnumValue<Integer>, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {
+public class BinaryLog<A extends Valuable<Integer>, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {
 	private CopyOnWriteArrayList<L> _buffer;
 	private List<L> lines;
 

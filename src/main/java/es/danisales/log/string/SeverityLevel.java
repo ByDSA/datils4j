@@ -1,8 +1,8 @@
 package es.danisales.log.string;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 
-public enum SeverityLevel implements EnumValue<Integer> {
+public enum SeverityLevel implements Valuable<Integer> {
     Emergency(0), Alert(1), Critical(2), Error(3), Warning(4), Notice(5), Informational(6), Debug(7);
 
     int val;
@@ -11,7 +11,7 @@ public enum SeverityLevel implements EnumValue<Integer> {
         val = v;
     }
 
-    public Integer value() {
+    public Integer getValue() {
         return val;
     }
 }

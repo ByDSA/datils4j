@@ -1,9 +1,9 @@
 package es.danisales.crypt;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 
 @SuppressWarnings("unused")
-public enum HashingAlgorithm implements EnumValue<String> {
+public enum HashingAlgorithm implements Valuable<String> {
     SHA256("SHA-256"), MD2("MD2"), MD5("MD5"), SHA1("SHA-1"), SHA384("SHA-384"), SHA512("SHA-512");
 
     String val;
@@ -13,7 +13,7 @@ public enum HashingAlgorithm implements EnumValue<String> {
     }
 
     @Override
-    public String value() {
+    public String getValue() {
         return val;
     }
 }

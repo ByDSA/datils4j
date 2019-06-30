@@ -1,6 +1,6 @@
 package es.danisales.io.binary.types;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 
 import java.nio.ByteBuffer;
 
@@ -10,8 +10,8 @@ public final class IntegerBin extends TypeBin<Integer> {
 		super(v);
 	}
 	
-	public IntegerBin(EnumValue<Integer> v) {
-		super(v.value());
+	public IntegerBin(Valuable<Integer> v) {
+		super(v.getValue());
 	}
 	
 	protected IntegerBin() {

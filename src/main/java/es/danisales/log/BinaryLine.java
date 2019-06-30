@@ -1,13 +1,13 @@
 package es.danisales.log;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 import es.danisales.io.binary.types.DateBin;
 import es.danisales.io.binary.types.IntegerBin;
 import es.danisales.io.binary.types.auto.AutoBin;
 
 import java.util.Date;
 
-public abstract class BinaryLine<A extends EnumValue<Integer>> implements AutoBin, EnumValue<Integer> {
+public abstract class BinaryLine<A extends Valuable<Integer>> implements AutoBin, Valuable<Integer> {
 	@SuppressWarnings({"FieldCanBeLocal","unused"})
 	private DateBin date;
 	private IntegerBin actionCode;
@@ -17,7 +17,7 @@ public abstract class BinaryLine<A extends EnumValue<Integer>> implements AutoBi
 		date = new DateBin( new Date() );
 	}
 
-	public Integer value() {
+	public Integer getValue() {
 		return actionCode.get();
 	}
 }

@@ -1,12 +1,12 @@
 package es.danisales.others;
 
-import es.danisales.enums.EnumValue;
+import es.danisales.utils.Valuable;
 
 @Deprecated
-public interface Codeable extends EnumValue<Integer> {
+public interface Codeable extends Valuable<Integer> {
 	int getCode();
 
-	default Integer value() {
+	default Integer getValue() {
 		return getCode();
 	}
 

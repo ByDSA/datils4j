@@ -65,9 +65,9 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 					sb.append( in.readChar() );
 
 				string key = sb.toString();
-				types value = in.readObject();
+				types getValue = in.readObject();
 
-				put(key, value);
+				put(key, getValue);
 			}
 		});
 
@@ -81,10 +81,10 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 		File.writeObject( path, (o) -> {
 			o.writeInt( sizeBytes() );
 
-			forEachThrowing((string key, Object value ) -> {
+			forEachThrowing((string key, Object getValue ) -> {
 				o.writeInt( key.length() );
 				o.writeChars( key );
-				o.writeObject( value );
+				o.writeObject( getValue );
 			});
 		});
 
