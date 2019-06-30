@@ -30,7 +30,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 		CONCURRENT, SEQUENTIAL
 	}
 
-	@SuppressWarnings("WeakerAccess")
 	public Action(Mode m) {
 		mode = m;
 		initialize();

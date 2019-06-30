@@ -2,6 +2,7 @@ package es.danisales.maths;
 
 import java.util.function.Function;
 
+@SuppressWarnings({"unused","WeakerAccess"})
 public class LinealFunction implements Function<Double, Double> {
 	double a, b;
 	

@@ -2,6 +2,7 @@ package es.danisales.maths;
 
 import java.util.function.Function;
 
+@SuppressWarnings({"unused","WeakerAccess"})
 public class CosFunction implements Function<Double, Double> {
 	double period;
 	long length;
