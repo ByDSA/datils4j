@@ -1,6 +1,6 @@
 package es.danisales.random.target;
 
-public class SimpleTarget implements Target {
+public class SimpleTarget implements Target<SimpleTarget> {
     private long surface = 1;
 
     public SimpleTarget() {
@@ -11,7 +11,7 @@ public class SimpleTarget implements Target {
     }
 
     @Override
-    public void afterOnPick() {
+    public void afterOnPick(SimpleTarget t) {
     }
 
     @Override
@@ -22,7 +22,7 @@ public class SimpleTarget implements Target {
     @Override
     public SimpleTarget pick() {
         beforeOnPick();
-        afterOnPick();
+        afterOnPick(this);
         return this;
     }
 
@@ -33,6 +33,8 @@ public class SimpleTarget implements Target {
 
     @SuppressWarnings("unused")
     public final void setSurface(long s) {
+        if (s <= 0)
+            throw new RandomPicker2D.NoSurfaceException();
         surface = s;
     }
 

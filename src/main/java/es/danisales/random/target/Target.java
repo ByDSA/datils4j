@@ -1,10 +1,10 @@
 package es.danisales.random.target;
 
-public interface Target {
-	Target pickDart(long dart);
-	Target pick();
+public interface Target<RET> {
+	RET pickDart(long dart);
+	RET pick();
 	long getSurface();
 	void next();
 	void beforeOnPick();
-	void afterOnPick();
+	void afterOnPick(RET picked);
 }

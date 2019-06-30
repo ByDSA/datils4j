@@ -1,6 +1,6 @@
 package es.danisales.random;
 
-import es.danisales.random.target.RandomPicker;
+import es.danisales.random.target.RandomPicker2D;
 import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
 
@@ -22,28 +22,28 @@ public class PackTargetTest {
 
     @Test
     public void defaultSurface() {
-        RandomPicker t = new RandomPicker();
+        RandomPicker2D t = new RandomPicker2D();
 
         assertEquals(0, t.getSurface());
     }
 
-    @Test(expected = RandomPicker.EmptyException.class)
+    @Test(expected = RandomPicker2D.EmptyException.class)
     public void defaultPickException() {
-        RandomPicker t = new RandomPicker();
+        RandomPicker2D t = new RandomPicker2D();
 
         t.pickDart(0);
     }
 
-    @Test(expected = RandomPicker.EmptyException.class)
+    @Test(expected = RandomPicker2D.EmptyException.class)
     public void defaultPickException2() {
-        RandomPicker t = new RandomPicker();
+        RandomPicker2D t = new RandomPicker2D();
 
         t.pick();
     }
 
-    @Test(expected = RandomPicker.NoSurfaceException.class)
+    @Test(expected = RandomPicker2D.NoSurfaceException.class)
     public void surfaceException() {
-        RandomPicker t = new RandomPicker();
+        RandomPicker2D t = new RandomPicker2D();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(0);
         t.add(st);
@@ -53,7 +53,7 @@ public class PackTargetTest {
 
     @Test
     public void surfaceNoException() {
-        RandomPicker t = new RandomPicker();
+        RandomPicker2D t = new RandomPicker2D();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(-1);
         t.add(st);
