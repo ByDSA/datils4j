@@ -21,8 +21,6 @@ jar {
     }
 
     baseName project.baseName
-
-    if (JavaVersion.current().isJava7()) {
-        archiveName baseName + (appendix ? "-" + appendix : "") + "-" + version + (classifier ? "-" + classifier : "")+ "-jdk7." + extension
-    }
 }
+
+tasks.jar.dependsOn("test")
