@@ -20,14 +20,14 @@ public class ProcessAction extends Action {
     public ProcessAction(String fname, List<String> params) {
         super(Mode.CONCURRENT);
 
-        setFileNameAndParams(fname, params);
+        setFilenameAndParams(fname, params);
     }
 
     @SuppressWarnings("unused")
     public ProcessAction(String fname, String... params) {
         super(Mode.CONCURRENT);
 
-        setFileNameAndParams(fname, params);
+        setFilenameAndParams(fname, params);
     }
 
     public ProcessAction() {
@@ -35,11 +35,11 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("WeakerAccess")
-    protected void setFileNameAndParams(String fname, List<String> params) {
-        setFileNameAndParams(fname, params.toArray(new String[0]));
+    protected void setFilenameAndParams(String fname, List<String> params) {
+        setFilenameAndParams(fname, params.toArray(new String[0]));
     }
 
-    protected void setFileNameAndParams(String fname, String... params) {
+    protected void setFilenameAndParams(String fname, String... params) {
         paramsWithName = new String[ params.length +1 ];
         paramsWithName[0] = fname;
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
