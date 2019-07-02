@@ -153,6 +153,14 @@ public abstract class Action implements Rule, Cloneable {
 		return this;
 	}
 
+	@SuppressWarnings("WeakerAccess")
+	public synchronized final Action addOnInterrupt(Action a) {
+		if (!onInterruptActions.contains( a ))
+			onInterruptActions.add(a);
+
+		return this;
+	}
+
 	public synchronized final Action run() {
 		if (isRunning())
 			throw new RunningException();
