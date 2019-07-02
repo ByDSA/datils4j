@@ -45,21 +45,25 @@ public class ActionList extends Action implements List<Action> {
 	}
 
 	@Override
-	public void join() {
+	public Action join() {
 		try {
 			super.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+		return this;
 	}
 
 	@Override
-	public void joinNext() {
+	public Action joinNext() {
 		super.joinNext();
 
 
 		for (Action a : this)
 			a.joinNext();
+
+		return this;
 	}
 
 	private void checkAndDoCommon(Action action) {

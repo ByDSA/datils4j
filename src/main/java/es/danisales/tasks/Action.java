@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static es.danisales.time.Sleep.sleep;
 
-public abstract class Action implements Runnable, Rule, Cloneable {
+public abstract class Action implements Rule, Cloneable {
 	// Non-duplicated
 	private AtomicBoolean done;
 	private AtomicBoolean running;
@@ -126,7 +126,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 	protected abstract void innerRun();
 
 	@SuppressWarnings("WeakerAccess")
-	public synchronized final void addNext(Action a) {
+	public synchronized final Action addNext(Action a) {
 		if (next == null) {
 			next = new ActionList(Mode.CONCURRENT);
 		}
@@ -135,10 +135,12 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
 		if (!a.previous.contains( this ))
 			a.addPrevious( this );
+
+		return this;
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public synchronized final void addPrevious(Action a) {
+	public synchronized final Action addPrevious(Action a) {
 		if (!previous.contains( a ))
 			previous.add(a);
 
@@ -147,14 +149,16 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 		}
 		if (!a.next.contains( this ))
 			a.addNext( this );
+
+		return this;
 	}
 
-	public synchronized final void run() {
+	public synchronized final Action run() {
 		if (isRunning())
 			throw new RunningException();
 
 		if (ending.get())
-			return;
+			return this;
 
 		running.set(true);
 		if (isSequential())
@@ -164,6 +168,8 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 			thread.start();
 			assert thread.isAlive();
 		}
+
+		return this;
 	}
 
 	private void doAction() {
@@ -210,16 +216,18 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 			thread.interrupt();
 	}
 
-	public void join() throws InterruptedException {
+	public Action join() throws InterruptedException {
 		if (isConcurrent())
 			thread.join();
 		else
 			while (!isDone()) {
 				Thread.sleep( checkingTime );
 			}
+
+		return this;
 	}
 
-	public void joinNext() {
+	public Action joinNext() {
 		boolean error = false;
 		do { // Ni idea de por qué a veces falla (en test 'tree'). Si se pone un sleep/println antes del join, no suele lanzar InterrruptedException (a veces aún así, especialmente si el sleep es pequeño)
 			try {
@@ -235,11 +243,15 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
 		if (next != null)
 			next.joinNext();
+
+		return this;
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public void setName(String s) {
+	public Action setName(String s) {
 		name = s;
+
+		return this;
 	}
 
 	@SuppressWarnings("unused")
