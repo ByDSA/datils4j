@@ -3,7 +3,7 @@
 [![Latest release](https://img.shields.io/github/release/ByDSA/datils4j.svg)](https://github.com/ByDSA/datils4j/releases/latest)
 [![Build Status](https://travis-ci.org/ByDSA/datils4j.svg?branch=master)](https://travis-ci.org/ByDSA/datils4j)
 
-Datils4j is a ser of core libraries that includes:
+Datils4j is a set of core libraries that includes:
 
 # Features
 - Random Picker:
@@ -26,9 +26,7 @@ allprojects {
 Add Dependency:
 ```gradle
 dependencies {
-  implementation 'com.github.ByDSA:datils4j:1.0'
-  // or, for JDK7:
-  implementation 'com.github.ByDSA:datils4j:1.0-jdk7'
+  implementation 'com.github.ByDSA:datils4j:1.1'
 }
 ```
 
@@ -48,8 +46,6 @@ Add Dependency:
 <dependency>
 	<groupId>com.github.ByDSA</groupId>
 	<artifactId>datils4j</artifactId>
-	<version>1.0</version>
-	<!-- or, for JDK7: -->
-	<version>1.0-jdk7</version>
+	<version>1.1</version>
 </dependency>
 ```
