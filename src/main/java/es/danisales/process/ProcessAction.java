@@ -8,10 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProcessAction extends Action {
     @SuppressWarnings("WeakerAccess")
     String[] paramsWithName;
+
+    private AtomicInteger resultCode = new AtomicInteger();
 
     @SuppressWarnings("unused")
     public ProcessAction(String fname, List<String> params) {
@@ -53,10 +56,10 @@ public class ProcessAction extends Action {
             Thread normalOutputThread = startNormalOutputListener(p);
             startErrorOutputListener(p);
 
-            int result = p.waitFor();
+            resultCode.set(p.waitFor());
             normalOutputThread.join();
-            if (result != 0) {
-                onError(result);
+            if (resultCode.get() != 0) {
+                onError(resultCode.get());
             }
         } catch (IOException e) {
             onNotFound();
@@ -65,24 +68,6 @@ public class ProcessAction extends Action {
         } catch(NoArgumentsException e) {
             onNoArguments(paramsWithName);
         }
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onNoArguments(String[] paramsWithName) {
-        System.err.println("no valid arguments");
-        if (paramsWithName != null)
-        for (String str : paramsWithName)
-            System.err.println(str);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onInterrupted() {
-        System.err.println("procccess interrupted");
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onNotFound() {
-        System.err.println("procccess not found");
     }
 
     private Thread startNormalOutputListener(Process p) {
@@ -123,6 +108,36 @@ public class ProcessAction extends Action {
         });
 
         errorOutputThread.start();
+    }
+
+    public Integer getResultCode() {
+        return resultCode.get();
+    }
+
+    public int joinResult() {
+        try {
+            join();
+        } catch (InterruptedException ignored) {}
+
+        return getResultCode();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void onNoArguments(String[] paramsWithName) {
+        System.err.println("no valid arguments");
+        if (paramsWithName != null)
+        for (String str : paramsWithName)
+            System.err.println(str);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void onInterrupted() {
+        System.err.println("procccess interrupted");
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void onNotFound() {
+        System.err.println("procccess not found");
     }
 
     @SuppressWarnings("WeakerAccess")
