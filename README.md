@@ -26,7 +26,7 @@ allprojects {
 Add Dependency:
 ```gradle
 dependencies {
-  implementation 'com.github.ByDSA:datils4j:1.1'
+  implementation 'com.github.ByDSA:datils4j:1.2'
 }
 ```
 
@@ -46,6 +46,6 @@ Add Dependency:
 <dependency>
 	<groupId>com.github.ByDSA</groupId>
 	<artifactId>datils4j</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 </dependency>
 ```
