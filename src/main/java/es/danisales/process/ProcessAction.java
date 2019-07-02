@@ -45,8 +45,12 @@ public class ProcessAction extends Action {
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
     }
 
+    protected void onBeforeRun() {
+    }
+
     @Override
     protected void innerRun() {
+        onBeforeRun();
         try {
             if (paramsWithName == null || paramsWithName.length == 0)
                 throw new NoArgumentsException();
@@ -132,6 +136,12 @@ public class ProcessAction extends Action {
         } catch (InterruptedException ignored) {}
 
         return getResultCode();
+    }
+
+    @SuppressWarnings("unused")
+    public int runAndJoin() {
+        run();
+        return joinResult();
     }
 
     @SuppressWarnings("WeakerAccess")
