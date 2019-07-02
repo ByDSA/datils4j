@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProcessAction extends Action {
     @SuppressWarnings("WeakerAccess")
-    String[] paramsWithName;
+    protected String[] paramsWithName;
 
     private AtomicInteger resultCode = new AtomicInteger();
 
