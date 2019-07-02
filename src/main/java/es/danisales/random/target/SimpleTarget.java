@@ -33,9 +33,7 @@ public class SimpleTarget implements Target<SimpleTarget> {
 
     @SuppressWarnings("unused")
     public final void setSurface(long s) {
-        if (s <= 0)
-            throw new RandomPicker2D.NoSurfaceException();
-        surface = s;
+        surface = Math.max(0, s);
     }
 
     @Override
