@@ -1,6 +1,5 @@
 package es.danisales.random;
 
-import es.danisales.log.string.Logging;
 import es.danisales.random.target.RandomPicker2D;
 import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
@@ -59,8 +58,6 @@ public class PackTargetTest {
         st.setSurface(-1);
         t.add(st);
         t.add(new SimpleTarget());
-        Logging.log(""+t.getSurface());
-        Logging.log(""+st.getSurface());
 
         t.pick();
     }
