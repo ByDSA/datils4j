@@ -110,10 +110,17 @@ public class ProcessAction extends Action {
         errorOutputThread.start();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Integer getResultCode() {
         return resultCode.get();
     }
 
+    @SuppressWarnings("unused")
+    public String getFileName() {
+        return paramsWithName == null || paramsWithName.length == 0 ? null : paramsWithName[0];
+    }
+
+    @SuppressWarnings("unused")
     public int joinResult() {
         try {
             join();
