@@ -22,6 +22,6 @@ public class Rm extends ProcessAction {
 
         String[] args = paramList.toArray(new String[0]);
 
-        constructor("rm", args);
+        setFileNameAndParams("rm", args);
     }
 }

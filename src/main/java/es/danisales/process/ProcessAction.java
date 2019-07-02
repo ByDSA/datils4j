@@ -19,22 +19,27 @@ public class ProcessAction extends Action {
     @SuppressWarnings("unused")
     public ProcessAction(String fname, List<String> params) {
         super(Mode.CONCURRENT);
-        String[] paramsArray = params.toArray(new String[0]);
-        constructor(fname, paramsArray);
+
+        setFileNameAndParams(fname, params);
     }
 
     @SuppressWarnings("unused")
     public ProcessAction(String fname, String... params) {
         super(Mode.CONCURRENT);
 
-        constructor(fname, params);
+        setFileNameAndParams(fname, params);
     }
 
     public ProcessAction() {
         super(Mode.CONCURRENT);
     }
 
-    protected void constructor(String fname, String... params) {
+    @SuppressWarnings("WeakerAccess")
+    protected void setFileNameAndParams(String fname, List<String> params) {
+        setFileNameAndParams(fname, params.toArray(new String[0]));
+    }
+
+    protected void setFileNameAndParams(String fname, String... params) {
         paramsWithName = new String[ params.length +1 ];
         paramsWithName[0] = fname;
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
