@@ -17,7 +17,6 @@ public abstract class Action implements Rule, Cloneable {
 	private ActionList next;
 	private List<Action> previous;
 	private ActionList atEndActions;
-	private ActionList onInterruptActions;
 	@SuppressWarnings("WeakerAccess") protected Object context;
 	private AtomicBoolean ending;
 
@@ -43,7 +42,6 @@ public abstract class Action implements Rule, Cloneable {
 		next = null;
 		previous = new ArrayList<>();
 		atEndActions = null;
-		onInterruptActions = null;
 		context = null;
 
 		if (mode == Mode.CONCURRENT)
@@ -99,10 +97,7 @@ public abstract class Action implements Rule, Cloneable {
 	public synchronized void interrupt() {
 		ending.set(true);
 		Thread.currentThread().interrupt();
-		if (onInterruptActions != null) {
-			onInterruptActions.run();
-			onInterruptActions.joinNext();
-		}
+			onInterrupt();
 	}
 
 	public boolean equals(Object o) {
@@ -154,11 +149,7 @@ public abstract class Action implements Rule, Cloneable {
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public synchronized final Action addOnInterrupt(Action a) {
-		if (!onInterruptActions.contains( a ))
-			onInterruptActions.add(a);
-
-		return this;
+	protected void onInterrupt() {
 	}
 
 	public synchronized final Action run() {
