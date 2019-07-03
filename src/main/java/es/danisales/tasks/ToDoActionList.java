@@ -2,7 +2,7 @@ package es.danisales.tasks;
 
 import es.danisales.log.string.Logging;
 
-class ToDoActionList extends ActionList {
+public class ToDoActionList extends ActionList {
     public ToDoActionList() {
         super(Mode.CONCURRENT);
     }
