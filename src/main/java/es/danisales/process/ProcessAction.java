@@ -139,7 +139,7 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public int runAndJoin() {
+    public int runAndJoinResult() {
         run();
         return joinResult();
     }
