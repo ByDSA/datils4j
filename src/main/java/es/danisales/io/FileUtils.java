@@ -25,14 +25,14 @@ public final class FileUtils {
 		return finderRecursive(dir, ext);
 	}
 
-	public static boolean safeDeleteFolder(File f) {
+	public static boolean deleteEmptyChildren(File f) {
 		if (f.isFile())
 			return false;
 
 		File[] children = f.listFiles();
 		if (children != null)
 			for (File f2 : children)
-				safeDeleteFolder(f2);
+				deleteEmptyChildren(f2);
 
 		children = f.listFiles();
 		if (children == null || children.length == 0)
@@ -41,7 +41,7 @@ public final class FileUtils {
 		return false;
 	}
 
-	public static ArrayList<java.io.File> finderRecursive(Path dir, String ext){
+	public static ArrayList<java.io.File> finderRecursive(Path dir, String ext) {
 		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
 
 		java.io.File[] files = dir.toFile().listFiles();
