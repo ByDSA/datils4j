@@ -19,19 +19,11 @@ public class ActionList extends Action implements List<Action> {
 
 	@Override
 	protected void innerRun() {
-		if (isConcurrent())
-			new Thread(() -> {
-				for (final Action action : this) {
-					checkAndDoCommon(action);
-				}
-			}).start();
-		else {
-			for (final Action action : this) {
-				checkAndDoCommon(action);
-			}
-
-			joinChild();
+		for (final Action action : this) {
+			checkAndDoCommon(action);
 		}
+
+		joinChild();
 	}
 
 	@SuppressWarnings("WeakerAccess")
