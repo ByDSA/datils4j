@@ -15,6 +15,7 @@ import es.danisales.arrays.ArrayWrapper;
 import es.danisales.crypt.CryptUtils;
 import es.danisales.functions.ThrowingConsumer;
 
+@SuppressWarnings("WeakerAccess")
 public final class FileUtils {
 	public static final String DATA_FOLDER = "data/";
 
@@ -22,6 +23,22 @@ public final class FileUtils {
 		Path dir = new java.io.File(dirName).toPath();
 
 		return finderRecursive(dir, ext);
+	}
+
+	public static boolean safeDeleteFolder(File f) {
+		if (f.isFile())
+			return false;
+
+		File[] children = f.listFiles();
+		if (children != null)
+			for (File f2 : children)
+				safeDeleteFolder(f2);
+
+		children = f.listFiles();
+		if (children == null || children.length == 0)
+			return f.delete();
+
+		return false;
 	}
 
 	public static ArrayList<java.io.File> finderRecursive(Path dir, String ext){
