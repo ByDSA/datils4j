@@ -43,11 +43,6 @@ public abstract class Action implements Rule, Cloneable {
 		previous = new ArrayList<>();
 		atEndActions = null;
 		context = null;
-
-		if (mode == Mode.CONCURRENT)
-			thread = new Thread(this::doAction);
-		else
-			thread = null;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -97,7 +92,7 @@ public abstract class Action implements Rule, Cloneable {
 	public synchronized void interrupt() {
 		ending.set(true);
 		Thread.currentThread().interrupt();
-			onInterrupt();
+		onInterrupt();
 	}
 
 	public boolean equals(Object o) {
@@ -154,7 +149,7 @@ public abstract class Action implements Rule, Cloneable {
 
 	public synchronized final Action run() {
 		if (isRunning())
-			throw new RunningException();
+			throw new IllegalStateException();
 
 		if (ending.get())
 			return this;
@@ -163,6 +158,7 @@ public abstract class Action implements Rule, Cloneable {
 		if (isSequential())
 			doAction();
 		else {
+			thread = new Thread(this::doAction);
 			thread.setName("Thread-Action-" + name);
 			thread.start();
 			assert thread.isAlive();
@@ -216,6 +212,9 @@ public abstract class Action implements Rule, Cloneable {
 	}
 
 	public Action join() throws InterruptedException {
+	    if (!isRunning())
+	        return null;
+
 		if (isConcurrent())
 			thread.join();
 		else
