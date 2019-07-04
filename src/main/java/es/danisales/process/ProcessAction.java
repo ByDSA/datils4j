@@ -7,14 +7,24 @@ import es.danisales.tasks.Action;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class ProcessAction extends Action {
     @SuppressWarnings("WeakerAccess")
     protected String[] paramsWithName;
 
     private AtomicInteger resultCode = new AtomicInteger();
+
+    private final List<Runnable> notFoundListeners = new ArrayList<>();
+    private final List<Runnable> beforeListeners = new ArrayList<>();
+    private final List<Consumer<String>> errorLineListeners = new ArrayList<>();
+    private final List<Consumer<String>> outLineListeners = new ArrayList<>();
+    private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
+    private final List<Runnable> interruptedListeners = new ArrayList<>();
+    private final List<Runnable> onNoArgumentsListeners = new ArrayList<>();
 
     @SuppressWarnings("unused")
     public ProcessAction(String fname, List<String> params) {
@@ -34,6 +44,153 @@ public class ProcessAction extends Action {
         super(Mode.CONCURRENT);
     }
 
+    @SuppressWarnings("unused")
+    public boolean addNotFoundListener(Runnable runnable) {
+        synchronized (notFoundListeners) {
+            return notFoundListeners.add(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addBeforeListener(Runnable runnable) {
+        synchronized (beforeListeners) {
+            return beforeListeners.add(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addErrorLineListener(Consumer<String> consumer) {
+        synchronized (errorLineListeners) {
+            return errorLineListeners.add(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addOutLineListener(Consumer<String> consumer) {
+        synchronized (outLineListeners) {
+            return outLineListeners.add(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addErrorListener(Consumer<Integer> consumer) {
+        synchronized (errorListeners) {
+            return errorListeners.add(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addInterruptedListener(Runnable runnable) {
+        synchronized (interruptedListeners) {
+            return interruptedListeners.add(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean addOnNoArgumentsListener(Runnable runnable) {
+        synchronized (onNoArgumentsListeners) {
+            return onNoArgumentsListeners.add(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeNotFoundListener(Runnable runnable) {
+        synchronized (notFoundListeners) {
+            return notFoundListeners.remove(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeBeforeListener(Runnable runnable) {
+        synchronized (beforeListeners) {
+            return beforeListeners.remove(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeErrorLineListener(Consumer<String> consumer) {
+        synchronized (errorLineListeners) {
+            return errorLineListeners.remove(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeOutLineListener(Consumer<String> consumer) {
+        synchronized (outLineListeners) {
+            return outLineListeners.remove(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeErrorListener(Consumer<Integer> consumer) {
+        synchronized (errorListeners) {
+            return errorListeners.remove(consumer);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeInterruptedListener(Runnable runnable) {
+        synchronized (interruptedListeners) {
+            return interruptedListeners.remove(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean removeOnNoArgumentsListener(Runnable runnable) {
+        synchronized (onNoArgumentsListeners) {
+            return onNoArgumentsListeners.remove(runnable);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearNotFoundListeners() {
+        synchronized (notFoundListeners) {
+            notFoundListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearBeforeListeners() {
+        synchronized (beforeListeners) {
+            beforeListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearErrorLineListeners() {
+        synchronized (errorLineListeners) {
+            errorLineListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearOutLineListener() {
+        synchronized (outLineListeners) {
+            outLineListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearErrorListeners() {
+        synchronized (errorListeners) {
+            errorListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearInterruptedListeners() {
+        synchronized (interruptedListeners) {
+            interruptedListeners.clear();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void clearOnNoArgumentsListeners() {
+        synchronized (onNoArgumentsListeners) {
+            onNoArgumentsListeners.clear();
+        }
+    }
+
     @SuppressWarnings("WeakerAccess")
     protected void setFilenameAndParams(String fname, List<String> params) {
         setFilenameAndParams(fname, params.toArray(new String[0]));
@@ -45,12 +202,12 @@ public class ProcessAction extends Action {
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
     }
 
-    protected void onBeforeRun() {
-    }
-
     @Override
     protected void innerRun() {
-        onBeforeRun();
+        synchronized (beforeListeners) {
+            for (Runnable r : beforeListeners)
+                r.run();
+        }
         try {
             if (paramsWithName == null || paramsWithName.length == 0)
                 throw new NoArgumentsException();
@@ -68,14 +225,26 @@ public class ProcessAction extends Action {
             resultCode.set(p.waitFor());
             normalOutputThread.join();
             if (resultCode.get() != 0) {
-                onError(resultCode.get());
+                synchronized (errorListeners) {
+                    for (Consumer<Integer> c : errorListeners)
+                        c.accept(resultCode.get());
+                }
             }
         } catch (IOException e) {
-            onNotFound();
+            synchronized (notFoundListeners) {
+                for (Runnable r : notFoundListeners)
+                    r.run();
+            }
         } catch (InterruptedException e) {
-            onInterrupted();
+            synchronized (interruptedListeners) {
+                for (Runnable r : interruptedListeners)
+                    r.run();
+            }
         } catch(NoArgumentsException e) {
-            onNoArguments(paramsWithName);
+            synchronized (onNoArgumentsListeners) {
+                for (Runnable r : onNoArgumentsListeners)
+                    r.run();
+            }
         }
     }
 
@@ -88,7 +257,10 @@ public class ProcessAction extends Action {
                                 (new InputStreamReader(p.getInputStream()));
 
                 while ((line = input.readLine()) != null)
-                    onOutLine(line);
+                    synchronized (outLineListeners) {
+                        for (Consumer<String> c : outLineListeners)
+                            c.accept(line);
+                    }
 
 
                 input.close();
@@ -109,7 +281,10 @@ public class ProcessAction extends Action {
                                 (new InputStreamReader(p.getErrorStream()));
 
                 while ((line = input.readLine()) != null)
-                    onErrLine(line);
+                    synchronized (errorLineListeners) {
+                        for (Consumer<String> c : errorLineListeners)
+                            c.accept(line);
+                    }
 
 
                 input.close();
@@ -129,7 +304,7 @@ public class ProcessAction extends Action {
         return paramsWithName == null || paramsWithName.length == 0 ? null : paramsWithName[0];
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused","WeakerAccess"})
     public int joinResult() {
         try {
             join();
@@ -144,38 +319,6 @@ public class ProcessAction extends Action {
         return joinResult();
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public void onNoArguments(String[] paramsWithName) {
-        System.err.println("no valid arguments");
-        if (paramsWithName != null)
-        for (String str : paramsWithName)
-            System.err.println(str);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onInterrupted() {
-        System.err.println("procccess interrupted");
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onNotFound() {
-        System.err.println("procccess not found");
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onError(int code) {
-        Logging.error("Process failed with status: " + code);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onOutLine(String line) {
-        Logging.log(line);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void onErrLine(String line) {
-        Logging.error(line);
-    }
 
     @SuppressWarnings("WeakerAccess")
     public static class NoArgumentsException extends RuntimeException {
