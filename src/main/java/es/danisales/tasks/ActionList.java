@@ -1,18 +1,16 @@
 package es.danisales.tasks;
 
-import es.danisales.log.string.Logging;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class ActionList extends Action implements List<Action> {
-	private CopyOnWriteArrayList<Action> list = new CopyOnWriteArrayList<>();
-	private ConcurrentHashMap<Action, Integer> times;
+	private final List<Action> list = new ArrayList<>();
+	private final ConcurrentHashMap<Action, Integer> times;
+	private final List<Consumer<Action>> beforeEachList = new ArrayList<>();
 
 	public ActionList(Mode m) {
 		super(m);
@@ -22,13 +20,25 @@ public class ActionList extends Action implements List<Action> {
 	@Override
 	protected void innerRun() {
 		secureForEach((Action action) -> {
+			synchronized (beforeEachList) {
+				for (Consumer<Action> c : beforeEachList)
+					c.accept(action);
+			}
 			checkAndDoCommon(action);
 		});
 
 		joinChild();
 	}
 
-	protected void secureForEach(Consumer<? super Action> f) {
+	@SuppressWarnings("unused")
+	public void addBeforeEach(Consumer<Action> r) {
+		synchronized (beforeEachList) {
+			beforeEachList.add(r);
+		}
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public void secureForEach(Consumer<? super Action> f) {
 		List<Action> calledActions;
 		calledActions = new ArrayList<>();
 
@@ -84,7 +94,7 @@ public class ActionList extends Action implements List<Action> {
 	public Action joinNext() {
 		super.joinNext();
 
-		secureForEach((Action a) -> a.joinNext());
+		secureForEach(Action::joinNext);
 
 		return this;
 	}
