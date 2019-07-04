@@ -107,6 +107,7 @@ public class ActionListTest {
                     ai.incrementAndGet();
                 }
             };
+            action1.setName("action-" + i);
             al.add(action1);
         }
         al.run();
@@ -219,8 +220,12 @@ public class ActionListTest {
                 ai.incrementAndGet();
             }
         };
-        for (int i = 0; i < 20; i++)
-            al.add(action1.newCopy());
+        action1.setName("Action Base");
+        for (int i = 0; i < 20; i++) {
+            Action a = action1.newCopy();
+            a.setName(action1.getName()+ " (copy " + i + ")");
+            al.add(a);
+        }
         assertEquals(20, al.size());
         al.run();
         assertTrue(al.isDone());
