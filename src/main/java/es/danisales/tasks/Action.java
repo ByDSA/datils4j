@@ -295,6 +295,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
     @Override
     public String toString() {
-        return name;
+        return name == null ? super.toString() : name;
     }
 }
