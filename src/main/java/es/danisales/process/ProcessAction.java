@@ -18,13 +18,13 @@ public class ProcessAction extends Action {
 
     private AtomicInteger resultCode = new AtomicInteger();
 
-    private final List<Runnable> notFoundListeners = new ArrayList<>();
+    private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
     private final List<Runnable> beforeListeners = new ArrayList<>();
     private final List<Consumer<String>> errorLineListeners = new ArrayList<>();
     private final List<Consumer<String>> outLineListeners = new ArrayList<>();
     private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
-    private final List<Runnable> interruptedListeners = new ArrayList<>();
-    private final List<Runnable> onNoArgumentsListeners = new ArrayList<>();
+    private final List<Consumer<InterruptedException>> interruptedListeners = new ArrayList<>();
+    private final List<Consumer<NoArgumentsException>> onNoArgumentsListeners = new ArrayList<>();
 
     @SuppressWarnings("unused")
     public ProcessAction(String fname, List<String> params) {
@@ -45,9 +45,9 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public boolean addNotFoundListener(Runnable runnable) {
+    public boolean addNotFoundListener(Consumer<IOException> consumer) {
         synchronized (notFoundListeners) {
-            return notFoundListeners.add(runnable);
+            return notFoundListeners.add(consumer);
         }
     }
 
@@ -80,23 +80,23 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public boolean addInterruptedListener(Runnable runnable) {
+    public boolean addInterruptedListener(Consumer<InterruptedException> consumer) {
         synchronized (interruptedListeners) {
-            return interruptedListeners.add(runnable);
+            return interruptedListeners.add(consumer);
         }
     }
 
     @SuppressWarnings("unused")
-    public boolean addOnNoArgumentsListener(Runnable runnable) {
+    public boolean addOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
         synchronized (onNoArgumentsListeners) {
-            return onNoArgumentsListeners.add(runnable);
+            return onNoArgumentsListeners.add(consumer);
         }
     }
 
     @SuppressWarnings("unused")
-    public boolean removeNotFoundListener(Runnable runnable) {
+    public boolean removeNotFoundListener(Consumer<IOException> consumer) {
         synchronized (notFoundListeners) {
-            return notFoundListeners.remove(runnable);
+            return notFoundListeners.remove(consumer);
         }
     }
 
@@ -129,16 +129,16 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public boolean removeInterruptedListener(Runnable runnable) {
+    public boolean removeInterruptedListener(Consumer<InterruptedException> consumer) {
         synchronized (interruptedListeners) {
-            return interruptedListeners.remove(runnable);
+            return interruptedListeners.remove(consumer);
         }
     }
 
     @SuppressWarnings("unused")
-    public boolean removeOnNoArgumentsListener(Runnable runnable) {
+    public boolean removeOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
         synchronized (onNoArgumentsListeners) {
-            return onNoArgumentsListeners.remove(runnable);
+            return onNoArgumentsListeners.remove(consumer);
         }
     }
 
@@ -232,18 +232,18 @@ public class ProcessAction extends Action {
             }
         } catch (IOException e) {
             synchronized (notFoundListeners) {
-                for (Runnable r : notFoundListeners)
-                    r.run();
+                for (Consumer<IOException> c : notFoundListeners)
+                    c.accept(e);
             }
         } catch (InterruptedException e) {
             synchronized (interruptedListeners) {
-                for (Runnable r : interruptedListeners)
-                    r.run();
+                for (Consumer<InterruptedException> c : interruptedListeners)
+                    c.accept(e);
             }
         } catch(NoArgumentsException e) {
             synchronized (onNoArgumentsListeners) {
-                for (Runnable r : onNoArgumentsListeners)
-                    r.run();
+                for (Consumer<NoArgumentsException> c : onNoArgumentsListeners)
+                    c.accept(e);
             }
         }
     }
