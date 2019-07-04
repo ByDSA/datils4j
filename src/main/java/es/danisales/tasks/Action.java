@@ -126,7 +126,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     public boolean equals(Object o) {
-        if (o.getClass().equals(this.getClass()) && o instanceof Action) {
+        if (o != null && o.getClass().equals(this.getClass()) && o instanceof Action) {
             Action a = (Action)o;
             return a == this;
         }
