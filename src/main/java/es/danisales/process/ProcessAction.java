@@ -9,14 +9,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ProcessAction extends Action {
     @SuppressWarnings("WeakerAccess")
     protected String[] paramsWithName;
-
     private AtomicInteger resultCode = new AtomicInteger();
+    private Thread normalOutputThread;
+    private Thread errorOutputThread;
 
     private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
     private final List<Runnable> beforeListeners = new ArrayList<>();
@@ -197,7 +199,7 @@ public class ProcessAction extends Action {
             Logging.log("Executing " + paramsWithName[0] + " " + StringUtils.join(" ", paramsWithName, 1));
             final Process p = Runtime.getRuntime().exec(paramsWithName);
 
-            Thread normalOutputThread = startNormalOutputListener(p);
+            normalOutputThread = startNormalOutputListener(p);
             startErrorOutputListener(p);
 
             resultCode.set(p.waitFor());
@@ -223,8 +225,18 @@ public class ProcessAction extends Action {
         }
     }
 
+    @Override
+    public void interrupt() {
+        if (normalOutputThread != null)
+            normalOutputThread.interrupt();
+        if (errorOutputThread != null)
+            errorOutputThread.interrupt();
+        super.interrupt();
+    }
+
     private Thread startNormalOutputListener(Process p) {
-        Thread normalOutputThread = new Thread(() -> {
+        assert normalOutputThread == null;
+        normalOutputThread = new Thread(() -> {
             try {
                 String line;
                 BufferedReader input =
@@ -248,7 +260,9 @@ public class ProcessAction extends Action {
     }
 
     private void startErrorOutputListener(Process p) {
-        Thread errorOutputThread = new Thread(() -> {
+        if (errorOutputThread != null)
+            errorOutputThread.interrupt();
+        errorOutputThread = new Thread(() -> {
             try {
                 String line;
                 BufferedReader input =
