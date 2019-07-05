@@ -17,7 +17,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private ActionList next;
     private List<Action> previous;
     private ActionList afterActions;
-    private ActionList atInterruptActions;
+    private final ActionList atInterruptActions = new ActionList(Mode.SEQUENTIAL);
     @SuppressWarnings("WeakerAccess") protected Object context;
     private AtomicBoolean ending;
 
@@ -43,7 +43,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         next = null;
         previous = new ArrayList<>();
         afterActions = null;
-        atInterruptActions = null;
         context = null;
     }
 
@@ -89,8 +88,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     @SuppressWarnings("unused")
     public final void addAtInterruptActions(Action a) {
         synchronized (atInterruptActions) {
-            if (atInterruptActions == null)
-                atInterruptActions = new ActionList(Mode.SEQUENTIAL);
             atInterruptActions.add(a);
         }
     }
