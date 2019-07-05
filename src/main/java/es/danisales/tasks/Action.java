@@ -88,9 +88,11 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
     @SuppressWarnings("unused")
     public final void addAtInterruptActions(Action a) {
-        if (atInterruptActions == null)
-            atInterruptActions= new ActionList(Mode.SEQUENTIAL);
-        atInterruptActions.add( a );
+        synchronized (atInterruptActions) {
+            if (atInterruptActions == null)
+                atInterruptActions = new ActionList(Mode.SEQUENTIAL);
+            atInterruptActions.add(a);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -120,9 +122,13 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
     public synchronized void interrupt() {
         ending.set(true);
-        Thread.currentThread().interrupt();
-        if (atInterruptActions != null)
-            atInterruptActions.run();
+        running.set(false);
+        if (thread != null)
+            thread.interrupt();
+        synchronized (atInterruptActions) {
+            if (atInterruptActions != null)
+                atInterruptActions.run();
+        }
     }
 
     public boolean equals(Object o) {
