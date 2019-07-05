@@ -108,6 +108,8 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     public synchronized void interrupt() {
+        if (!ending.get() || !running.get())
+            return;
         ending.set(true);
         running.set(false);
         if (thread != null)
@@ -116,6 +118,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
           for (Runnable r : interruptionListeners)
               r.run();
         }
+        ending.set(false);
     }
 
     public boolean equals(Object o) {
@@ -241,7 +244,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     public Action join() throws InterruptedException {
-        if (!isRunning())
+        if (!isRunning() || isDone() || isEnding())
             return null;
 
         if (isConcurrent())
