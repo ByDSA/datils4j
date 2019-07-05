@@ -14,12 +14,12 @@ public class ToDoActionList extends ActionList {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
         });
-        a.addAtInterruptActions(() -> {
-            Logging.log("Interrupt " + a);
+        a.addAtInterruptActions(()-> {
+            remove(a);
             interrupt();
         });
 
-        if (!isRunning())
+        if (!isRunning() && !isEnding())
             run();
 
         return ret;
