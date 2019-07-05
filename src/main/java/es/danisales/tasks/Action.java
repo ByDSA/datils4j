@@ -17,7 +17,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private ActionList next;
     private List<Action> previous;
     private ActionList afterActions;
-    private final ActionList atInterruptActions = new ActionList(Mode.SEQUENTIAL);
+    private final List<Runnable> interruptionListeners = new ArrayList<>();
     @SuppressWarnings("WeakerAccess") protected Object context;
     private AtomicBoolean ending;
 
@@ -86,20 +86,10 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     @SuppressWarnings("unused")
-    public final void addAtInterruptActions(Action a) {
-        synchronized (atInterruptActions) {
-            atInterruptActions.add(a);
+    public final void addInterruptionListener(Runnable a) {
+        synchronized (interruptionListeners) {
+            interruptionListeners.add(a);
         }
-    }
-
-    @SuppressWarnings("unused")
-    public final void addAtInterruptActions(Runnable a) {
-        addAtInterruptActions(new Action(Mode.SEQUENTIAL) {
-            @Override
-            protected void innerRun() {
-                a.run();
-            }
-        });
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -122,9 +112,9 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         running.set(false);
         if (thread != null)
             thread.interrupt();
-        synchronized (atInterruptActions) {
-            if (atInterruptActions != null)
-                atInterruptActions.run();
+        synchronized (interruptionListeners) {
+          for (Runnable r : interruptionListeners)
+              r.run();
         }
     }
 

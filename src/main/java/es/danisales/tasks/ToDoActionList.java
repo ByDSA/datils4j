@@ -14,7 +14,7 @@ public class ToDoActionList extends ActionList {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
         });
-        a.addAtInterruptActions(()-> {
+        a.addInterruptionListener(()-> {
             remove(a);
             interrupt();
         });
