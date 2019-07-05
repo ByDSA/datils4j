@@ -247,7 +247,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         if (isConcurrent())
             thread.join();
         else
-            while (!isDone()) {
+            while (!isDone() && isRunning() && !isEnding()) {
                 Thread.sleep( checkingTime );
             }
 
