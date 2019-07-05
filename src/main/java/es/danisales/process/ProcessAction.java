@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -226,7 +225,7 @@ public class ProcessAction extends Action {
     }
 
     @Override
-    public void interrupt() {
+    public synchronized void interrupt() {
         if (normalOutputThread != null)
             normalOutputThread.interrupt();
         if (errorOutputThread != null)
