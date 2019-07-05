@@ -23,7 +23,6 @@ public class ProcessAction extends Action {
     private final List<Consumer<String>> errorLineListeners = new ArrayList<>();
     private final List<Consumer<String>> outLineListeners = new ArrayList<>();
     private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
-    private final List<Consumer<InterruptedException>> interruptedListeners = new ArrayList<>();
     private final List<Consumer<NoArgumentsException>> onNoArgumentsListeners = new ArrayList<>();
 
     @SuppressWarnings("unused")
@@ -80,13 +79,6 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public boolean addInterruptedListener(Consumer<InterruptedException> consumer) {
-        synchronized (interruptedListeners) {
-            return interruptedListeners.add(consumer);
-        }
-    }
-
-    @SuppressWarnings("unused")
     public boolean addOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
         synchronized (onNoArgumentsListeners) {
             return onNoArgumentsListeners.add(consumer);
@@ -129,13 +121,6 @@ public class ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    public boolean removeInterruptedListener(Consumer<InterruptedException> consumer) {
-        synchronized (interruptedListeners) {
-            return interruptedListeners.remove(consumer);
-        }
-    }
-
-    @SuppressWarnings("unused")
     public boolean removeOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
         synchronized (onNoArgumentsListeners) {
             return onNoArgumentsListeners.remove(consumer);
@@ -174,13 +159,6 @@ public class ProcessAction extends Action {
     public void clearErrorListeners() {
         synchronized (errorListeners) {
             errorListeners.clear();
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void clearInterruptedListeners() {
-        synchronized (interruptedListeners) {
-            interruptedListeners.clear();
         }
     }
 
@@ -236,10 +214,7 @@ public class ProcessAction extends Action {
                     c.accept(e);
             }
         } catch (InterruptedException e) {
-            synchronized (interruptedListeners) {
-                for (Consumer<InterruptedException> c : interruptedListeners)
-                    c.accept(e);
-            }
+            interrupt();
         } catch(NoArgumentsException e) {
             synchronized (onNoArgumentsListeners) {
                 for (Consumer<NoArgumentsException> c : onNoArgumentsListeners)
