@@ -72,14 +72,9 @@ public class ActionTest {
 		a2.run();
 		try {
 			a2.join();
-		} catch (InterruptedException e) { }
+        } catch (InterruptedException ignored) {
+        }
 		assertNotEquals(a, a2);
-
-		a3.run();
-		a3.interrupt();
-		Action a4 = a3.newCopy();
-		assertTrue(a3.isEnding());
-		assertFalse(a4.isEnding());
 	}
 
 	@Test
