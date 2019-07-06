@@ -15,6 +15,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private AtomicBoolean running;
     protected Object _lock;
     private Thread thread;
+    private final Object threadLock = new Object();
     private ActionList next;
     private List<Action> previous;
     private final List<Runnable> afterActions = new ArrayList<>();
@@ -104,11 +105,13 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         Logging.log("Interrumpida acción " + this);
         ending.set(true);
         running.set(false);
-        if (thread != null)
-            thread.interrupt();
+        synchronized (threadLock) {
+            if (thread != null)
+                thread.interrupt();
+        }
         synchronized (interruptionListeners) {
-          for (Runnable r : interruptionListeners)
-              r.run();
+            for (Runnable r : interruptionListeners)
+                r.run();
         }
         ending.set(false);
     }
@@ -169,13 +172,18 @@ public abstract class Action implements Runnable, Rule, Cloneable {
             return;
 
         running.set(true);
-        if (isSequential())
+        if (isSequential()) {
+            synchronized (threadLock) {
+                thread = Thread.currentThread();
+            }
             doAction();
-        else {
-            thread = new Thread(this::doAction);
-            thread.setName("Thread-Action-" + name);
-            thread.start();
-            assert thread.isAlive();
+        } else {
+            synchronized (threadLock) {
+                thread = new Thread(this::doAction);
+                thread.setName("Thread-Action-" + name);
+                thread.start();
+                assert thread.isAlive();
+            }
         }
     }
 
@@ -236,12 +244,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     @Deprecated
     public synchronized final Object getContext() {
         return context;
-    }
-
-    @Deprecated
-    public synchronized void forceCheck() {
-        if (thread != null)
-            thread.interrupt();
     }
 
     public Action join() throws InterruptedException {
