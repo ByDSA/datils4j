@@ -11,6 +11,8 @@ public class ActionList extends Action implements List<Action> {
 	private final List<Action> list = new ArrayList<>();
 	private final ConcurrentHashMap<Action, Integer> times;
 	private final List<Consumer<Action>> beforeEachList = new ArrayList<>();
+    private final List<Consumer<Action>> onRemoveListeners = new ArrayList<>();
+    private final List<Consumer<Action>> onAddListeners = new ArrayList<>();
 
 	public ActionList(Mode m) {
 		super(m);
@@ -36,6 +38,20 @@ public class ActionList extends Action implements List<Action> {
 			beforeEachList.add(r);
 		}
 	}
+
+    @SuppressWarnings("unused")
+    public void addOnRemoveListener(Consumer<Action> r) {
+        synchronized (onRemoveListeners) {
+            onRemoveListeners.add(r);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void addOnAddListeners(Consumer<Action> r) {
+        synchronized (onAddListeners) {
+            onAddListeners.add(r);
+        }
+    }
 
 	@SuppressWarnings("WeakerAccess")
 	public void secureForEach(Consumer<? super Action> f) {
@@ -171,11 +187,25 @@ public class ActionList extends Action implements List<Action> {
 	public synchronized boolean add(Action action) {
 		if (contains(action))
 			throw new AddedException(action);
+
+        synchronized (onAddListeners) {
+            for (Consumer<Action> c : onAddListeners)
+                c.accept(action);
+        }
+
 		return list.add(action);
 	}
 
 	@Override
 	public synchronized boolean remove(Object o) {
+        if (!(o instanceof Action))
+            return false;
+
+        synchronized (onRemoveListeners) {
+            for (Consumer<Action> c : onRemoveListeners)
+                c.accept((Action) o);
+        }
+
 		return list.remove(o);
 	}
 
