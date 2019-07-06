@@ -47,7 +47,7 @@ public class ActionList extends Action implements List<Action> {
     }
 
     @SuppressWarnings("unused")
-    public void addOnAddListeners(Consumer<Action> r) {
+    public void addOnAddListener(Consumer<Action> r) {
         synchronized (onAddListeners) {
             onAddListeners.add(r);
         }
