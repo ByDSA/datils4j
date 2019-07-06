@@ -16,7 +16,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private Thread thread;
     private ActionList next;
     private List<Action> previous;
-    private ActionList afterActions;
+    private final List<Runnable> afterActions = new ArrayList<>();
     private final List<Runnable> interruptionListeners = new ArrayList<>();
     @SuppressWarnings("WeakerAccess") protected Object context;
     private AtomicBoolean ending;
@@ -42,7 +42,6 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         _lock = new Object();
         next = null;
         previous = new ArrayList<>();
-        afterActions = null;
         context = null;
     }
 
@@ -69,20 +68,10 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     @SuppressWarnings("unused")
-    public final void addAfter(Action a) {
-        if (afterActions == null)
-            afterActions = new ActionList(Mode.SEQUENTIAL);
-        afterActions.add( a );
-    }
-
-    @SuppressWarnings("unused")
-    public final void addAfter(Runnable a) {
-        addAfter(new Action(Mode.SEQUENTIAL) {
-            @Override
-            protected void innerRun() {
-                a.run();
-            }
-        });
+    public final void addAfter(Runnable r) {
+        synchronized (afterActions) {
+            afterActions.add(r);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -200,32 +189,41 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     }
 
     private void doAction() {
-        // Wait for previous
-        for (Action a : previous) {
-            try {
-                a.join();
-            } catch (InterruptedException ignored) {	}
+        try {
+            // Wait for previous
+            for (Action a : previous) {
+                try {
+                    a.join();
+                } catch (InterruptedException ignored) {
+                }
+            }
+
+            // Wait for conditions
+            while (!check()) {
+                try {
+                    Thread.sleep(checkingTime);
+                } catch (InterruptedException ignored) {
+                }
+            }
+
+            innerRun();
+
+            running.set(false);
+            done.set(true);
+
+            // End Actions
+            if (next != null) {
+                next.setName("next of " + this);
+                next.run();
+            }
+            synchronized (afterActions) {
+                for (Runnable r : afterActions)
+                    r.run();
+            }
+        } catch (Exception e) {
+            interrupt();
+            throw e;
         }
-
-        // Wait for conditions
-        while (!check()) {
-            try {
-                Thread.sleep( checkingTime );
-            } catch ( InterruptedException ignored) { }
-        }
-
-        innerRun();
-
-        running.set(false);
-        done.set( true );
-
-        // End Actions
-        if (next != null) {
-            next.setName("next of " + this);
-            next.run();
-        }
-        if (afterActions != null)
-            afterActions.run();
     }
 
     public synchronized boolean check() {
