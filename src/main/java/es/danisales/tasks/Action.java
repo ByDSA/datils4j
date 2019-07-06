@@ -1,5 +1,6 @@
 package es.danisales.tasks;
 
+import es.danisales.log.string.Logging;
 import es.danisales.rules.Rule;
 
 import java.util.ArrayList;
@@ -99,6 +100,8 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     public synchronized void interrupt() {
         if (!ending.get() || !running.get())
             return;
+
+        Logging.log("Interrumpida acción " + this);
         ending.set(true);
         running.set(false);
         if (thread != null)
