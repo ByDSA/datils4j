@@ -174,7 +174,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         running.set(true);
         if (isSequential()) {
             synchronized (threadLock) {
-                thread = Thread.currentThread();
+                thread = Thread.currentThread(); // Todo: no para la ejecución de Sequential con Interrupt
             }
             doAction();
         } else {
