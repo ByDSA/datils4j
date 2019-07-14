@@ -19,6 +19,7 @@ public class ToDoActionList extends ActionList {
 
     @Override
     public boolean add(Action a) {
+        Logging.log(this + " Adding action " + a);
         boolean ret = super.add(a);
 
         a.addAfter(() -> {
