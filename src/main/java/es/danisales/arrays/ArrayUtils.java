@@ -3,6 +3,9 @@ package es.danisales.arrays;
 import java.lang.reflect.Array;
 
 public class ArrayUtils {
+    private ArrayUtils() {
+    } // noninstantiable
+
 	public static <T> T[] concat(T[] a, T[] b) {
 		int aLen = a.length;
 		int bLen = b.length;

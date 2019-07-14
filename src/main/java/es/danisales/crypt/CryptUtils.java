@@ -8,11 +8,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class CryptUtils {
+	private CryptUtils() {
+	} // noninstantiable
+
 	@SuppressWarnings("WeakerAccess")
 	public static byte[] hashFile(File f, HashingAlgorithm alg) throws NoSuchAlgorithmException, IOException {
 		byte[] buffer= new byte[8192];
 		int count;
-		MessageDigest digest = MessageDigest.getInstance(alg.getValue());
+		MessageDigest digest = MessageDigest.getInstance(alg.get());
 		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f));
 		while ((count = bis.read(buffer)) > 0) {
 			digest.update(buffer, 0, count);

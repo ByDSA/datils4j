@@ -1,22 +1,21 @@
 package es.danisales.io;
 
-import java.io.*;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import es.danisales.arrays.ArrayUtils;
 import es.danisales.arrays.ArrayWrapper;
 import es.danisales.crypt.CryptUtils;
 import es.danisales.functions.ThrowingConsumer;
 
+import java.io.*;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 @SuppressWarnings("WeakerAccess")
 public final class FileUtils {
+	private FileUtils() {
+	} // noninstantiable
+
 	public static final String DATA_FOLDER = "data/";
 
 	public static ArrayList<java.io.File> finderRecursive(String dirName, String ext){

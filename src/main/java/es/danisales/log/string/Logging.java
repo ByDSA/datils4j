@@ -11,6 +11,9 @@ public class Logging {
 	private static Map<SeverityLevel, BiConsumerListener<SeverityLevel, String>> map = new ConcurrentHashMap<>();
 	private static final Object lock = new Object();
 
+	private Logging() {
+	} // noninstantiable
+
 	@SuppressWarnings("WeakerAccess")
 	public static void addListener(SeverityLevel sl, BiConsumer<SeverityLevel, String> f) {
 		synchronized(lock) {

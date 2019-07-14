@@ -1,6 +1,9 @@
 package es.danisales.strings;
 
 public class StringUtils {
+	private StringUtils() {
+	} // noninstantiable
+
 	public static String replaceLast(String base, String find, String replacement) {
 		int ind = base.lastIndexOf(find);
 		if( ind>=0 )
@@ -15,7 +18,7 @@ public class StringUtils {
 	public static String leftPad(String base, char padChar, int cifras) {
 		StringBuilder zs = new StringBuilder();
 
-		for (int i = 0; i < cifras-base.toString().length(); i++)
+		for (int i = 0; i < cifras - base.length(); i++)
 			zs.append( padChar );
 
 		zs.append( base );
