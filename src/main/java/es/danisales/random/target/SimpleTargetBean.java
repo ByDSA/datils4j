@@ -11,16 +11,16 @@ public class SimpleTargetBean<T> extends SimpleTarget implements Bean<T> {
 	public SimpleTargetBean(T v) {
 		super();
 
-		setValue(v);
+        set(v);
 	}
 
 	@Override
-	public final T getValue() {
+    public final T get() {
 		return value;
 	}
 
     @Override
-	public final void setValue(T v) {
+    public final void set(T v) {
         Objects.requireNonNull(v);
 	    value = v;
     }
