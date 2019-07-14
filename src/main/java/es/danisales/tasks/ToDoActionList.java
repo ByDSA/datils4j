@@ -12,6 +12,12 @@ public class ToDoActionList extends ActionList {
     }
 
     @Override
+    protected void innerRun() {
+        Logging.log("Running " + this + "...");
+        super.innerRun();
+    }
+
+    @Override
     public boolean add(Action a) {
         boolean ret = super.add(a);
 

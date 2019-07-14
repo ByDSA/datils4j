@@ -218,10 +218,13 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
             // Wait for conditions
             checkThread = Thread.currentThread();
+            if (!check())
+                Logging.log("Waiting for " + this + " check...");
             while (!check()) {
                 try {
                     Thread.sleep(checkingTime);
                 } catch (InterruptedException ignored) {
+                    Logging.log("Interrupted checking " + this);
                 }
             }
 
