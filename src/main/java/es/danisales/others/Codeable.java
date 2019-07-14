@@ -1,13 +1,13 @@
 package es.danisales.others;
 
-import es.danisales.utils.Valuable;
+import java.util.function.Supplier;
 
 @Deprecated
-public interface Codeable extends Valuable<Integer> {
+public interface Codeable extends Supplier<Integer> {
 	int getCode();
 
-	default Integer getValue() {
+	@Override
+	default Integer get() {
 		return getCode();
 	}
-
 }

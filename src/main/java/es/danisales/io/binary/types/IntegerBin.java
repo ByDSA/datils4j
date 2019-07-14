@@ -1,17 +1,16 @@
 package es.danisales.io.binary.types;
 
-import es.danisales.utils.Valuable;
-
 import java.nio.ByteBuffer;
+import java.util.function.Supplier;
 
 @SuppressWarnings("WeakerAccess")
 public final class IntegerBin extends TypeBin<Integer> {
 	public IntegerBin(Integer v) {
 		super(v);
 	}
-	
-	public IntegerBin(Valuable<Integer> v) {
-		super(v.getValue());
+
+	public IntegerBin(Supplier<Integer> v) {
+		super(v.get());
 	}
 	
 	protected IntegerBin() {

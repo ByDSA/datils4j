@@ -1,5 +1,7 @@
 package es.danisales.utils;
 
-public interface Bean<T> extends Valuable<T> {
+import java.util.function.Supplier;
+
+public interface Bean<T> extends Supplier<T> {
     void setValue(T v);
 }
