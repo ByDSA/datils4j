@@ -5,7 +5,12 @@ import es.danisales.log.string.Logging;
 public class ToDoActionList extends ActionList {
     public ToDoActionList() {
         super(Mode.CONCURRENT);
+
+        addNext(this);
+
+        run();
     }
+
     @Override
     public boolean add(Action a) {
         boolean ret = super.add(a);
@@ -19,10 +24,13 @@ public class ToDoActionList extends ActionList {
             interrupt();
         });
 
-        if (!isRunning() && !isEnding())
-            run();
+        forceCheck();
 
         return ret;
     }
 
+    @Override
+    public boolean check() {
+        return !isRunning() && !isEnding() && size() > 0;
+    }
 }

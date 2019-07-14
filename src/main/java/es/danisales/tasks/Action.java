@@ -199,6 +199,13 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         return joinNext();
     }
 
+    private Thread checkThread;
+
+    protected void forceCheck() {
+        if (checkThread != null && checkThread.isAlive())
+            checkThread.interrupt();
+    }
+
     private void doAction() {
         try {
             // Wait for previous
@@ -210,6 +217,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
             }
 
             // Wait for conditions
+            checkThread = Thread.currentThread();
             while (!check()) {
                 try {
                     Thread.sleep(checkingTime);
