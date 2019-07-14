@@ -21,8 +21,7 @@ public class SimpleTargetBean<T> extends SimpleTarget implements Bean<T> {
 
     @Override
     public final void set(T v) {
-        Objects.requireNonNull(v);
-	    value = v;
+        value = Objects.requireNonNull(v);
     }
 
 	@SuppressWarnings("unchecked")
