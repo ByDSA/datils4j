@@ -13,6 +13,8 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     // Non-duplicated
     private AtomicBoolean done;
     private AtomicBoolean running;
+    // Duplicated
+    protected long checkingTime = 100;
     protected Object _lock;
     private Thread thread;
     private final Object threadLock = new Object();
@@ -22,9 +24,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private final List<Runnable> interruptionListeners = new ArrayList<>();
     @SuppressWarnings("WeakerAccess") protected Object context;
     private AtomicBoolean ending;
-
-    // Duplicated
-    private long checkingTime = 100;
+    private AtomicBoolean waitingCheck;
     private String name;
     private final Mode mode;
 
@@ -41,6 +41,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         ending = new AtomicBoolean(false);
         done = new AtomicBoolean(false);
         running = new AtomicBoolean(false);
+        waitingCheck = new AtomicBoolean(false);
         _lock = new Object();
         next = null;
         previous = new ArrayList<>();
@@ -86,6 +87,11 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     @SuppressWarnings("WeakerAccess")
     public final boolean isRunning() {
         return running.get();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public final boolean isWaitingCheck() {
+        return waitingCheck.get();
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -144,7 +150,7 @@ public abstract class Action implements Runnable, Rule, Cloneable {
         if (!next.contains( a ))
             next.add(a);
 
-        if (!a.previous.contains( this ))
+        if (!a.previous.contains(this) && a != this)
             a.addPrevious( this );
 
         return this;
@@ -152,6 +158,9 @@ public abstract class Action implements Runnable, Rule, Cloneable {
 
     @SuppressWarnings("WeakerAccess")
     public synchronized final Action addPrevious(Action a) {
+        if (a == this)
+            throw new RunningException();
+
         if (!previous.contains( a ))
             previous.add(a);
 
@@ -209,6 +218,8 @@ public abstract class Action implements Runnable, Rule, Cloneable {
     private void doAction() {
         try {
             // Wait for previous
+            if (previous.size() > 0)
+                Logging.log("Waiting for previous of " + this + "...");
             for (Action a : previous) {
                 try {
                     a.join();
@@ -220,25 +231,32 @@ public abstract class Action implements Runnable, Rule, Cloneable {
             checkThread = Thread.currentThread();
             if (!check())
                 Logging.log("Waiting for " + this + " check...");
+            waitingCheck.set(true);
             while (!check()) {
                 try {
                     Thread.sleep(checkingTime);
                 } catch (InterruptedException ignored) {
-                    Logging.log("Interrupted checking " + this);
                 }
             }
+            waitingCheck.set(false);
+
+            Logging.log("Running " + this + "...");
 
             innerRun();
 
+            Logging.log("Done " + this + "!");
             running.set(false);
             done.set(true);
 
             // End Actions
             if (next != null) {
                 next.setName("next of " + this);
+                Logging.log("Running " + next + "...");
                 next.run();
             }
             synchronized (afterActions) {
+                if (afterActions.size() > 0)
+                    Logging.log(this + " Executing afterActions...");
                 for (Runnable r : afterActions)
                     r.run();
             }

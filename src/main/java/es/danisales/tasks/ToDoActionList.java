@@ -7,8 +7,20 @@ public class ToDoActionList extends ActionList {
         super(Mode.CONCURRENT);
 
         addNext(this);
+    }
 
-        run();
+    @Override
+    public Action join() {
+        while (!isEmpty()) {
+            try {
+                // todo: interrupir el thread al terminar las acciones
+                Thread.sleep(checkingTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return this;
     }
 
     @Override
@@ -38,6 +50,6 @@ public class ToDoActionList extends ActionList {
 
     @Override
     public boolean check() {
-        return !isRunning() && !isEnding() && size() > 0;
+        return !isEnding() && size() > 0;
     }
 }
