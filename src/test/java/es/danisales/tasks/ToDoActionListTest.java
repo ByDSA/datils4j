@@ -14,12 +14,7 @@ public class ToDoActionListTest {
         assertFalse(td.isRunning());
 
         AtomicInteger ai = new AtomicInteger(0);
-        Action a = new Action(Action.Mode.SEQUENTIAL) {
-            @Override
-            protected void innerRun() {
-                ai.incrementAndGet();
-            }
-        };
+        Action a = Action.of(Action.Mode.SEQUENTIAL, (Action ac) -> ai.incrementAndGet());
         a.setName("IncrementorAction");
         td.run();
         assertTrue(td.isRunning());

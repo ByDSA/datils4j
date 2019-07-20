@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class ProcessAction extends Action {
+public class ProcessAction implements Action {
     @SuppressWarnings("WeakerAccess")
     protected String[] paramsWithName;
     private AtomicInteger resultCode = new AtomicInteger();
@@ -26,22 +27,25 @@ public class ProcessAction extends Action {
     private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
     private final List<Consumer<NoArgumentsException>> onNoArgumentsListeners = new ArrayList<>();
 
-    @SuppressWarnings("unused")
-    public ProcessAction(String fname, List<String> params) {
-        super(Mode.CONCURRENT);
+    private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun);
 
-        setFilenameAndParams(fname, params);
+    private ProcessAction() {
     }
 
-    @SuppressWarnings("unused")
-    public ProcessAction(String fname, String... params) {
-        super(Mode.CONCURRENT);
+    public static ProcessAction of(String fname, List<String> params) {
+        ProcessAction ret = new ProcessAction();
 
-        setFilenameAndParams(fname, params);
+        ret.setFilenameAndParams(fname, params);
+
+        return ret;
     }
 
-    public ProcessAction() {
-        super(Mode.CONCURRENT);
+    public static ProcessAction of(String fname, String... params) {
+        ProcessAction ret = new ProcessAction();
+
+        ret.setFilenameAndParams(fname, params);
+
+        return ret;
     }
 
     @SuppressWarnings("unused")
@@ -175,53 +179,92 @@ public class ProcessAction extends Action {
         setFilenameAndParams(fname, params.toArray(new String[0]));
     }
 
-    protected void setFilenameAndParams(String fname, String... params) {
+    private void setFilenameAndParams(String fname, String... params) {
         paramsWithName = new String[ params.length +1 ];
         paramsWithName[0] = fname;
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
     }
 
-    @Override
-    protected void innerRun() {
-        synchronized (beforeListeners) {
-            for (Runnable r : beforeListeners)
+    private void innerRun(ProcessAction self) {
+        synchronized (self.beforeListeners) {
+            for (Runnable r : self.beforeListeners)
                 r.run();
         }
         try {
-            if (paramsWithName == null || paramsWithName.length == 0)
+            if (self.paramsWithName == null || self.paramsWithName.length == 0)
                 throw new NoArgumentsException();
             else
-                for (String str : paramsWithName)
+                for (String str : self.paramsWithName)
                     if (str == null)
                         throw new NoArgumentsException();
 
-            Logging.log("Executing " + paramsWithName[0] + " " + StringUtils.join(" ", paramsWithName, 1));
-            final Process p = Runtime.getRuntime().exec(paramsWithName);
+            Logging.log("Executing " + self.paramsWithName[0] + " " + StringUtils.join(" ", self.paramsWithName, 1));
+            final Process p = Runtime.getRuntime().exec(self.paramsWithName);
 
-            normalOutputThread = startNormalOutputListener(p);
-            startErrorOutputListener(p);
+            self.normalOutputThread = self.startNormalOutputListener(p);
+            self.startErrorOutputListener(p);
 
-            resultCode.set(p.waitFor());
-            normalOutputThread.join();
-            if (resultCode.get() != 0) {
-                synchronized (errorListeners) {
-                    for (Consumer<Integer> c : errorListeners)
-                        c.accept(resultCode.get());
+            self.resultCode.set(p.waitFor());
+            self.normalOutputThread.join();
+            if (self.resultCode.get() != 0) {
+                synchronized (self.errorListeners) {
+                    for (Consumer<Integer> c : self.errorListeners)
+                        c.accept(self.resultCode.get());
                 }
             }
         } catch (IOException e) {
-            synchronized (notFoundListeners) {
-                for (Consumer<IOException> c : notFoundListeners)
+            synchronized (self.notFoundListeners) {
+                for (Consumer<IOException> c : self.notFoundListeners)
                     c.accept(e);
             }
         } catch (InterruptedException e) {
-            interrupt();
+            self.interrupt();
         } catch(NoArgumentsException e) {
-            synchronized (onNoArgumentsListeners) {
-                for (Consumer<NoArgumentsException> c : onNoArgumentsListeners)
+            synchronized (self.onNoArgumentsListeners) {
+                for (Consumer<NoArgumentsException> c : self.onNoArgumentsListeners)
                     c.accept(e);
             }
         }
+    }
+
+    @Override
+    public long getCheckingTime() {
+        return actionAdapter.getCheckingTime();
+    }
+
+    @Override
+    public void setCheckingTime(long checkingTime) {
+        actionAdapter.setCheckingTime(checkingTime);
+    }
+
+    @Override
+    public void addAfter(Runnable r) {
+        actionAdapter.addAfter(r);
+    }
+
+    @Override
+    public void addInterruptedListener(Runnable a) {
+        actionAdapter.addInterruptedListener(a);
+    }
+
+    @Override
+    public boolean isRunning() {
+        return actionAdapter.isRunning();
+    }
+
+    @Override
+    public boolean isWaitingCheck() {
+        return actionAdapter.isWaitingCheck();
+    }
+
+    @Override
+    public boolean isEnding() {
+        return actionAdapter.isEnding();
+    }
+
+    @Override
+    public boolean isDone() {
+        return actionAdapter.isDone();
     }
 
     @Override
@@ -230,7 +273,77 @@ public class ProcessAction extends Action {
             normalOutputThread.interrupt();
         if (errorOutputThread != null)
             errorOutputThread.interrupt();
-        super.interrupt();
+        actionAdapter.interrupt();
+    }
+
+    @Override
+    public Mode getMode() {
+        return actionAdapter.getMode();
+    }
+
+    @Override
+    public void addNext(Action a) {
+        actionAdapter.addNext(a);
+    }
+
+    @Override
+    public void addPrevious(Action a) {
+        actionAdapter.addPrevious(a);
+    }
+
+    @Override
+    public void join() throws InterruptedException {
+        actionAdapter.join();
+    }
+
+    @Override
+    public void joinNext() {
+        actionAdapter.joinNext();
+    }
+
+    @Override
+    public String getName() {
+        return actionAdapter.getName();
+    }
+
+    @Override
+    public void setName(String s) {
+        actionAdapter.setName(s);
+    }
+
+    @Override
+    public boolean hasPrevious(Action a) {
+        return actionAdapter.hasPrevious(a);
+    }
+
+    @Override
+    public boolean hasNext(Action a) {
+        return actionAdapter.hasNext(a);
+    }
+
+    @Override
+    public Object getContext() {
+        return actionAdapter.getContext();
+    }
+
+    @Override
+    public void run(Object context) {
+        actionAdapter.run(context);
+    }
+
+    @Override
+    public Consumer<? extends Action> getFunc() {
+        return actionAdapter.getFunc();
+    }
+
+    @Override
+    public void setCheckFunction(Supplier<Boolean> f) {
+        actionAdapter.setCheckFunction(f);
+    }
+
+    @Override
+    public boolean check() {
+        return actionAdapter.check();
     }
 
     private Thread startNormalOutputListener(Process p) {
@@ -305,6 +418,11 @@ public class ProcessAction extends Action {
     public int runAndJoinResult() {
         run();
         return joinResult();
+    }
+
+    @Override
+    public void run() {
+        actionAdapter.run();
     }
 
 

@@ -1,20 +1,20 @@
 package es.danisales.io;
 
+import es.danisales.concurrency.Lockable;
+import es.danisales.tasks.Action;
+import es.danisales.tasks.ActionList;
+import es.danisales.tasks.LoopTask;
+
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import es.danisales.concurrency.Lockable;
-import es.danisales.tasks.Action;
-import es.danisales.tasks.LoopTask;
-import es.danisales.tasks.ActionList;
-
 public abstract class FileAutosavable extends File implements Lockable {
-	final static ActionList threads = new ActionList(Action.Mode.CONCURRENT);
-	
+    final static ActionList threads = ActionList.of(Action.Mode.CONCURRENT);
+
 	protected AtomicBoolean _dirty = new AtomicBoolean(false);
 	protected AtomicBoolean _autosaving = new AtomicBoolean( false );
 	final Object _lock = new Object();
-	
+
 	public FileAutosavable(String pathname) {
 		super( pathname );
 	}
@@ -43,19 +43,17 @@ public abstract class FileAutosavable extends File implements Lockable {
 		if (getAndSetAutosaving(true))
 			return;
 
-		threads.add( new LoopTask(Action.Mode.CONCURRENT) {
-			@Override
-			public boolean check() {
-				return isDirty();
-			}
+        Action action = new LoopTask.Builder()
+                .setMode(Action.Mode.CONCURRENT)
+                .setRun((LoopTask self) -> {
+                    synchronized (_lock) {
+                        save();
+                    }
+                })
+                .setCheckFunction(this::isDirty)
+                .build();
 
-			@Override
-			public void innerRun() {
-				synchronized(this._lock) {
-					save();
-				}
-			}
-		});
+        threads.add(action);
 
 		threads.run();
 	}

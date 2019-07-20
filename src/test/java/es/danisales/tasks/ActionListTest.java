@@ -14,16 +14,13 @@ public class ActionListTest {
     public void runConcurrentTaskInConcurrentList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.CONCURRENT);
-        Action action1 = new Action(Action.Mode.CONCURRENT) {
-            @Override
-            protected void innerRun() {
+        ActionList al = ActionList.of(Action.Mode.CONCURRENT);
+        Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
                 for (int i = 0; i < 200; i++) {
                     sleep(2);
                     ai.incrementAndGet();
                 }
-            }
-        };
+        });
         al.add(action1);
         assertFalse(al.isRunning());
         assertFalse(action1.isRunning());
@@ -37,16 +34,13 @@ public class ActionListTest {
     public void runConcurrentTaskInSequentialList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
-        Action action1 = new Action(Action.Mode.CONCURRENT) {
-            @Override
-            protected void innerRun() {
-                for (int i = 0; i < 200; i++) {
-                    sleep(2);
-                    ai.incrementAndGet();
-                }
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
+        Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+            for (int i = 0; i < 200; i++) {
+                sleep(2);
+                ai.incrementAndGet();
             }
-        };
+        });
         al.add(action1);
         assertFalse(al.isRunning());
         assertFalse(action1.isRunning());
@@ -59,15 +53,12 @@ public class ActionListTest {
     public void runSequentialTasksInSequentialList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
         for (int i = 0; i < 20; i++) {
-            Action action1 = new Action(Action.Mode.SEQUENTIAL) {
-                @Override
-                protected void innerRun() {
-                    sleep(2);
-                    ai.incrementAndGet();
-                }
-            };
+            Action action1 = Action.of(Action.Mode.SEQUENTIAL, (Action self) -> {
+                sleep(2);
+                ai.incrementAndGet();
+            });
             al.add(action1);
         }
         al.run();
@@ -79,15 +70,12 @@ public class ActionListTest {
     public void runConcurrentTasksInSequentialList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
         for (int i = 0; i < 20; i++) {
-            Action action1 = new Action(Action.Mode.CONCURRENT) {
-                @Override
-                protected void innerRun() {
-                    sleep(200);
-                    ai.incrementAndGet();
-                }
-            };
+            Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+                sleep(200);
+                ai.incrementAndGet();
+            });
             al.add(action1);
         }
         al.run();
@@ -98,15 +86,12 @@ public class ActionListTest {
     public void runConcurrentTasksInConcurrentList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.CONCURRENT);
+        ActionList al = ActionList.of(Action.Mode.CONCURRENT);
         for (int i = 0; i < 20; i++) {
-            Action action1 = new Action(Action.Mode.CONCURRENT) {
-                @Override
-                protected void innerRun() {
-                    sleep(20);
-                    ai.incrementAndGet();
-                }
-            };
+            Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+                sleep(20);
+                ai.incrementAndGet();
+            });
             action1.setName("action-" + i);
             al.add(action1);
         }
@@ -119,15 +104,12 @@ public class ActionListTest {
     public void runSequentialTasksInConcurrentList() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.CONCURRENT);
+        ActionList al = ActionList.of(Action.Mode.CONCURRENT);
         for (int i = 0; i < 20; i++) {
-            Action action1 = new Action(Action.Mode.SEQUENTIAL) {
-                @Override
-                protected void innerRun() {
-                    sleep(20);
-                    ai.incrementAndGet();
-                }
-            };
+            Action action1 = Action.of(Action.Mode.SEQUENTIAL, (Action self) -> {
+                sleep(20);
+                ai.incrementAndGet();
+            });
             al.add(action1);
         }
         al.run();
@@ -140,7 +122,7 @@ public class ActionListTest {
 
     @Test
     public void runNoTask() {
-        ActionList al = new ActionList(Action.Mode.CONCURRENT);
+        ActionList al = ActionList.of(Action.Mode.CONCURRENT);
         al.run();
         sleep(runSleep);
         assertTrue(al.isDone());
@@ -149,7 +131,7 @@ public class ActionListTest {
 
     @Test
     public void sequential() {
-        ActionList sam = new ActionList(Action.Mode.SEQUENTIAL);
+        ActionList sam = ActionList.of(Action.Mode.SEQUENTIAL);
         AtomicInteger atomicInteger = new AtomicInteger( 0 );
         for (int i = 0; i < ActionTest.N; i++)
             sam.add( new ActionTest.Action2(atomicInteger) );
@@ -175,16 +157,17 @@ public class ActionListTest {
     public void runSameClonedTaskSequentialy() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
-        Action action1 = new Action(Action.Mode.SEQUENTIAL) {
-            @Override
-            protected void innerRun() {
-                sleep(2);
-                ai.incrementAndGet();
-            }
-        };
-        for (int i = 0; i < 20; i++)
-            al.add(action1.newCopy());
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
+        al.setName("Action List");
+        Action action1 = Action.of(Action.Mode.SEQUENTIAL, (Action self) -> {
+            sleep(2);
+            ai.incrementAndGet();
+        });
+        for (int i = 0; i < 20; i++) {
+            Action a = Action.of(action1);
+            a.setName("Action " + i);
+            al.add(a);
+        }
         al.run();
         assertTrue(al.isDone());
         assertFalse(al.isRunning());
@@ -195,14 +178,11 @@ public class ActionListTest {
     public void runSameTaskException() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
-        Action action1 = new Action(Action.Mode.SEQUENTIAL) {
-            @Override
-            protected void innerRun() {
-                sleep(2);
-                ai.incrementAndGet();
-            }
-        };
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
+        Action action1 = Action.of(Action.Mode.SEQUENTIAL, (Action self) -> {
+            sleep(2);
+            ai.incrementAndGet();
+        });
         for (int i = 0; i < 20; i++)
             al.add(action1);
         al.run();
@@ -212,17 +192,14 @@ public class ActionListTest {
     public void runSameClonedTaskConcurrently() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
-        Action action1 = new Action(Action.Mode.CONCURRENT) {
-            @Override
-            protected void innerRun() {
-                sleep(2);
-                ai.incrementAndGet();
-            }
-        };
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
+        Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+            sleep(2);
+            ai.incrementAndGet();
+        });
         action1.setName("Action Base");
         for (int i = 0; i < 20; i++) {
-            Action a = action1.newCopy();
+            Action a = Action.of(action1);
             a.setName(action1.getName()+ " (copy " + i + ")");
             al.add(a);
         }
@@ -237,12 +214,9 @@ public class ActionListTest {
     public void size() {
         AtomicInteger ai = new AtomicInteger(0);
 
-        ActionList al = new ActionList(Action.Mode.SEQUENTIAL);
-        Action action1 = new Action(Action.Mode.CONCURRENT) {
-            @Override
-            protected void innerRun() {
-            }
-        };
+        ActionList al = ActionList.of(Action.Mode.SEQUENTIAL);
+        Action action1 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+        });
         assertTrue(al.isEmpty());
         assertEquals(0, al.size());
         al.add(action1);

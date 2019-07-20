@@ -10,23 +10,15 @@ public class ToDoActionList extends ActionList {
     }
 
     @Override
-    public Action join() {
+    public void join() {
         while (!isEmpty()) {
             try {
                 // todo: interrupir el thread al terminar las acciones
-                Thread.sleep(checkingTime);
+                Thread.sleep(getCheckingTime());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-        return this;
-    }
-
-    @Override
-    protected void innerRun() {
-        Logging.log("Running " + this + "...");
-        super.innerRun();
     }
 
     @Override
@@ -38,12 +30,12 @@ public class ToDoActionList extends ActionList {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
         });
-        a.addInterruptionListener(()-> {
+        a.addInterruptedListener(() -> {
             remove(a);
             interrupt();
         });
 
-        forceCheck();
+        actionAdapter.forceCheck();
 
         return ret;
     }

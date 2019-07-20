@@ -1,19 +1,26 @@
 package es.danisales.tasks;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
 import es.danisales.rules.Rule;
 import es.danisales.time.Calendar;
 import es.danisales.time.CalendarInterface;
 
-public abstract class CalendarTask extends Action implements CalendarInterface {
-	Calendar calendar = new Calendar();
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-	public CalendarTask(Mode m) {
-		super(m);
+public class CalendarTask implements Action, CalendarInterface {
+	private final Calendar calendar = new Calendar();
+	private final Action actionAdapter;
+
+	private CalendarTask(Mode m, Consumer<CalendarTask> f) {
+		actionAdapter = Action.of(m, f);
+	}
+
+	public static CalendarTask of(Mode m, Consumer<CalendarTask> f) {
+		return new CalendarTask(m, f);
 	}
 
 	@Override
@@ -149,10 +156,122 @@ public abstract class CalendarTask extends Action implements CalendarInterface {
 	}
 
 	@Override
+	public long getCheckingTime() {
+		return actionAdapter.getCheckingTime();
+	}
+
+	@Override
+	public void setCheckingTime(long checkingTime) {
+		actionAdapter.setCheckingTime(checkingTime);
+	}
+
+	@Override
+	public void addAfter(Runnable r) {
+		actionAdapter.addAfter(r);
+	}
+
+	@Override
+	public void addInterruptedListener(Runnable a) {
+		actionAdapter.addInterruptedListener(a);
+	}
+
+	@Override
+	public boolean isRunning() {
+		return actionAdapter.isRunning();
+	}
+
+	@Override
+	public boolean isWaitingCheck() {
+		return actionAdapter.isWaitingCheck();
+	}
+
+	@Override
+	public boolean isEnding() {
+		return actionAdapter.isEnding();
+	}
+
+	@Override
+	public boolean isDone() {
+		return actionAdapter.isDone();
+	}
+
+	@Override
+	public void interrupt() {
+		actionAdapter.interrupt();
+	}
+
+	@Override
+	public Mode getMode() {
+		return actionAdapter.getMode();
+	}
+
+	@Override
+	public void addNext(Action a) {
+		actionAdapter.addNext(a);
+	}
+
+	@Override
+	public void addPrevious(Action a) {
+		actionAdapter.addPrevious(a);
+	}
+
+	@Override
 	public boolean check() {
 		return calendar.check();
 	}
 
-	public abstract boolean innerApply(int n);
+	@Override
+	public void join() throws InterruptedException {
+		actionAdapter.join();
+	}
 
+	@Override
+	public void joinNext() {
+		actionAdapter.joinNext();
+	}
+
+	@Override
+	public String getName() {
+		return actionAdapter.getName();
+	}
+
+	@Override
+	public void setName(String s) {
+		actionAdapter.setName(s);
+	}
+
+	@Override
+	public boolean hasPrevious(Action a) {
+		return actionAdapter.hasPrevious(a);
+	}
+
+	@Override
+	public boolean hasNext(Action a) {
+		return actionAdapter.hasNext(a);
+	}
+
+	@Override
+	public Object getContext() {
+		return actionAdapter.getContext();
+	}
+
+	@Override
+	public void run(Object context) {
+		actionAdapter.run(context);
+	}
+
+	@Override
+	public Consumer<? extends Action> getFunc() {
+		return actionAdapter.getFunc();
+	}
+
+	@Override
+	public void setCheckFunction(Supplier<Boolean> f) {
+		actionAdapter.setCheckFunction(f);
+	}
+
+	@Override
+	public void run() {
+		actionAdapter.run();
+	}
 }

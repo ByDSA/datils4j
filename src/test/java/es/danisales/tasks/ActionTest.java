@@ -8,87 +8,126 @@ import static es.danisales.time.Sleep.sleep;
 import static org.junit.Assert.*;
 
 public class ActionTest {
-	public static class Action2 extends Action {
-		final AtomicInteger atomicInteger;
-		public Action2(AtomicInteger ai) {
-			super(Action.Mode.CONCURRENT);
-			atomicInteger = ai;
-		}
-		@Override
-		protected void innerRun() {
-			atomicInteger.incrementAndGet();
-		}
-	}
-
 	public static int N = 10000;
-
-	public void recursive(Action2 a, int n, int levels) {
-		if (levels == 0)
-			return;
-		for (int i = 0; i < n; i++) {
-			Action2 b;
-			if (levels == 1)
-				b = new Action2(a.atomicInteger) {
-					@Override
-					protected void innerRun() {
-						atomicInteger.incrementAndGet();
-					}
-				};
-			else
-				b = new Action2(a.atomicInteger) {
-					@Override
-					protected void innerRun() {
-					}
-				};
-			a.addNext( b );
-			recursive(b, n, levels-1);
-		}
-	}
 
 	@Test
 	public void cloneTest() {
-		final AtomicInteger atomicInteger = new AtomicInteger( 0 );
-		Action a = new Action(Action.Mode.CONCURRENT) {
-			@Override
-			protected void innerRun() {
-				atomicInteger.incrementAndGet();
-				sleep(100);
-			}
-		};
+		Action a = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
+			sleep(100);
+		});
 		a.run();
-		Action a2 = a.newCopy();
+		Action a2 = Action.of(a);
+		assertNotEquals(a, a2);
 		try {
 			a.join();
-		} catch (InterruptedException e) { }
-		Action a3 = a.newCopy();
+			assertTrue(a.isDone());
+		} catch (InterruptedException ignored) {
+		}
+		assertFalse(a2.isDone());
+		Action a3 = Action.of(a);
 		assertTrue(a != a2);
 		assertNotEquals(a, a2);
-		assertEquals(a.isConcurrent(), a2.isConcurrent());
 		assertFalse(a2.isDone());
 		assertFalse(a3.isDone());
 		assertFalse(a2.isRunning());
-		assertNotEquals(a._lock, a2._lock);
 
 		a2.run();
 		try {
 			a2.join();
         } catch (InterruptedException ignored) {
         }
-		assertNotEquals(a, a2);
+		assertEquals(a, a2);
+	}
+
+	@Test
+	public void pointless() {
+		Action p = Action.createPointless();
+		Action p2 = Action.createPointless();
+		assertEquals(p, p2);
+		assertFalse(p == p2);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void modeNull() {
+		Action.of(null, (Action) -> {
+		});
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void builderModeNull() {
+		new ActionAdapter.Builder<>()
+				.setMode(null)
+				.setRun((Action) -> {
+				})
+				.build();
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void builderRunNull() {
+		new ActionAdapter.Builder<>()
+				.setMode(Action.Mode.SEQUENTIAL)
+				.setRun(null)
+				.build();
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void runNull() {
+		Action.of(Action.Mode.SEQUENTIAL, null);
+	}
+
+	@Test
+	public void join() {
+		Action first = Action.of(Action.Mode.SEQUENTIAL, (Action a) -> {
+		});
+		first.run();
+		try {
+			first.join();
+		} catch (InterruptedException ignored) {
+		}
+
+		assertTrue(first.isDone());
+	}
+
+	@Test
+	public void joinNextWithoutNext() {
+		Action first = Action.of(Action.Mode.SEQUENTIAL, (Action a) -> {
+		});
+		first.run();
+		first.joinNext();
+
+		assertTrue(first.isDone());
+	}
+
+	@Test
+	public void joinNext() {
+		Action first = Action.of(Action.Mode.SEQUENTIAL, (Action a) -> {
+		});
+		Action root = first;
+		root.setName("root");
+		for (int i = 0; i < 10; i++) {
+			Action second = Action.of(first);
+			second.setName("Action " + i);
+			first.addNext(second);
+			first = second;
+		}
+
+		root.run();
+		root.joinNext();
+		while (((ActionAdapter) root).next.size() > 0) {
+			assertTrue(root.getName(), root.isDone());
+			root = (ActionAdapter) ((ActionAdapter) root).next.get(0);
+		}
 	}
 
 	@Test
 	public void nextSimple() {
 		AtomicInteger ai = new AtomicInteger(0);
-		Action first = new Action(Action.Mode.SEQUENTIAL) {
-			@Override
-			protected void innerRun() {
-				ai.incrementAndGet();
-			}
-		};
+		Action first = Action.of(Action.Mode.SEQUENTIAL, (Action a) -> ai.incrementAndGet());
 		Action root = first;
+		root.setName("root");
 		for (int i = 0; i < 10; i++) {
-			Action second = first.newCopy();
+			Action second = Action.of(first);
+			second.setName("Action " + i);
 			first.addNext(second);
 			first = second;
 		}
@@ -96,6 +135,20 @@ public class ActionTest {
 		root.run();
 		root.joinNext();
 		assertEquals(11, ai.get());
+	}
+
+	public void recursive(Action a, AtomicInteger ai, int n, int levels) {
+		if (levels == 0)
+			return;
+		for (int i = 0; i < n; i++) {
+			Action b;
+			if (levels == 1)
+				b = new Action2(ai);
+			else
+				b = Action.createPointless();
+			a.addNext(b);
+			recursive(b, ai, n, levels - 1);
+		}
 	}
 
 	@Test
@@ -147,15 +200,40 @@ public class ActionTest {
 	public void tree() {
 		AtomicInteger atomicInteger = new AtomicInteger( 0 );
 
-		Action2 a = new Action2(atomicInteger) {
-			@Override
-			protected void innerRun() {
-			}
-		};
-		recursive(a, 10, 4);
+		Action2 a = new Action2(atomicInteger);
+		a.setName("base");
+		recursive(a, atomicInteger, 10, 4);
 		a.run();
 		a.joinNext();
 
-		assertEquals(N, atomicInteger.get());
+		assertEquals(N + 1, atomicInteger.get());
+	}
+
+	public static class Action2 extends ActionAdapter<Action2> {
+		final AtomicInteger atomicInteger;
+		static int N = 0;
+
+		public Action2(AtomicInteger ai) {
+			super(new ActionAdapter.Builder<Action2>()
+					.setMode(Action.Mode.CONCURRENT)
+					.setRun((Action2 self) -> self.atomicInteger.incrementAndGet()));
+			atomicInteger = ai;
+			N++;
+			setName("Action2(n=" + N + ")");
+		}
+
+		public Action2(Action2 a) {
+			this(a.atomicInteger);
+		}
+
+		public boolean equals(Object o) {
+			if (!(o instanceof Action2))
+				return false;
+
+			Action2 casted = (Action2) o;
+
+			return super.equals(o)
+					&& atomicInteger.get() == casted.atomicInteger.get();
+		}
 	}
 }

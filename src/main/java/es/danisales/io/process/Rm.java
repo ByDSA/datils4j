@@ -6,15 +6,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
-public class Rm extends ProcessAction {
-    public Rm(Path path) {
-        this(path, false);
+@SuppressWarnings({"unused"})
+public class Rm {
+    private Rm() {
     }
 
-    public Rm(Path path, boolean recursive) {
-        super();
-
+    public static ProcessAction of(Path path, boolean recursive) {
         List<String> paramList = new ArrayList<>();
         if (recursive)
             paramList.add("-r");
@@ -22,6 +19,10 @@ public class Rm extends ProcessAction {
 
         String[] args = paramList.toArray(new String[0]);
 
-        setFilenameAndParams("rm", args);
+        return ProcessAction.of("rm", args);
+    }
+
+    public static ProcessAction of(Path path) {
+        return of(path, false);
     }
 }
