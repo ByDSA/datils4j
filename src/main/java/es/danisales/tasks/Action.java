@@ -24,22 +24,12 @@ public interface Action extends Runnable {
     }
 
     @SuppressWarnings("unused")
-    long getCheckingTime();
-
-    @SuppressWarnings("unused")
-    void setCheckingTime(long checkingTime);
-
-    @SuppressWarnings("unused")
     void addAfter(Runnable r);
 
     @SuppressWarnings("unused")
     void addOnInterrupt(Runnable a);
 
     boolean isRunning();
-
-    boolean isIddle();
-
-    boolean isEnding();
 
     boolean isDone();
 
@@ -63,7 +53,7 @@ public interface Action extends Runnable {
 
     void addPrevious(Action a);
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "UnusedReturnValue"})
     default int runAndWaitFor() {
         run();
         return waitFor();

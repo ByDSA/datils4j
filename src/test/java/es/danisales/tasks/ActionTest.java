@@ -11,24 +11,6 @@ public class ActionTest {
 	public static int N = 1000;
 
 	@Test
-	public void checkingTimeValue() {
-		// Getter & setter testing
-		Action a = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
-			sleep(100);
-		});
-		long iniCheckTime = a.getCheckingTime();
-		final long newValue = 500;
-		a.setCheckingTime(newValue);
-		assertEquals(newValue, a.getCheckingTime());
-
-		// Same value on new instance
-		Action a2 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
-			sleep(100);
-		});
-		assertEquals(iniCheckTime, a2.getCheckingTime());
-	}
-
-	@Test
 	public void afterActions() {
 		AtomicInteger ai = new AtomicInteger(0);
 		Action a = Action.of(Action.Mode.CONCURRENT, (Action self) -> {

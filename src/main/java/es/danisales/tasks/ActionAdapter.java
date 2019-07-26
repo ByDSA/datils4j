@@ -8,32 +8,28 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-class ActionAdapter<A extends Action> implements ActionBounding<A> {
+class ActionAdapter<A extends Action> implements Action {
     // todo: override hashCode()
 
     static final Action pointless = Action.of(Mode.SEQUENTIAL, (Action a) -> {
     });
-    final Set<Action> next = new HashSet<>();
     // Non-duplicated
+    final private Set<Action> next = new HashSet<>();
     private final Set<Action> previous = new HashSet<>();
     private final List<Runnable> afterListeners = new ArrayList<>();
     private final List<Runnable> interruptionListeners = new ArrayList<>();
     private final Object statusLock = new Object();
-    protected RuleList readyRules, successRules;
-    private boolean done = false;
-    private boolean ending = false;
-    private boolean waitingCheck = false;
+    protected boolean redoOnFail = false;
+    RuleList readyRules, successRules;
 
     private final Mode mode;
     private final Consumer<A> innerRun;
-    // Duplicated
-    private long checkingTime = 100;
     private Thread thread;
     private Object context;
     private String name;
     private A caller;
     private Thread checkThread;
-    private boolean running = false;
+    ActionStatus status = ActionStatus.NONE;
 
     ActionAdapter(Builder<A> builder) {
         checkNotNull(builder.mode);
@@ -53,22 +49,25 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
             successRules = builder.successRules;
 
         if (builder.caller != null)
-            setCaller(builder.caller);
+            caller = builder.caller;
         else
-            setCaller((A) this);
+            caller = (A) this;
+
+        redoOnFail = builder.redoOnFail;
     }
 
+    // todo: para comprimar next y prev en equal
     private static boolean equalList(List<Action> l1, List<Action> l2, Action o1, Action o2) {
         if (l1.size() != l2.size())
             return false;
         else
             for (int i = 0; i < l1.size(); i++) {
-                if (l1.get(i) == o1 && l2.get(i) == o2)
-                    continue;
-                else if (l1.get(i) == o1 || l2.get(i) == o2) {
-                    return false;
-                } else if (!l1.get(i).equals(l2.get(i))) {
-                    return false;
+                if (l1.get(i) != o1 || l2.get(i) != o2) {
+                    if (l1.get(i) == o1 || l2.get(i) == o2) {
+                        return false;
+                    } else if (!l1.get(i).equals(l2.get(i))) {
+                        return false;
+                    }
                 }
             }
 
@@ -83,26 +82,12 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         ActionAdapter casted = (ActionAdapter) o;
 
         return Objects.equals(getFunc(), casted.getFunc())
-                && getCheckingTime() == casted.getCheckingTime()
                 && getMode() == casted.getMode()
-                && (getCaller() == this || Objects.equals(getCaller(), casted.getCaller()))
+                && (caller == this || Objects.equals(caller, casted.caller))
                 && Objects.equals(getContext(), casted.getContext())
                 && Objects.equals(getName(), casted.getName())
-                && Objects.equals(this.isDone(), casted.isDone())
-                && Objects.equals(this.isEnding(), casted.isEnding())
-                && Objects.equals(this.isRunning(), casted.isRunning())
-                && Objects.equals(this.isIddle(), casted.isIddle())
+                && Objects.equals(this.status, casted.status)
                 ;
-    }
-
-    @SuppressWarnings("unused")
-    public long getCheckingTime() {
-        return checkingTime;
-    }
-
-    @SuppressWarnings("unused")
-    public void setCheckingTime(long checkingTime) {
-        this.checkingTime = checkingTime;
     }
 
     @SuppressWarnings("unused")
@@ -121,25 +106,14 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
     public final boolean isRunning() {
         synchronized (statusLock) {
-            return running;
+            return status == ActionStatus.INITALIZING || status == ActionStatus.WAITING || status == ActionStatus.EXECUTING;
         }
     }
 
-    public final boolean isIddle() {
-        synchronized (statusLock) {
-            return waitingCheck;
-        }
-    }
-
-    public boolean isEnding() {
-        synchronized (statusLock) {
-            return ending;
-        }
-    }
-
+    @Override
     public final boolean isDone() {
         synchronized (statusLock) {
-            return thread != null && !thread.isAlive() || done;
+            return thread != null && !thread.isAlive() || status == ActionStatus.DONE;
         }
     }
 
@@ -155,19 +129,18 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
     public synchronized void interrupt() {
         synchronized (statusLock) {
-            if (!ending || !running)
+            if (!isRunning())
                 return;
 
             Logging.log("Interrumpida acción " + this);
-            ending = true;
-            running = false;
+            status = ActionStatus.ABORTING;
             if (thread != null && thread.isAlive())
                 thread.interrupt();
             synchronized (interruptionListeners) {
                 for (Runnable r : interruptionListeners)
                     r.run();
             }
-            ending = false;
+            status = ActionStatus.INTERRUPTED;
         }
     }
 
@@ -203,13 +176,12 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
             if (isRunning())
                 throw new IllegalStateException("Action " + this + " already started");
 
-            if (ending || isSuccessful())
+            if (status != ActionStatus.NONE && status != ActionStatus.DONE || isSuccessful())
                 return;
 
             checkNotNull(caller);
 
-            running = true;
-            done = false;
+            status = ActionStatus.INITALIZING;
         }
 
         if (isSequential()) {
@@ -227,42 +199,56 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
             checkThread.interrupt();
     }
 
+    private void doDependencies() {
+        if (previous.size() > 0) {
+            Logging.log("Waiting for previous of " + this + "...");
+            ActionList prevActionList = ActionList.of(Mode.CONCURRENT, previous);
+            prevActionList.setName("previous of " + this);
+            prevActionList.runAndWaitFor();
+        }
+    }
+
+    private void waitForConditions() {
+        synchronized (statusLock) {
+            status = ActionStatus.WAITING;
+        }
+        while (!caller.isReady()) {
+            try {
+                if (checkThread == null) {
+                    checkThread = Thread.currentThread();
+                    Logging.log("Waiting for " + this + " check...");
+                }
+                long checkReadyEvery = 100;
+                Thread.sleep(checkReadyEvery);
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    private void execute() {
+        synchronized (statusLock) {
+            status = ActionStatus.EXECUTING;
+        }
+        Logging.log("Executing " + this + "...");
+
+        innerRun.accept(caller);
+    }
+
     private void doAction() {
         try {
-            // Previous dependencies
-            if (previous.size() > 0) {
-                Logging.log("Waiting for previous of " + this + "...");
-                ActionList prevActionList = ActionList.of(Mode.CONCURRENT, previous);
-                prevActionList.setName("previous of " + this);
-                prevActionList.runAndWaitFor();
-            }
+            do {
+                // Previous dependencies
+                doDependencies();
 
-            // Wait for conditions
-            synchronized (statusLock) {
-                waitingCheck = true;
-            }
-            while (!caller.isReady()) {
-                try {
-                    if (checkThread == null) {
-                        checkThread = Thread.currentThread();
-                        Logging.log("Waiting for " + this + " check...");
-                    }
-                    Thread.sleep(checkingTime);
-                } catch (InterruptedException ignored) {
-                }
-            }
-            synchronized (statusLock) {
-                waitingCheck = false;
-            }
+                // Wait for conditions
+                waitForConditions();
 
-            // Running
-            Logging.log("Running " + this + "...");
-
-            innerRun.accept(caller);
+                // Running
+                execute();
+            } while (!isSuccessful() && redoOnFail);
 
             synchronized (this) {
-                running = false;
-                done = true;
+                status = ActionStatus.DONE;
             }
             Logging.log("Done " + this + "!");
 
@@ -297,15 +283,6 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         return context;
     }
 
-    public final A getCaller() {
-        return caller;
-    }
-
-    @Override
-    public void setCaller(A c) {
-        caller = c;
-    }
-
     @Override
     public synchronized void run(Object context) {
         this.context = context;
@@ -322,9 +299,9 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         do {
             try {
                 synchronized (this) {
-                    if (done) {
+                    if (isDone()) {
                         Logging.log("Don't WaitingFor " + this + ". It's done!");
-                        return ActionValues.ok.intValue();
+                        return ActionValues.OK.intValue();
                     }
                     Logging.log("WaitingFor " + this);
                     wait();
@@ -336,7 +313,7 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
         Logging.log("WaitingFor (End)" + this);
 
-        return ActionValues.ok.intValue();
+        return ActionValues.OK.intValue();
     }
 
     public int waitForNext() {
@@ -349,7 +326,7 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
             a.waitForNext();
 
         Logging.log("WaitForNext (End) " + this);
-        return ActionValues.ok.intValue();
+        return ActionValues.OK.intValue();
     }
 
     @SuppressWarnings("unused")
@@ -379,9 +356,16 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
     static class Builder<A extends Action> extends ActionBuilder<Builder<A>, A> {
         A caller;
+        boolean redoOnFail = false;
 
         Builder<A> setCaller(A caller) {
             this.caller = caller;
+
+            return self();
+        }
+
+        Builder<A> redoOnFail() {
+            redoOnFail = true;
 
             return self();
         }

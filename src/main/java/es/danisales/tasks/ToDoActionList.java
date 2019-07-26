@@ -3,15 +3,14 @@ package es.danisales.tasks;
 import es.danisales.log.string.Logging;
 
 public class ToDoActionList extends ActionList {
-    private ActionValues returnCode = ActionValues.abortError;
+    private ActionValues returnCode = ActionValues.ABORT;
 
     public ToDoActionList() {
         super(Mode.CONCURRENT);
 
-        addNext(this);
-
-        actionAdapter.readyRules.add(() -> !isEnding() && size() > 0);
-        actionAdapter.successRules.add(this::isEmpty);
+        actionAdapter.redoOnFail = true;
+        actionAdapter.readyRules.add(() -> !isEmpty());
+        //actionAdapter.successRules.add(this::isEmpty);
     }
 
     @Override
@@ -33,8 +32,8 @@ public class ToDoActionList extends ActionList {
         a.addAfter(() -> {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
-            if (isSuccessful()) {
-                returnCode = ActionValues.ok;
+            if (isEmpty()) {
+                returnCode = ActionValues.OK;
                 synchronized (this) {
                     notifyAll();
                 }
@@ -44,11 +43,9 @@ public class ToDoActionList extends ActionList {
         a.addOnInterrupt(() -> {
             remove(a);
             interrupt();
-            if (isSuccessful()) {
-                returnCode = ActionValues.abortError;
-                synchronized (this) {
-                    notifyAll();
-                }
+            returnCode = ActionValues.ABORT;
+            synchronized (this) {
+                notifyAll();
             }
         });
 

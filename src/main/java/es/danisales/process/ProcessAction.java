@@ -227,16 +227,6 @@ public class ProcessAction implements Action {
     }
 
     @Override
-    public long getCheckingTime() {
-        return actionAdapter.getCheckingTime();
-    }
-
-    @Override
-    public void setCheckingTime(long checkingTime) {
-        actionAdapter.setCheckingTime(checkingTime);
-    }
-
-    @Override
     public void addAfter(Runnable r) {
         actionAdapter.addAfter(r);
     }
@@ -249,16 +239,6 @@ public class ProcessAction implements Action {
     @Override
     public boolean isRunning() {
         return actionAdapter.isRunning();
-    }
-
-    @Override
-    public boolean isIddle() {
-        return actionAdapter.isIddle();
-    }
-
-    @Override
-    public boolean isEnding() {
-        return actionAdapter.isEnding();
     }
 
     @Override

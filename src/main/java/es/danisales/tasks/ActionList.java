@@ -35,8 +35,7 @@ public class ActionList implements Action, List<Action> {
 
 	public static ActionList of(@NonNull Mode mode, @NonNull Collection<Action> actions) {
 		ActionList ret = new ActionList(mode);
-		if (actions != null)
-			ret.addAll(actions);
+		ret.addAll(actions);
 
 		return ret;
 	}
@@ -125,7 +124,7 @@ public class ActionList implements Action, List<Action> {
 
 		secureForEach(Action::waitForNext);
 
-		return ActionValues.ok.intValue();
+		return ActionValues.OK.intValue();
 	}
 
 	@Override
@@ -164,7 +163,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	private void checkAndDoCommon(@NonNull Action action) {
-		if (isEnding())
+		if (actionAdapter.status != ActionStatus.EXECUTING)
 			return;
 
 		boolean condition = action.isReady() && !action.isRunning();
@@ -176,16 +175,6 @@ public class ActionList implements Action, List<Action> {
 			action.run(this);
 			times.put( action, n+1 );
 		}
-	}
-
-	@Override
-	public long getCheckingTime() {
-		return actionAdapter.getCheckingTime();
-	}
-
-	@Override
-	public void setCheckingTime(long checkingTime) {
-		actionAdapter.setCheckingTime(checkingTime);
 	}
 
 	@Override
@@ -201,16 +190,6 @@ public class ActionList implements Action, List<Action> {
 	@Override
 	public boolean isRunning() {
 		return actionAdapter.isRunning();
-	}
-
-	@Override
-	public boolean isIddle() {
-		return actionAdapter.isIddle();
-	}
-
-	@Override
-	public boolean isEnding() {
-		return actionAdapter.isEnding();
 	}
 
 	@Override
