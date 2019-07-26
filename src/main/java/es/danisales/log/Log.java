@@ -1,15 +1,14 @@
 package es.danisales.log;
 
-import es.danisales.concurrency.Lockable;
 import es.danisales.io.FileAppendable;
 import es.danisales.io.FileReadable;
 
 import java.util.List;
 
-public interface Log<L> extends Lockable, FileAppendable<L>, FileReadable {
+public interface Log<L> extends FileAppendable<L>, FileReadable {
 	@SuppressWarnings("unused")
 	default boolean save() {
-		synchronized(lock()) {
+		synchronized (this) {
 			if (buffer().isEmpty())
 				return false;
 			else {
@@ -24,7 +23,7 @@ public interface Log<L> extends Lockable, FileAppendable<L>, FileReadable {
 	@Deprecated
 	@SuppressWarnings("unused")
 	default void addBuffer(L l) {
-		synchronized(lock()) {
+		synchronized (this) {
 			buffer().add( l );
 		}
 	}

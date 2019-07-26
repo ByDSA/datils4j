@@ -1,6 +1,5 @@
 package es.danisales.io;
 
-import es.danisales.concurrency.Lockable;
 import es.danisales.tasks.Action;
 import es.danisales.tasks.ActionList;
 import es.danisales.tasks.LoopTask;
@@ -8,12 +7,11 @@ import es.danisales.tasks.LoopTask;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class FileAutosavable extends File implements Lockable {
-    final static ActionList threads = ActionList.of(Action.Mode.CONCURRENT);
+public abstract class FileAutosavable extends File {
+    private final static ActionList threads = ActionList.of(Action.Mode.CONCURRENT);
 
-	protected AtomicBoolean _dirty = new AtomicBoolean(false);
-	protected AtomicBoolean _autosaving = new AtomicBoolean( false );
-	final Object _lock = new Object();
+    private AtomicBoolean _dirty = new AtomicBoolean(false);
+    private AtomicBoolean _autosaving = new AtomicBoolean(false);
 
 	public FileAutosavable(String pathname) {
 		super( pathname );
@@ -46,7 +44,7 @@ public abstract class FileAutosavable extends File implements Lockable {
         Action action = new LoopTask.Builder()
                 .setMode(Action.Mode.CONCURRENT)
                 .setRun((LoopTask self) -> {
-                    synchronized (_lock) {
+                    synchronized (this) {
                         save();
                     }
                 })
@@ -67,13 +65,8 @@ public abstract class FileAutosavable extends File implements Lockable {
 	}
 
 	@Override
-	public final Object lock() {
-		return _lock;
-	}
-
-	@Override
 	public final boolean delete() {
-		synchronized(lock()) {
+        synchronized (this) {
 			return super.delete();
 		}
 	}
