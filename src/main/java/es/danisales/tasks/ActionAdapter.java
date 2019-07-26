@@ -1,7 +1,7 @@
 package es.danisales.tasks;
 
 import es.danisales.log.string.Logging;
-import es.danisales.rules.ListOfRules;
+import es.danisales.rules.RuleList;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -19,7 +19,7 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     private final List<Runnable> afterListeners = new ArrayList<>();
     private final List<Runnable> interruptionListeners = new ArrayList<>();
     private final Object statusLock = new Object();
-    protected ListOfRules readyRules, successRules;
+    protected RuleList readyRules, successRules;
     private boolean done = false;
     private boolean ending = false;
     private boolean waitingCheck = false;
@@ -43,12 +43,12 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         innerRun = builder.function;
 
         if (builder.readyRules == null)
-            readyRules = ListOfRules.of(true);
+            readyRules = RuleList.of(true);
         else
             readyRules = builder.readyRules;
 
         if (builder.successRules == null)
-            successRules = ListOfRules.of(false);
+            successRules = RuleList.of(false);
         else
             successRules = builder.successRules;
 

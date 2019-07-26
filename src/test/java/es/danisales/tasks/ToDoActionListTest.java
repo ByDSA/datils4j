@@ -13,7 +13,6 @@ public class ToDoActionListTest {
         ToDoActionList td = new ToDoActionList();
         td.setName("ToDoList");
         assertFalse(td.isRunning());
-
         AtomicInteger ai = new AtomicInteger(0);
         Action a = Action.of(Action.Mode.SEQUENTIAL, (Action ac) -> ai.incrementAndGet());
         a.setName("IncrementorAction");

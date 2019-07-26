@@ -1,14 +1,14 @@
 package es.danisales.tasks;
 
-import es.danisales.rules.ListOfRules;
 import es.danisales.rules.Rule;
+import es.danisales.rules.RuleList;
 
 import java.util.function.Consumer;
 
 public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Action> {
     Action.Mode mode;
     Consumer<A> function;
-    ListOfRules readyRules, successRules;
+    RuleList readyRules, successRules;
 
     public T setMode(Action.Mode mode) {
         this.mode = mode;
@@ -23,7 +23,7 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
 
     public T addReadyRule(Rule r) {
         if (readyRules == null)
-            readyRules = ListOfRules.of(true);
+            readyRules = RuleList.of(true);
         readyRules.add(r);
 
         return self();
@@ -31,7 +31,7 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
 
     public T addTestRule(Rule r) {
         if (successRules == null)
-            successRules = ListOfRules.of(false);
+            successRules = RuleList.of(false);
         successRules.add(r);
 
         return self();
