@@ -50,7 +50,7 @@ public abstract class FileAutosavable extends File implements Lockable {
                         save();
                     }
                 })
-                .setCheckFunction(this::isDirty)
+                .addReadyRule(this::isDirty)
                 .build();
 
         threads.add(action);

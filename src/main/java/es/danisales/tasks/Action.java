@@ -1,13 +1,10 @@
 package es.danisales.tasks;
 
-import es.danisales.rules.Rule;
-
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface Action extends Runnable, Rule {
+public interface Action extends Runnable {
     static Action createPointless() {
         return Action.of(ActionAdapter.pointless);
     }
@@ -36,15 +33,19 @@ public interface Action extends Runnable, Rule {
     void addAfter(Runnable r);
 
     @SuppressWarnings("unused")
-    void addInterruptedListener(Runnable a);
+    void addOnInterrupt(Runnable a);
 
     boolean isRunning();
 
-    boolean isWaitingCheck();
+    boolean isIddle();
 
     boolean isEnding();
 
     boolean isDone();
+
+    boolean isReady();
+
+    boolean isSuccessful();
 
     void interrupt();
 
@@ -63,20 +64,20 @@ public interface Action extends Runnable, Rule {
     void addPrevious(Action a);
 
     @SuppressWarnings("unused")
-    default void runAndJoin() throws InterruptedException {
+    default int runAndWaitFor() {
         run();
-        join();
+        return waitFor();
     }
 
     @SuppressWarnings("unused")
-    default void runAndJoinNext() {
+    default int runAndWaitForNext() {
         run();
-        joinNext();
+        return waitForNext();
     }
 
-    void join() throws InterruptedException;
+    int waitFor();
 
-    void joinNext();
+    int waitForNext();
 
     String getName();
 
@@ -91,10 +92,6 @@ public interface Action extends Runnable, Rule {
     void run(Object context);
 
     Consumer<? extends Action> getFunc();
-
-    void setCheckFunction(Supplier<Boolean> f);
-
-    boolean check();
 
     enum Mode {
         CONCURRENT, SEQUENTIAL

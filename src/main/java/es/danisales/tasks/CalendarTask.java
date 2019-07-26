@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class CalendarTask implements Action, CalendarInterface {
 	private final Calendar calendar = new Calendar();
@@ -171,8 +170,8 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public void addInterruptedListener(Runnable a) {
-		actionAdapter.addInterruptedListener(a);
+	public void addOnInterrupt(Runnable a) {
+		actionAdapter.addOnInterrupt(a);
 	}
 
 	@Override
@@ -181,8 +180,8 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean isWaitingCheck() {
-		return actionAdapter.isWaitingCheck();
+	public boolean isIddle() {
+		return actionAdapter.isIddle();
 	}
 
 	@Override
@@ -193,6 +192,16 @@ public class CalendarTask implements Action, CalendarInterface {
 	@Override
 	public boolean isDone() {
 		return actionAdapter.isDone();
+	}
+
+	@Override
+	public boolean isReady() {
+		return actionAdapter.isReady();
+	}
+
+	@Override
+	public boolean isSuccessful() {
+		return actionAdapter.isSuccessful();
 	}
 
 	@Override
@@ -221,13 +230,13 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public void join() throws InterruptedException {
-		actionAdapter.join();
+	public int waitFor() {
+		return actionAdapter.waitFor();
 	}
 
 	@Override
-	public void joinNext() {
-		actionAdapter.joinNext();
+	public int waitForNext() {
+		return actionAdapter.waitForNext();
 	}
 
 	@Override
@@ -263,11 +272,6 @@ public class CalendarTask implements Action, CalendarInterface {
 	@Override
 	public Consumer<? extends Action> getFunc() {
 		return actionAdapter.getFunc();
-	}
-
-	@Override
-	public void setCheckFunction(Supplier<Boolean> f) {
-		actionAdapter.setCheckFunction(f);
 	}
 
 	@Override

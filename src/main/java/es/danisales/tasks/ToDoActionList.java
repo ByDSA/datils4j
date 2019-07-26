@@ -7,10 +7,13 @@ public class ToDoActionList extends ActionList {
         super(Mode.CONCURRENT);
 
         addNext(this);
+
+        actionAdapter.readyRules.add(() -> !isEnding() && size() > 0);
+        actionAdapter.successRules.add(() -> size() == 0);
     }
 
     @Override
-    public void join() {
+    public int waitFor() {
         while (!isEmpty()) {
             try {
                 // todo: interrupir el thread al terminar las acciones
@@ -19,29 +22,31 @@ public class ToDoActionList extends ActionList {
                 e.printStackTrace();
             }
         }
+
+        return ActionValues.ok.intValue();
     }
 
     @Override
-    public boolean add(Action a) {
+    public boolean add(final Action a) {
         Logging.log(this + " Adding action " + a);
-        boolean ret = super.add(a);
 
         a.addAfter(() -> {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
         });
-        a.addInterruptedListener(() -> {
+
+        a.addOnInterrupt(() -> {
             remove(a);
             interrupt();
         });
 
-        actionAdapter.forceCheck();
 
-        return ret;
-    }
+        synchronized (this) {
+            boolean ret = super.add(a);
 
-    @Override
-    public boolean check() {
-        return !isEnding() && size() > 0;
+            actionAdapter.forceCheck();
+
+            return ret;
+        }
     }
 }

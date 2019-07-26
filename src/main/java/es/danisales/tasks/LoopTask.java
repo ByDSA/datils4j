@@ -1,12 +1,11 @@
 package es.danisales.tasks;
 
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class LoopTask implements Action {
-	private Action actionAdapter;
+	private final Action actionAdapter;
 
 	private LoopTask(Builder builder) {
 		checkNotNull(builder.mode);
@@ -31,8 +30,8 @@ public class LoopTask implements Action {
 	}
 
 	@Override
-	public void addInterruptedListener(Runnable a) {
-		actionAdapter.addInterruptedListener(a);
+	public void addOnInterrupt(Runnable a) {
+		actionAdapter.addOnInterrupt(a);
 	}
 
 	@Override
@@ -41,8 +40,8 @@ public class LoopTask implements Action {
 	}
 
 	@Override
-	public boolean isWaitingCheck() {
-		return actionAdapter.isWaitingCheck();
+	public boolean isIddle() {
+		return actionAdapter.isIddle();
 	}
 
 	@Override
@@ -53,6 +52,16 @@ public class LoopTask implements Action {
 	@Override
 	public boolean isDone() {
 		return actionAdapter.isDone();
+	}
+
+	@Override
+	public boolean isReady() {
+		return actionAdapter.isReady();
+	}
+
+	@Override
+	public boolean isSuccessful() {
+		return actionAdapter.isSuccessful();
 	}
 
 	@Override
@@ -76,13 +85,13 @@ public class LoopTask implements Action {
 	}
 
 	@Override
-	public void join() throws InterruptedException {
-		actionAdapter.join();
+	public int waitFor() {
+		return actionAdapter.waitFor();
 	}
 
 	@Override
-	public void joinNext() {
-		actionAdapter.joinNext();
+	public int waitForNext() {
+		return actionAdapter.waitForNext();
 	}
 
 	@Override
@@ -118,16 +127,6 @@ public class LoopTask implements Action {
 	@Override
 	public Consumer<? extends Action> getFunc() {
 		return actionAdapter.getFunc();
-	}
-
-	@Override
-	public void setCheckFunction(Supplier<Boolean> f) {
-		actionAdapter.setCheckFunction(f);
-	}
-
-	@Override
-	public boolean check() {
-		return actionAdapter.check();
 	}
 
 	@Override

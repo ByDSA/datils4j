@@ -1,12 +1,14 @@
 package es.danisales.tasks;
 
+import es.danisales.rules.ListOfRules;
+import es.danisales.rules.Rule;
+
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Action> {
     Action.Mode mode;
     Consumer<A> function;
-    Supplier<Boolean> checkFunction;
+    ListOfRules readyRules, successRules;
 
     public T setMode(Action.Mode mode) {
         this.mode = mode;
@@ -19,8 +21,18 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
         return self();
     }
 
-    public T setCheckFunction(Supplier<Boolean> f) {
-        checkFunction = f;
+    public T addReadyRule(Rule r) {
+        if (readyRules == null)
+            readyRules = ListOfRules.of(true);
+        readyRules.add(r);
+
+        return self();
+    }
+
+    public T addTestRule(Rule r) {
+        if (successRules == null)
+            successRules = ListOfRules.of(false);
+        successRules.add(r);
 
         return self();
     }

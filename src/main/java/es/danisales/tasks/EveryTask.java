@@ -2,7 +2,6 @@ package es.danisales.tasks;
 
 import java.util.Date;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -14,7 +13,6 @@ public class EveryTask implements Action {
 	public EveryTask(Builder builder) {
 		checkNotNull(builder.mode);
 		checkNotNull(builder.function);
-		checkNotNull(builder.every);
 		actionAdapter = Action.of(builder.mode, builder.function);
 		every = builder.every;
 	}
@@ -35,8 +33,8 @@ public class EveryTask implements Action {
 	}
 
 	@Override
-	public void addInterruptedListener(Runnable a) {
-		actionAdapter.addInterruptedListener(a);
+	public void addOnInterrupt(Runnable a) {
+		actionAdapter.addOnInterrupt(a);
 	}
 
 	@Override
@@ -45,8 +43,8 @@ public class EveryTask implements Action {
 	}
 
 	@Override
-	public boolean isWaitingCheck() {
-		return actionAdapter.isWaitingCheck();
+	public boolean isIddle() {
+		return actionAdapter.isIddle();
 	}
 
 	@Override
@@ -57,6 +55,16 @@ public class EveryTask implements Action {
 	@Override
 	public boolean isDone() {
 		return actionAdapter.isDone();
+	}
+
+	@Override
+	public boolean isReady() {
+		return lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
+	}
+
+	@Override
+	public boolean isSuccessful() {
+		return actionAdapter.isSuccessful();
 	}
 
 	@Override
@@ -80,18 +88,13 @@ public class EveryTask implements Action {
 	}
 
 	@Override
-	public boolean check() {
-		return lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
+	public int waitFor() {
+		return actionAdapter.waitFor();
 	}
 
 	@Override
-	public void join() throws InterruptedException {
-		actionAdapter.join();
-	}
-
-	@Override
-	public void joinNext() {
-		actionAdapter.joinNext();
+	public int waitForNext() {
+		return actionAdapter.waitForNext();
 	}
 
 	@Override
@@ -130,17 +133,12 @@ public class EveryTask implements Action {
 	}
 
 	@Override
-	public void setCheckFunction(Supplier<Boolean> f) {
-		actionAdapter.setCheckFunction(f);
-	}
-
-	@Override
 	public void run() {
 		actionAdapter.run();
 	}
 
 	public static class Builder extends ActionBuilder<Builder, EveryTask> {
-		long every;
+		long every = 0;
 
 		@Override
 		public EveryTask build() {

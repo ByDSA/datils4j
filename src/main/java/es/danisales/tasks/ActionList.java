@@ -1,10 +1,11 @@
 package es.danisales.tasks;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -28,11 +29,11 @@ public class ActionList implements Action, List<Action> {
 				.build();
 	}
 
-	public static ActionList of(Mode mode, Action... actions) {
+	public static ActionList of(@NonNull Mode mode, Action... actions) {
 		return of(mode, Arrays.asList(actions));
 	}
 
-	public static ActionList of(Mode mode, List<Action> actions) {
+	public static ActionList of(@NonNull Mode mode, @NonNull Collection<Action> actions) {
 		ActionList ret = new ActionList(mode);
 		if (actions != null)
 			ret.addAll(actions);
@@ -40,7 +41,7 @@ public class ActionList implements Action, List<Action> {
 		return ret;
 	}
 
-	private void innerRun(ActionList self) {
+	private void innerRun(@NonNull ActionList self) {
 		self.secureForEach((Action action) -> {
 			synchronized (self.beforeEachList) {
 				for (Consumer<Action> c : self.beforeEachList)
@@ -49,32 +50,31 @@ public class ActionList implements Action, List<Action> {
 			self.checkAndDoCommon(action);
 		});
 
-		self.joinChild();
+		self.waitForChildren();
 	}
 
 	@SuppressWarnings("unused")
-	public void addBeforeEach(Consumer<Action> r) {
+	public void addBeforeEach(@NonNull Consumer<Action> r) {
 		synchronized (beforeEachList) {
 			beforeEachList.add(r);
 		}
 	}
 
 	@SuppressWarnings("unused")
-	public void addOnRemoveListener(Consumer<Action> r) {
+	public void addOnRemoveListener(@NonNull Consumer<Action> r) {
 		synchronized (onRemoveListeners) {
 			onRemoveListeners.add(r);
 		}
 	}
 
 	@SuppressWarnings("unused")
-	public void addOnAddListener(Consumer<Action> r) {
+	public void addOnAddListener(@NonNull Consumer<Action> r) {
 		synchronized (onAddListeners) {
 			onAddListeners.add(r);
 		}
 	}
 
-	@SuppressWarnings("WeakerAccess")
-	public void secureForEach(Consumer<? super Action> f) {
+	private void secureForEach(@NonNull Consumer<? super Action> f) {
 		List<Action> calledActions;
 		calledActions = new ArrayList<>();
 
@@ -106,29 +106,26 @@ public class ActionList implements Action, List<Action> {
 
 
 	@SuppressWarnings("WeakerAccess")
-	public void joinChild() {
+	public void waitForChildren() {
+		//Logging.log("WaitForChildren " + this);
 		secureForEach((Action a) -> {
-			try {
-				a.join();
-			} catch (InterruptedException ignored) {
-			}
+			//Logging.log("WaitForChildren " + this + " " + a);
+			a.waitFor();
 		});
 	}
 
 	@Override
-	public void join() {
-		try {
-			actionAdapter.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	public int waitFor() {
+		return actionAdapter.waitFor();
 	}
 
 	@Override
-	public void joinNext() {
-		actionAdapter.joinNext();
+	public int waitForNext() {
+		actionAdapter.waitForNext();
 
-		secureForEach(Action::joinNext);
+		secureForEach(Action::waitForNext);
+
+		return ActionValues.ok.intValue();
 	}
 
 	@Override
@@ -142,12 +139,12 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public boolean hasPrevious(Action a) {
+	public boolean hasPrevious(@NonNull Action a) {
 		return actionAdapter.hasPrevious(a);
 	}
 
 	@Override
-	public boolean hasNext(Action a) {
+	public boolean hasNext(@NonNull Action a) {
 		return actionAdapter.hasNext(a);
 	}
 
@@ -157,7 +154,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void run(Object context) {
+	public void run(@NonNull Object context) {
 		actionAdapter.run(context);
 	}
 
@@ -166,22 +163,11 @@ public class ActionList implements Action, List<Action> {
 		return actionAdapter.getFunc();
 	}
 
-	@Override
-	public void setCheckFunction(Supplier<Boolean> f) {
-		actionAdapter.setCheckFunction(f);
-	}
-
-	@Override
-	public boolean check() {
-		return actionAdapter.check();
-	}
-
-	private void checkAndDoCommon(Action action) {
-		assert action != null;
+	private void checkAndDoCommon(@NonNull Action action) {
 		if (isEnding())
 			return;
 
-		boolean condition = action.check() && !action.isRunning();
+		boolean condition = action.isReady() && !action.isRunning();
 		if ( condition ) {
 			checkNotNull(times);
 			Integer n = times.get( action );
@@ -208,8 +194,8 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void addInterruptedListener(Runnable a) {
-		actionAdapter.addInterruptedListener(a);
+	public void addOnInterrupt(Runnable a) {
+		actionAdapter.addOnInterrupt(a);
 	}
 
 	@Override
@@ -218,8 +204,8 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public boolean isWaitingCheck() {
-		return actionAdapter.isWaitingCheck();
+	public boolean isIddle() {
+		return actionAdapter.isIddle();
 	}
 
 	@Override
@@ -230,6 +216,16 @@ public class ActionList implements Action, List<Action> {
 	@Override
 	public boolean isDone() {
 		return actionAdapter.isDone();
+	}
+
+	@Override
+	public boolean isReady() {
+		return actionAdapter.isReady();
+	}
+
+	@Override
+	public boolean isSuccessful() {
+		return actionAdapter.isSuccessful();
 	}
 
 	@Override
@@ -248,11 +244,6 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public boolean isConcurrent() {
-		return actionAdapter.isConcurrent();
-	}
-
-	@Override
 	public Mode getMode() {
 		return actionAdapter.getMode();
 	}
@@ -268,176 +259,241 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public synchronized int size() {
-		return listAdapter.size();
+	public int size() {
+		synchronized (listAdapter) {
+			return listAdapter.size();
+		}
 	}
 
 	@Override
-	public synchronized boolean isEmpty() {
-		return listAdapter.isEmpty();
+	public boolean isEmpty() {
+		synchronized (listAdapter) {
+			return listAdapter.isEmpty();
+		}
 	}
 
 	@Override
-	public synchronized boolean contains(Object o) {
-		return listAdapter.contains(o);
+	public boolean contains(Object o) {
+		synchronized (listAdapter) {
+			return listAdapter.contains(o);
+		}
 	}
 
 	@Override
-	public synchronized Iterator<Action> iterator() {
-		return listAdapter.iterator();
+	public Iterator<Action> iterator() {
+		synchronized (listAdapter) {
+			return listAdapter.iterator();
+		}
 	}
 
 	@Override
-	public synchronized void forEach(Consumer<? super Action> action) {
-		listAdapter.forEach(action);
+	public void forEach(Consumer<? super Action> action) {
+		synchronized (listAdapter) {
+			listAdapter.forEach(action);
+		}
 	}
 
 	@Override
-	public synchronized Object[] toArray() {
-		return listAdapter.toArray();
+	public Object[] toArray() {
+		synchronized (listAdapter) {
+			return listAdapter.toArray();
+		}
 	}
 
 	@SuppressWarnings("SuspiciousToArrayCall")
 	@Override
-	public synchronized <T> T[] toArray(T[] a) {
-		return listAdapter.toArray(a);
-	}
-
-	@Override
-	public synchronized boolean add(Action action) {
-		int index = indexOf(action);
-		if (index >= 0 && get(index) == action)
-			throw new AddedException(action);
-
-		synchronized (onAddListeners) {
-			for (Consumer<Action> c : onAddListeners)
-				c.accept(action);
+	public <T> T[] toArray(T[] a) {
+		synchronized (listAdapter) {
+			return listAdapter.toArray(a);
 		}
-
-		return listAdapter.add(action);
 	}
 
 	@Override
-	public synchronized boolean remove(Object o) {
+	public boolean add(Action action) {
+		synchronized (listAdapter) {
+			int index = indexOf(action);
+			if (index >= 0 && get(index) == action)
+				throw new AddedException(action);
+
+			synchronized (onAddListeners) {
+				for (Consumer<Action> c : onAddListeners)
+					c.accept(action);
+			}
+
+			return listAdapter.add(action);
+		}
+	}
+
+	@Override
+	public boolean remove(Object o) {
 		if (!(o instanceof Action))
 			return false;
 
-		synchronized (onRemoveListeners) {
-			for (Consumer<Action> c : onRemoveListeners)
-				c.accept((Action) o);
+		synchronized (listAdapter) {
+			synchronized (onRemoveListeners) {
+				for (Consumer<Action> c : onRemoveListeners)
+					c.accept((Action) o);
+			}
+
+			return listAdapter.remove(o);
 		}
-
-		return listAdapter.remove(o);
 	}
 
 	@Override
-	public synchronized boolean containsAll(Collection<?> c) {
-		return listAdapter.containsAll(c);
+	public boolean containsAll(Collection<?> c) {
+		synchronized (listAdapter) {
+			return listAdapter.containsAll(c);
+		}
 	}
 
 	@Override
-	public synchronized boolean addAll(Collection<? extends Action> c) {
-		return listAdapter.addAll(c);
+	public boolean addAll(Collection<? extends Action> c) {
+		synchronized (listAdapter) {
+			return listAdapter.addAll(c);
+		}
 	}
 
 	@Override
-	public synchronized boolean addAll(int index, Collection<? extends Action> c) {
-		return listAdapter.addAll(c);
+	public boolean addAll(int index, Collection<? extends Action> c) {
+		synchronized (listAdapter) {
+			return listAdapter.addAll(c);
+		}
 	}
 
 	@Override
-	public synchronized boolean removeAll(Collection<?> c) {
-		return listAdapter.removeAll(c);
+	public boolean removeAll(Collection<?> c) {
+		synchronized (listAdapter) {
+			return listAdapter.removeAll(c);
+		}
 	}
 
 	@Override
-	public synchronized boolean removeIf(Predicate<? super Action> filter) {
-		return listAdapter.removeIf(filter);
+	public boolean removeIf(Predicate<? super Action> filter) {
+		synchronized (listAdapter) {
+			return listAdapter.removeIf(filter);
+		}
 	}
 
 	@Override
-	public synchronized boolean retainAll(Collection<?> c) {
-		return listAdapter.retainAll(c);
+	public boolean retainAll(Collection<?> c) {
+		synchronized (listAdapter) {
+			return listAdapter.retainAll(c);
+		}
 	}
 
 	@Override
-	public synchronized void replaceAll(UnaryOperator<Action> operator) {
-		listAdapter.replaceAll(operator);
+	public void replaceAll(UnaryOperator<Action> operator) {
+		synchronized (listAdapter) {
+			listAdapter.replaceAll(operator);
+		}
 	}
 
 	@Override
-	public synchronized void sort(Comparator<? super Action> c) {
-		listAdapter.sort(c);
+	public void sort(Comparator<? super Action> c) {
+		synchronized (listAdapter) {
+			listAdapter.sort(c);
+		}
 	}
 
 	@Override
-	public synchronized void clear() {
-		listAdapter.clear();
+	public void clear() {
+		synchronized (listAdapter) {
+			listAdapter.clear();
+		}
 	}
 
 	@Override
-	public synchronized Action get(int index) {
-		return listAdapter.get(index);
+	public Action get(int index) {
+		synchronized (listAdapter) {
+			return listAdapter.get(index);
+		}
 	}
 
 	@Override
-	public synchronized Action set(int index, Action element) {
-		return listAdapter.set(index, element);
+	public Action set(int index, Action element) {
+		synchronized (listAdapter) {
+			return listAdapter.set(index, element);
+		}
 	}
 
 	@Override
-	public synchronized void add(int index, Action element) {
-		listAdapter.add(index, element);
+	public void add(int index, Action element) {
+		synchronized (listAdapter) {
+			listAdapter.add(index, element);
+		}
 	}
 
 	@Override
-	public synchronized Action remove(int index) {
-		return listAdapter.remove(index);
+	public Action remove(int index) {
+		synchronized (listAdapter) {
+			return listAdapter.remove(index);
+		}
 	}
 
 	@Override
-	public synchronized int indexOf(Object o) {
-		return listAdapter.indexOf(o);
+	public int indexOf(Object o) {
+		synchronized (listAdapter) {
+			return listAdapter.indexOf(o);
+		}
 	}
 
 	@Override
-	public synchronized int lastIndexOf(Object o) {
-		return listAdapter.lastIndexOf(o);
+	public int lastIndexOf(Object o) {
+		synchronized (listAdapter) {
+			return listAdapter.lastIndexOf(o);
+		}
 	}
 
 	@Override
-	public synchronized ListIterator<Action> listIterator() {
-		return listAdapter.listIterator();
+	public ListIterator<Action> listIterator() {
+		synchronized (listAdapter) {
+			return listAdapter.listIterator();
+		}
 	}
 
 	@Override
-	public synchronized ListIterator<Action> listIterator(int index) {
-		return listAdapter.listIterator(index);
+	public ListIterator<Action> listIterator(int index) {
+		synchronized (listAdapter) {
+			return listAdapter.listIterator(index);
+		}
 	}
 
 	@Override
-	public synchronized List<Action> subList(int fromIndex, int toIndex) {
-		return listAdapter.subList(fromIndex, toIndex);
+	public List<Action> subList(int fromIndex, int toIndex) {
+		synchronized (listAdapter) {
+			return listAdapter.subList(fromIndex, toIndex);
+		}
 	}
 
 	@Override
-	public synchronized Spliterator<Action> spliterator() {
-		return listAdapter.spliterator();
+	public Spliterator<Action> spliterator() {
+		synchronized (listAdapter) {
+			return listAdapter.spliterator();
+		}
 	}
 
 	@Override
-	public synchronized Stream<Action> stream() {
-		return listAdapter.stream();
+	public Stream<Action> stream() {
+		synchronized (listAdapter) {
+			return listAdapter.stream();
+		}
 	}
 
 	@Override
-	public synchronized Stream<Action> parallelStream() {
-		return listAdapter.parallelStream();
+	public Stream<Action> parallelStream() {
+		synchronized (listAdapter) {
+			return listAdapter.parallelStream();
+		}
 	}
 
 	@Override
 	public void run() {
 		actionAdapter.run();
+	}
+
+	@Override
+	public String toString() {
+		return actionAdapter.toString();
 	}
 
 	@SuppressWarnings("WeakerAccess")

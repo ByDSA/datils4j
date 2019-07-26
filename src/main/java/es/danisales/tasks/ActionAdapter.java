@@ -1,32 +1,31 @@
 package es.danisales.tasks;
 
 import es.danisales.log.string.Logging;
+import es.danisales.rules.ListOfRules;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static es.danisales.time.Sleep.sleep;
 
 class ActionAdapter<A extends Action> implements ActionBounding<A> {
+    // todo: override hashCode()
+
     static final Action pointless = Action.of(Mode.SEQUENTIAL, (Action a) -> {
     });
-    final List<Action> next = new ArrayList<>();
+    final Set<Action> next = new HashSet<>();
     // Non-duplicated
-    private final AtomicBoolean done = new AtomicBoolean(false);
-    private final Object threadLock = new Object();
-    private final List<Action> previous = new ArrayList<>();
+    private final Set<Action> previous = new HashSet<>();
     private final List<Runnable> afterListeners = new ArrayList<>();
     private final List<Runnable> interruptionListeners = new ArrayList<>();
-    private final AtomicBoolean ending = new AtomicBoolean(false);
-    private final AtomicBoolean waitingCheck = new AtomicBoolean(false);
+    private final Object statusLock = new Object();
+    protected ListOfRules readyRules, successRules;
+    private boolean done = false;
+    private boolean ending = false;
+    private boolean waitingCheck = false;
+
     private final Mode mode;
     private final Consumer<A> innerRun;
-    private AtomicBoolean running = new AtomicBoolean(false);
     // Duplicated
     private long checkingTime = 100;
     private Thread thread;
@@ -34,7 +33,7 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     private String name;
     private A caller;
     private Thread checkThread;
-    private Supplier<Boolean> checkFunction;
+    private boolean running = false;
 
     ActionAdapter(Builder<A> builder) {
         checkNotNull(builder.mode);
@@ -43,10 +42,15 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         mode = builder.mode;
         innerRun = builder.function;
 
-        if (builder.checkFunction == null)
-            checkFunction = () -> Boolean.TRUE;
+        if (builder.readyRules == null)
+            readyRules = ListOfRules.of(true);
         else
-            checkFunction = builder.checkFunction;
+            readyRules = builder.readyRules;
+
+        if (builder.successRules == null)
+            successRules = ListOfRules.of(false);
+        else
+            successRules = builder.successRules;
 
         if (builder.caller != null)
             setCaller(builder.caller);
@@ -78,17 +82,16 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
         ActionAdapter casted = (ActionAdapter) o;
 
-
         return Objects.equals(getFunc(), casted.getFunc())
                 && getCheckingTime() == casted.getCheckingTime()
                 && getMode() == casted.getMode()
-                && (caller == this || Objects.equals(getCaller(), casted.getCaller()))
+                && (getCaller() == this || Objects.equals(getCaller(), casted.getCaller()))
                 && Objects.equals(getContext(), casted.getContext())
                 && Objects.equals(getName(), casted.getName())
                 && Objects.equals(this.isDone(), casted.isDone())
                 && Objects.equals(this.isEnding(), casted.isEnding())
                 && Objects.equals(this.isRunning(), casted.isRunning())
-                && Objects.equals(this.isWaitingCheck(), casted.isWaitingCheck())
+                && Objects.equals(this.isIddle(), casted.isIddle())
                 ;
     }
 
@@ -110,44 +113,62 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     }
 
     @SuppressWarnings("unused")
-    public final void addInterruptedListener(Runnable a) {
+    public final void addOnInterrupt(Runnable a) {
         synchronized (interruptionListeners) {
             interruptionListeners.add(a);
         }
     }
 
     public final boolean isRunning() {
-        return running.get();
+        synchronized (statusLock) {
+            return running;
+        }
     }
 
-    public final boolean isWaitingCheck() {
-        return waitingCheck.get();
+    public final boolean isIddle() {
+        synchronized (statusLock) {
+            return waitingCheck;
+        }
     }
 
     public boolean isEnding() {
-        return ending.get();
+        synchronized (statusLock) {
+            return ending;
+        }
     }
 
     public final boolean isDone() {
-        return thread != null && !thread.isAlive() || done.get();
+        synchronized (statusLock) {
+            return thread != null && !thread.isAlive() || done;
+        }
+    }
+
+    @Override
+    public boolean isReady() {
+        return readyRules.check();
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return successRules.check();
     }
 
     public synchronized void interrupt() {
-        if (!ending.get() || !running.get())
-            return;
+        synchronized (statusLock) {
+            if (!ending || !running)
+                return;
 
-        Logging.log("Interrumpida acción " + this);
-        ending.set(true);
-        running.set(false);
-        synchronized (threadLock) {
-            if (thread != null)
+            Logging.log("Interrumpida acción " + this);
+            ending = true;
+            running = false;
+            if (thread != null && thread.isAlive())
                 thread.interrupt();
+            synchronized (interruptionListeners) {
+                for (Runnable r : interruptionListeners)
+                    r.run();
+            }
+            ending = false;
         }
-        synchronized (interruptionListeners) {
-            for (Runnable r : interruptionListeners)
-                r.run();
-        }
-        ending.set(false);
     }
 
     @Override
@@ -158,22 +179,17 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     @Override
     public void addNext(Action a) {
         synchronized (next) {
-            if (!next.contains(a))
-                next.add(a);
+            next.add(a);
         }
-
-        if (!a.hasPrevious(this) && a != this)
-            a.addPrevious(this);
     }
 
     @Override
-    public void addPrevious(Action a) {
+    public void addPrevious(final Action a) {
         if (a == this)
             throw new RunningException();
 
         synchronized (previous) {
-            if (!previous.contains(a))
-                previous.add(a);
+            previous.add(a);
         }
 
         synchronized (a) {
@@ -182,27 +198,27 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         }
     }
 
-    public synchronized final void run() {
-        if (isRunning())
-            throw new IllegalStateException("Action " + this + " already started");
+    public final void run() {
+        synchronized (statusLock) {
+            if (isRunning())
+                throw new IllegalStateException("Action " + this + " already started");
 
-        if (ending.get())
-            return;
+            if (ending || isSuccessful())
+                return;
 
-        checkNotNull(caller);
+            checkNotNull(caller);
 
-        running.set(true);
+            running = true;
+            done = false;
+        }
+
         if (isSequential()) {
-            synchronized (threadLock) {
-                thread = Thread.currentThread(); // Todo: no para la ejecución de Sequential con Interrupt
-            }
+            thread = Thread.currentThread(); // Todo: no para la ejecución de Sequential con Interrupt
             doAction();
-        } else {
-            synchronized (threadLock) {
-                thread = new Thread(this::doAction);
-                thread.setName("Thread-Action-" + name);
-                thread.start();
-            }
+        } else if (isConcurrent()) {
+            thread = new Thread(this::doAction);
+            thread.setName("Thread-Action-" + name);
+            thread.start();
         }
     }
 
@@ -213,51 +229,64 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
 
     private void doAction() {
         try {
-            // Wait for previous
-            if (previous.size() > 0)
+            // Previous dependencies
+            if (previous.size() > 0) {
                 Logging.log("Waiting for previous of " + this + "...");
-            for (Action a : previous) {
-                try {
-                    a.join();
-                } catch (InterruptedException ignored) {
-                }
+                ActionList prevActionList = ActionList.of(Mode.CONCURRENT, previous);
+                prevActionList.setName("previous of " + this);
+                prevActionList.runAndWaitFor();
             }
 
             // Wait for conditions
-            checkThread = Thread.currentThread();
-            if (!check())
-                Logging.log("Waiting for " + this + " check...");
-            waitingCheck.set(true);
-            while (!checkFunction.get()) {
+            synchronized (statusLock) {
+                waitingCheck = true;
+            }
+            while (!caller.isReady()) {
                 try {
+                    if (checkThread == null) {
+                        checkThread = Thread.currentThread();
+                        Logging.log("Waiting for " + this + " check...");
+                    }
                     Thread.sleep(checkingTime);
                 } catch (InterruptedException ignored) {
                 }
             }
-            waitingCheck.set(false);
+            synchronized (statusLock) {
+                waitingCheck = false;
+            }
 
+            // Running
             Logging.log("Running " + this + "...");
 
             innerRun.accept(caller);
 
-            Logging.log("Done " + this + "!");
-            running.set(false);
-            done.set(true);
-
-            // End Actions
-            if (next.size() > 0) {
-                ActionList nextActionList = ActionList.of(Mode.CONCURRENT, next);
-                nextActionList.setName("next of " + this);
-                Logging.log("Running " + nextActionList + "...");
-                nextActionList.run();
+            synchronized (this) {
+                running = false;
+                done = true;
             }
+            Logging.log("Done " + this + "!");
 
+            // After Listeners
             synchronized (afterListeners) {
                 if (afterListeners.size() > 0)
-                    Logging.log(this + " Executing afterListeners...");
+                    Logging.log("Executing afterListeners " + this);
                 for (Runnable r : afterListeners)
                     r.run();
             }
+
+            // Notify waitingFor
+            Logging.log("Notifying " + this + "!");
+            synchronized (this) {
+                notifyAll();
+            }
+
+            // Next Actions
+            if (next.size() > 0) {
+                ActionList nextActionList = ActionList.of(Mode.CONCURRENT, next);
+                nextActionList.setName("next of " + this);
+                nextActionList.run();
+            }
+
         } catch (Exception e) {
             interrupt();
             throw e;
@@ -278,7 +307,7 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     }
 
     @Override
-    public void run(Object context) {
+    public synchronized void run(Object context) {
         this.context = context;
         run();
         this.context = null;
@@ -289,40 +318,38 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
         return innerRun;
     }
 
-    @Override
-    public void setCheckFunction(Supplier<Boolean> f) {
-        checkFunction = f;
-    }
-
-    public void join() throws InterruptedException {
-        if (isDone() || isEnding())
-            return;
-
-        if (isConcurrent())
-            thread.join();
-        else
-            while (!isDone() && !isEnding()) {
-                Thread.sleep(checkingTime);
-            }
-    }
-
-    public void joinNext() {
-        boolean error = false;
-        do
-        { // Ni idea de por qué a veces falla (en test 'tree'). Si se pone un sleep/println antes del join, no suele lanzar InterrruptedException (a veces aún así, especialmente si el sleep es pequeño)
+    public int waitFor() {
+        do {
             try {
-                if (error)
-                    sleep(20);
-                join();
-                error = false;
-            } catch (InterruptedException e) {
-                error = true;
+                synchronized (this) {
+                    if (done) {
+                        Logging.log("Don't WaitingFor " + this + ". It's done!");
+                        return ActionValues.ok.intValue();
+                    }
+                    Logging.log("WaitingFor " + this);
+                    wait();
+                }
+                break;
+            } catch (InterruptedException ignored) {
             }
-        } while (error);
+        } while (true);
 
+        Logging.log("WaitingFor (End)" + this);
 
+        return ActionValues.ok.intValue();
+    }
+
+    public int waitForNext() {
+        Logging.log("WaitForNext " + this);
+        // Ni idea de por qué a veces falla (en test 'tree'). Si se pone un sleep/println antes del waitFor, no suele lanzar InterrruptedException (a veces aún así, especialmente si el sleep es pequeño)
+        waitFor();
+
+        Logging.log("WaitForNext (nextList)" + this);
         for (Action a : next)
-            a.joinNext();
+            a.waitForNext();
+
+        Logging.log("WaitForNext (End) " + this);
+        return ActionValues.ok.intValue();
     }
 
     @SuppressWarnings("unused")
@@ -348,11 +375,6 @@ class ActionAdapter<A extends Action> implements ActionBounding<A> {
     @Override
     public String toString() {
         return name == null ? super.toString() : name;
-    }
-
-    @Override
-    public boolean check() {
-        return checkFunction.get();
     }
 
     static class Builder<A extends Action> extends ActionBuilder<Builder<A>, A> {

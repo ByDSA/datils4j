@@ -134,7 +134,7 @@ public class ActionListTest {
         ActionList sam = ActionList.of(Action.Mode.SEQUENTIAL);
         AtomicInteger atomicInteger = new AtomicInteger( 0 );
         for (int i = 0; i < ActionTest.N; i++)
-            sam.add( new ActionTest.Action2(atomicInteger) );
+            sam.add(new ActionWaitForTests.Action2(atomicInteger));
 
         for (int i = 0; i < ActionTest.N; i++)
             assertFalse(sam.get(i).isDone());

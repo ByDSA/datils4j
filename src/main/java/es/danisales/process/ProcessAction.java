@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class ProcessAction implements Action {
     @SuppressWarnings("WeakerAccess")
@@ -243,8 +242,8 @@ public class ProcessAction implements Action {
     }
 
     @Override
-    public void addInterruptedListener(Runnable a) {
-        actionAdapter.addInterruptedListener(a);
+    public void addOnInterrupt(Runnable a) {
+        actionAdapter.addOnInterrupt(a);
     }
 
     @Override
@@ -253,8 +252,8 @@ public class ProcessAction implements Action {
     }
 
     @Override
-    public boolean isWaitingCheck() {
-        return actionAdapter.isWaitingCheck();
+    public boolean isIddle() {
+        return actionAdapter.isIddle();
     }
 
     @Override
@@ -265,6 +264,16 @@ public class ProcessAction implements Action {
     @Override
     public boolean isDone() {
         return actionAdapter.isDone();
+    }
+
+    @Override
+    public boolean isReady() {
+        return actionAdapter.isReady();
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return actionAdapter.isSuccessful();
     }
 
     @Override
@@ -292,13 +301,15 @@ public class ProcessAction implements Action {
     }
 
     @Override
-    public void join() throws InterruptedException {
-        actionAdapter.join();
+    public int waitFor() {
+        actionAdapter.waitFor();
+
+        return getResultCode();
     }
 
     @Override
-    public void joinNext() {
-        actionAdapter.joinNext();
+    public int waitForNext() {
+        return actionAdapter.waitForNext();
     }
 
     @Override
@@ -334,16 +345,6 @@ public class ProcessAction implements Action {
     @Override
     public Consumer<? extends Action> getFunc() {
         return actionAdapter.getFunc();
-    }
-
-    @Override
-    public void setCheckFunction(Supplier<Boolean> f) {
-        actionAdapter.setCheckFunction(f);
-    }
-
-    @Override
-    public boolean check() {
-        return actionAdapter.check();
     }
 
     private Thread startNormalOutputListener(Process p) {
@@ -396,28 +397,13 @@ public class ProcessAction implements Action {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public Integer getResultCode() {
+    public int getResultCode() {
         return resultCode.get();
     }
 
     @SuppressWarnings("unused")
     public String getFileName() {
         return paramsWithName == null || paramsWithName.length == 0 ? null : paramsWithName[0];
-    }
-
-    @SuppressWarnings({"unused","WeakerAccess"})
-    public int joinResult() {
-        try {
-            join();
-        } catch (InterruptedException ignored) {}
-
-        return getResultCode();
-    }
-
-    @SuppressWarnings("unused")
-    public int runAndJoinResult() {
-        run();
-        return joinResult();
     }
 
     @Override
