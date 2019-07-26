@@ -4,16 +4,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 
-public class ListOfRules implements Rule, List<Rule> {
+public class RuleList implements Rule, List<Rule> {
     private final List<Rule> rulesListAdaptor = new ArrayList<>();
     private final boolean defaultEmptyValue;
 
-    private ListOfRules(boolean d) {
+    private RuleList(boolean d) {
         defaultEmptyValue = d;
     }
 
-    public static ListOfRules of(boolean defaultEmptyValue, Rule... r) {
-        ListOfRules l = new ListOfRules(defaultEmptyValue);
+    public static RuleList of(boolean defaultEmptyValue, Rule... r) {
+        RuleList l = new RuleList(defaultEmptyValue);
         if (r != null)
             l.addAll(Arrays.asList(r));
 
@@ -187,6 +187,7 @@ public class ListOfRules implements Rule, List<Rule> {
         }
     }
 
+    @SuppressWarnings("SuspiciousToArrayCall")
     @Override
     public @NonNull <T> T[] toArray(@NonNull T[] a) {
         synchronized (rulesListAdaptor) {
