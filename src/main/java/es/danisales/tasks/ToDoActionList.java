@@ -5,6 +5,7 @@ import es.danisales.log.string.Logging;
 public class ToDoActionList extends ActionList {
     private ActionValues returnCode = ActionValues.ABORT;
 
+    @SuppressWarnings("WeakerAccess")
     public ToDoActionList() {
         super(Mode.CONCURRENT);
 
@@ -51,11 +52,11 @@ public class ToDoActionList extends ActionList {
 
 
         synchronized (this) {
-            boolean ret = super.add(a);
+            super.add(a);
 
             actionAdapter.forceCheck();
 
-            return ret;
+            return true;
         }
     }
 }

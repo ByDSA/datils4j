@@ -8,17 +8,14 @@ import java.util.function.Consumer;
 
 public interface ProcessAction extends Action {
     static ProcessAction of(String fname, List<String> params) {
-        ProcessAction ret = ProcessActionAdapter.of(fname, params);
-
-        return ret;
+        return ProcessActionAdapter.of(fname, params);
     }
 
     static ProcessAction of(String fname, String... params) {
-        ProcessAction ret = ProcessActionAdapter.of(fname, params);
-
-        return ret;
+        return ProcessActionAdapter.of(fname, params);
     }
 
+    @SuppressWarnings("unused")
     static ProcessAction newInstance() {
         return ProcessActionAdapter.newInstance();
     }
@@ -76,7 +73,6 @@ public interface ProcessAction extends Action {
     @SuppressWarnings("unused")
     void clearOnNoArgumentsListeners();
 
-    @SuppressWarnings("WeakerAccess")
     int getResultCode();
 
     @SuppressWarnings("unused")

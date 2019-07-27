@@ -3,7 +3,7 @@ package es.danisales.rules;
 import es.danisales.time.Time;
 
 public class DayOfWeekRule implements Rule {
-	int day;
+	private int day;
 	
 	public DayOfWeekRule(int d) {
 		day = d;

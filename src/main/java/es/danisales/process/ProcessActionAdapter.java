@@ -40,6 +40,7 @@ class ProcessActionAdapter implements ProcessAction {
         return ret;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static ProcessActionAdapter newInstance() {
         return new ProcessActionAdapter();
     }
@@ -233,12 +234,12 @@ class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public void addAfter(Runnable r) {
+    public void addAfter(@NonNull Runnable r) {
         actionAdapter.addAfter(r);
     }
 
     @Override
-    public void addOnInterrupt(Runnable a) {
+    public void addOnInterrupt(@NonNull Runnable a) {
         actionAdapter.addOnInterrupt(a);
     }
 
@@ -277,12 +278,12 @@ class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public void addNext(Action a) {
+    public void addNext(@NonNull Action a) {
         actionAdapter.addNext(a);
     }
 
     @Override
-    public void addPrevious(Action a) {
+    public void addPrevious(@NonNull Action a) {
         actionAdapter.addPrevious(a);
     }
 
@@ -309,12 +310,12 @@ class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public boolean hasPrevious(Action a) {
+    public boolean hasPrevious(@NonNull Action a) {
         return actionAdapter.hasPrevious(a);
     }
 
     @Override
-    public boolean hasNext(Action a) {
+    public boolean hasNext(@NonNull Action a) {
         return actionAdapter.hasNext(a);
     }
 
@@ -324,11 +325,12 @@ class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public void run(Object context) {
+    public void run(@NonNull Object context) {
         actionAdapter.run(context);
     }
 
     @Override
+    @NonNull
     public Consumer<? extends Action> getFunc() {
         return actionAdapter.getFunc();
     }

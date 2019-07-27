@@ -1,21 +1,24 @@
 package es.danisales.tasks;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.function.Consumer;
 
 public abstract class ActionBounding implements Action {
     final Action action;
 
+    @SuppressWarnings("WeakerAccess")
     protected ActionBounding(Action a) {
         action = a;
     }
 
     @Override
-    public void addAfter(Runnable r) {
+    public void addAfter(@NonNull Runnable r) {
         action.addAfter(r);
     }
 
     @Override
-    public void addOnInterrupt(Runnable a) {
+    public void addOnInterrupt(@NonNull Runnable a) {
         action.addOnInterrupt(a);
     }
 
@@ -50,12 +53,12 @@ public abstract class ActionBounding implements Action {
     }
 
     @Override
-    public void addNext(Action a) {
+    public void addNext(@NonNull Action a) {
         action.addNext(a);
     }
 
     @Override
-    public void addPrevious(Action a) {
+    public void addPrevious(@NonNull Action a) {
         action.addPrevious(a);
     }
 
@@ -80,12 +83,12 @@ public abstract class ActionBounding implements Action {
     }
 
     @Override
-    public boolean hasPrevious(Action a) {
+    public boolean hasPrevious(@NonNull Action a) {
         return action.hasPrevious(a);
     }
 
     @Override
-    public boolean hasNext(Action a) {
+    public boolean hasNext(@NonNull Action a) {
         return action.hasNext(a);
     }
 
@@ -95,11 +98,12 @@ public abstract class ActionBounding implements Action {
     }
 
     @Override
-    public void run(Object context) {
+    public void run(@NonNull Object context) {
         action.run(context);
     }
 
     @Override
+    @NonNull
     public Consumer<? extends Action> getFunc() {
         return action.getFunc();
     }

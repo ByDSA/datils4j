@@ -2,8 +2,11 @@ package es.danisales.tasks;
 
 import es.danisales.rules.Rule;
 import es.danisales.rules.RuleList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Consumer;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Action> {
     Action.Mode mode;
@@ -12,23 +15,28 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
             successRules = RuleList.of(false);
 
     public T setMode(Action.Mode mode) {
+        checkNotNull(mode);
         this.mode = mode;
         return self();
     }
 
-    public T setRun(Consumer<A> f) {
+    public T setRun(@NonNull Consumer<A> f) {
+        checkNotNull(f);
         function = f;
 
         return self();
     }
 
-    public T addReadyRule(Rule r) {
+    public T addReadyRule(@NonNull Rule r) {
+        checkNotNull(r);
         readyRules.add(r);
 
         return self();
     }
 
-    public T addSuccessRule(Rule r) {
+    @SuppressWarnings("WeakerAccess")
+    public T addSuccessRule(@NonNull Rule r) {
+        checkNotNull(r);
         successRules.add(r);
 
         return self();

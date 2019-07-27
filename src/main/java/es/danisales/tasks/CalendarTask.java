@@ -3,6 +3,7 @@ package es.danisales.tasks;
 import es.danisales.rules.Rule;
 import es.danisales.time.Calendar;
 import es.danisales.time.CalendarInterface;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -23,18 +24,19 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean add(Rule e) {
+	public boolean add(@NonNull Rule e) {
 		return calendar.add( e );
 	}
 
-	public boolean add(Calendar c) {
+	public boolean add(@NonNull Calendar c) {
 		calendar.addAll( c );
 		for(Rule e : c.getExceptions())
 			calendar.addException( e );
 		
 		return true;
 	}
-	
+
+	@NonNull
 	public List<Rule> getExceptions() {
 		return calendar.getExceptions();
 	}
@@ -45,12 +47,12 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends Rule> c) {
+	public boolean addAll(@NonNull Collection<? extends Rule> c) {
 		return calendar.addAll(c);
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends Rule> c) {
+	public boolean addAll(int index, @NonNull Collection<? extends Rule> c) {
 		return calendar.addAll(index, c);
 	}
 
@@ -65,7 +67,7 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(@NonNull Collection<?> c) {
 		return calendar.containsAll(c);
 	}
 
@@ -85,6 +87,7 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
+	@NonNull
 	public Iterator<Rule> iterator() {
 		return calendar.iterator();
 	}
@@ -95,11 +98,13 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
+	@NonNull
 	public ListIterator<Rule> listIterator() {
 		return calendar.listIterator();
 	}
 
 	@Override
+	@NonNull
 	public ListIterator<Rule> listIterator(int index) {
 		return calendar.listIterator(index);
 	}
@@ -115,12 +120,12 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(@NonNull Collection<?> c) {
 		return calendar.removeAll(c);
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(@NonNull Collection<?> c) {
 		return calendar.retainAll(c);
 	}
 
@@ -135,32 +140,35 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
+	@NonNull
 	public List<Rule> subList(int fromIndex, int toIndex) {
 		return calendar.subList(fromIndex, toIndex);
 	}
 
 	@Override
+	@NonNull
 	public Object[] toArray() {
 		return calendar.toArray();
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	@NonNull
+	public <T> T[] toArray(@NonNull T[] a) {
 		return calendar.toArray( a );
 	}
 
 	@Override
-	public void addException(Rule r) {
+	public void addException(@NonNull Rule r) {
 		calendar.addException( r );
 	}
 
 	@Override
-	public void addAfter(Runnable r) {
+	public void addAfter(@NonNull Runnable r) {
 		actionAdapter.addAfter(r);
 	}
 
 	@Override
-	public void addOnInterrupt(Runnable a) {
+	public void addOnInterrupt(@NonNull Runnable a) {
 		actionAdapter.addOnInterrupt(a);
 	}
 
@@ -195,12 +203,12 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public void addNext(Action a) {
+	public void addNext(@NonNull Action a) {
 		actionAdapter.addNext(a);
 	}
 
 	@Override
-	public void addPrevious(Action a) {
+	public void addPrevious(@NonNull Action a) {
 		actionAdapter.addPrevious(a);
 	}
 
@@ -230,12 +238,12 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public boolean hasPrevious(Action a) {
+	public boolean hasPrevious(@NonNull Action a) {
 		return actionAdapter.hasPrevious(a);
 	}
 
 	@Override
-	public boolean hasNext(Action a) {
+	public boolean hasNext(@NonNull Action a) {
 		return actionAdapter.hasNext(a);
 	}
 
@@ -245,11 +253,12 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
-	public void run(Object context) {
+	public void run(@NonNull Object context) {
 		actionAdapter.run(context);
 	}
 
 	@Override
+	@NonNull
 	public Consumer<? extends Action> getFunc() {
 		return actionAdapter.getFunc();
 	}

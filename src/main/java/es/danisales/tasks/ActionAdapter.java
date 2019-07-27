@@ -2,6 +2,7 @@ package es.danisales.tasks;
 
 import es.danisales.log.string.Logging;
 import es.danisales.rules.RuleList;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -84,14 +85,16 @@ class ActionAdapter<A extends Action> implements Action {
     }
 
     @SuppressWarnings("unused")
-    public final void addAfter(Runnable r) {
+    public final void addAfter(@NonNull Runnable r) {
+        checkNotNull(r);
         synchronized (afterListeners) {
             afterListeners.add(r);
         }
     }
 
     @SuppressWarnings("unused")
-    public final void addOnInterrupt(Runnable a) {
+    public final void addOnInterrupt(@NonNull Runnable a) {
+        checkNotNull(a);
         synchronized (interruptionListeners) {
             interruptionListeners.add(a);
         }
@@ -143,14 +146,14 @@ class ActionAdapter<A extends Action> implements Action {
     }
 
     @Override
-    public void addNext(Action a) {
+    public void addNext(@NonNull Action a) {
         synchronized (next) {
             next.add(a);
         }
     }
 
     @Override
-    public void addPrevious(final Action a) {
+    public void addPrevious(@NonNull final Action a) {
         if (a == this)
             throw new RunningException();
 
@@ -283,13 +286,14 @@ class ActionAdapter<A extends Action> implements Action {
     }
 
     @Override
-    public synchronized void run(Object context) {
+    public synchronized void run(@NonNull Object context) {
         this.context = context;
         run();
         this.context = null;
     }
 
     @Override
+    @NonNull
     public Consumer<A> getFunc() {
         return innerRun;
     }
@@ -342,12 +346,12 @@ class ActionAdapter<A extends Action> implements Action {
     }
 
     @Override
-    public boolean hasPrevious(Action a) {
+    public boolean hasPrevious(@NonNull Action a) {
         return previous.contains(a);
     }
 
     @Override
-    public boolean hasNext(Action a) {
+    public boolean hasNext(@NonNull Action a) {
         return next.contains(a);
     }
 

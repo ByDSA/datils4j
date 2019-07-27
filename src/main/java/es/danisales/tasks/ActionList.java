@@ -162,6 +162,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
+	@NonNull
 	public Consumer<ActionList> getFunc() {
 		return actionAdapter.getFunc();
 	}
@@ -182,12 +183,12 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void addAfter(Runnable r) {
+	public void addAfter(@NonNull Runnable r) {
 		actionAdapter.addAfter(r);
 	}
 
 	@Override
-	public void addOnInterrupt(Runnable a) {
+	public void addOnInterrupt(@NonNull Runnable a) {
 		actionAdapter.addOnInterrupt(a);
 	}
 
@@ -232,12 +233,12 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void addNext(Action a) {
+	public void addNext(@NonNull Action a) {
 		actionAdapter.addNext(a);
 	}
 
 	@Override
-	public void addPrevious(Action a) {
+	public void addPrevious(@NonNull Action a) {
 		actionAdapter.addPrevious(a);
 	}
 

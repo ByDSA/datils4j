@@ -1,12 +1,13 @@
 package es.danisales.time;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import es.danisales.rules.DayOfWeekRule;
 import es.danisales.rules.Rule;
 import es.danisales.strings.StringUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class Calendar extends ArrayList<Rule> implements CalendarInterface {	
 	List<Rule> exceptions;
@@ -64,17 +65,15 @@ public class Calendar extends ArrayList<Rule> implements CalendarInterface {
 			}
 		}
 
-		if (rulesException)
-			return false;
-
-		return true;
+		return !rulesException;
 	}
 
-	public void addException(Rule r) {
+	public void addException(@NonNull Rule r) {
 		exceptions.add( r );
 	}
 
 	@Override
+	@NonNull
 	public List<Rule> getExceptions() {
 		return exceptions;
 	}

@@ -5,6 +5,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public interface Action extends Runnable {
     static Action createPointless() {
         return Action.of(ActionAdapter.pointless);
@@ -15,6 +17,9 @@ public interface Action extends Runnable {
     }
 
     static <A extends Action> Action of(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
+        checkNotNull(m);
+        checkNotNull(innerRun);
+
         final AtomicReference<ActionAdapter> a = new AtomicReference<>();
         a.set(
                 (ActionAdapter) builder(m, innerRun)
@@ -32,10 +37,10 @@ public interface Action extends Runnable {
     }
 
     @SuppressWarnings("unused")
-    void addAfter(Runnable r);
+    void addAfter(@NonNull Runnable r);
 
     @SuppressWarnings("unused")
-    void addOnInterrupt(Runnable a);
+    void addOnInterrupt(@NonNull Runnable a);
 
     boolean isRunning();
 
@@ -57,9 +62,9 @@ public interface Action extends Runnable {
 
     Mode getMode();
 
-    void addNext(Action a);
+    void addNext(@NonNull Action a);
 
-    void addPrevious(Action a);
+    void addPrevious(@NonNull Action a);
 
     @SuppressWarnings({"unused", "UnusedReturnValue"})
     default int runAndWaitFor() {
@@ -81,14 +86,15 @@ public interface Action extends Runnable {
 
     void setName(String s);
 
-    boolean hasPrevious(Action a);
+    boolean hasPrevious(@NonNull Action a);
 
-    boolean hasNext(Action a);
+    boolean hasNext(@NonNull Action a);
 
     Object getContext();
 
-    void run(Object context);
+    void run(@NonNull Object context);
 
+    @NonNull
     Consumer<? extends Action> getFunc();
 
     enum Mode {

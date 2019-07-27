@@ -1,10 +1,12 @@
 package es.danisales.process;
 
 import es.danisales.tasks.Action;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public class ProcessActionBounding implements ProcessAction {
     private final ProcessAction processAction;
 
@@ -118,12 +120,12 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public void addAfter(Runnable r) {
+    public void addAfter(@NonNull Runnable r) {
         processAction.addAfter(r);
     }
 
     @Override
-    public void addOnInterrupt(Runnable a) {
+    public void addOnInterrupt(@NonNull Runnable a) {
         processAction.addOnInterrupt(a);
     }
 
@@ -158,12 +160,12 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public void addNext(Action a) {
+    public void addNext(@NonNull Action a) {
         processAction.addNext(a);
     }
 
     @Override
-    public void addPrevious(Action a) {
+    public void addPrevious(@NonNull Action a) {
         processAction.addPrevious(a);
     }
 
@@ -188,12 +190,12 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public boolean hasPrevious(Action a) {
+    public boolean hasPrevious(@NonNull Action a) {
         return processAction.hasPrevious(a);
     }
 
     @Override
-    public boolean hasNext(Action a) {
+    public boolean hasNext(@NonNull Action a) {
         return processAction.hasNext(a);
     }
 
@@ -203,11 +205,12 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public void run(Object context) {
+    public void run(@NonNull Object context) {
         processAction.run(context);
     }
 
     @Override
+    @NonNull
     public Consumer<? extends Action> getFunc() {
         return processAction.getFunc();
     }

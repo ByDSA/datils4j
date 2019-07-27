@@ -1,10 +1,12 @@
 package es.danisales.time;
 
+import es.danisales.rules.Rule;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.List;
 
-import es.danisales.rules.Rule;
-
 public interface CalendarInterface extends Rule, List<Rule> {
-	void addException(Rule r);
-	List<Rule> getExceptions();
+	void addException(@NonNull Rule r);
+
+	@NonNull List<Rule> getExceptions();
 }
