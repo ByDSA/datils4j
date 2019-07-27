@@ -16,10 +16,12 @@ public class ActionTest {
 		Action a = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
 			sleep(100);
 		});
+		a.setName("a");
 		Action a2 = Action.of(Action.Mode.CONCURRENT, (Action self) -> {
 			sleep(50);
 			ai.incrementAndGet();
 		});
+		a2.setName("a2");
 		a.addAfter(a2);
 		assertEquals(0, ai.get());
 		a.run();

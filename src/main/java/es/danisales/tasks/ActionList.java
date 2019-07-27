@@ -4,6 +4,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -19,6 +20,7 @@ public class ActionList implements Action, List<Action> {
 	private final List<Consumer<Action>> beforeEachList = new ArrayList<>();
 	private final List<Consumer<Action>> onRemoveListeners = new ArrayList<>();
 	private final List<Consumer<Action>> onAddListeners = new ArrayList<>();
+	private final AtomicBoolean doneAll = new AtomicBoolean(false);
 
 	protected ActionList(Mode m) {
 		times = new ConcurrentHashMap<>();
@@ -26,6 +28,7 @@ public class ActionList implements Action, List<Action> {
 				.setMode(m)
 				.setRun(this::innerRun)
 				.setCaller(this)
+				.addSuccessRule(doneAll::get)
 				.build();
 	}
 
@@ -41,6 +44,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	private void innerRun(@NonNull ActionList self) {
+		doneAll.set(false);
 		self.secureForEach((Action action) -> {
 			synchronized (self.beforeEachList) {
 				for (Consumer<Action> c : self.beforeEachList)
@@ -50,6 +54,7 @@ public class ActionList implements Action, List<Action> {
 		});
 
 		self.waitForChildren();
+		doneAll.set(true);
 	}
 
 	@SuppressWarnings("unused")

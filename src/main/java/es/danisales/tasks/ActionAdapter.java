@@ -8,9 +8,8 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+// todo: override hashCode()
 class ActionAdapter<A extends Action> implements Action {
-    // todo: override hashCode()
-
     static final Action pointless = Action.of(Mode.SEQUENTIAL, (Action a) -> {
     });
     // Non-duplicated
@@ -30,6 +29,7 @@ class ActionAdapter<A extends Action> implements Action {
     private A caller;
     private Thread checkThread;
     ActionStatus status = ActionStatus.NONE;
+    protected boolean once = false;
 
     ActionAdapter(Builder<A> builder) {
         checkNotNull(builder.mode);
@@ -38,15 +38,8 @@ class ActionAdapter<A extends Action> implements Action {
         mode = builder.mode;
         innerRun = builder.function;
 
-        if (builder.readyRules == null)
-            readyRules = RuleList.of(true);
-        else
-            readyRules = builder.readyRules;
-
-        if (builder.successRules == null)
-            successRules = RuleList.of(false);
-        else
-            successRules = builder.successRules;
+        readyRules = builder.readyRules;
+        successRules = builder.successRules;
 
         if (builder.caller != null)
             caller = builder.caller;
@@ -56,7 +49,7 @@ class ActionAdapter<A extends Action> implements Action {
         redoOnFail = builder.redoOnFail;
     }
 
-    // todo: para comprimar next y prev en equal
+    // todo: para comparar next y prev en equal
     private static boolean equalList(List<Action> l1, List<Action> l2, Action o1, Action o2) {
         if (l1.size() != l2.size())
             return false;
@@ -113,7 +106,7 @@ class ActionAdapter<A extends Action> implements Action {
     @Override
     public final boolean isDone() {
         synchronized (statusLock) {
-            return thread != null && !thread.isAlive() || status == ActionStatus.DONE;
+            return status == ActionStatus.DONE;
         }
     }
 
@@ -176,7 +169,7 @@ class ActionAdapter<A extends Action> implements Action {
             if (isRunning())
                 throw new IllegalStateException("Action " + this + " already started");
 
-            if (status != ActionStatus.NONE && status != ActionStatus.DONE || isSuccessful())
+            if (status != ActionStatus.NONE && status != ActionStatus.DONE || isSuccessful() && once)
                 return;
 
             checkNotNull(caller);
@@ -185,7 +178,8 @@ class ActionAdapter<A extends Action> implements Action {
         }
 
         if (isSequential()) {
-            thread = Thread.currentThread(); // Todo: no para la ejecución de Sequential con Interrupt
+            // Todo: no para la ejecución de Sequential con Interrupt
+            thread = Thread.currentThread();
             doAction();
         } else if (isConcurrent()) {
             thread = new Thread(this::doAction);
@@ -247,9 +241,14 @@ class ActionAdapter<A extends Action> implements Action {
                 execute();
             } while (!isSuccessful() && redoOnFail);
 
-            synchronized (this) {
-                status = ActionStatus.DONE;
-            }
+            if (redoOnFail || isSuccessful())
+                synchronized (this) {
+                    status = ActionStatus.DONE;
+                }
+            else
+                synchronized (this) {
+                    status = ActionStatus.INTERRUPTED;
+                }
             Logging.log("Done " + this + "!");
 
             // After Listeners
@@ -300,8 +299,11 @@ class ActionAdapter<A extends Action> implements Action {
             try {
                 synchronized (this) {
                     if (isDone()) {
-                        Logging.log("Don't WaitingFor " + this + ". It's done!");
+                        Logging.log("Don't WaitingFor " + this + ". It's already done!");
                         return ActionValues.OK.intValue();
+                    } else if (status == ActionStatus.INTERRUPTED) {
+                        Logging.log("Don't WaitingFor " + this + ". Interrupted!");
+                        return ActionValues.ABORT.intValue();
                     }
                     Logging.log("WaitingFor " + this);
                     wait();

@@ -8,7 +8,8 @@ import java.util.function.Consumer;
 public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Action> {
     Action.Mode mode;
     Consumer<A> function;
-    RuleList readyRules, successRules;
+    RuleList readyRules = RuleList.of(true),
+            successRules = RuleList.of(false);
 
     public T setMode(Action.Mode mode) {
         this.mode = mode;
@@ -22,16 +23,12 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
     }
 
     public T addReadyRule(Rule r) {
-        if (readyRules == null)
-            readyRules = RuleList.of(true);
         readyRules.add(r);
 
         return self();
     }
 
-    public T addTestRule(Rule r) {
-        if (successRules == null)
-            successRules = RuleList.of(false);
+    public T addSuccessRule(Rule r) {
         successRules.add(r);
 
         return self();

@@ -10,7 +10,7 @@ public class ToDoActionList extends ActionList {
 
         actionAdapter.redoOnFail = true;
         actionAdapter.readyRules.add(() -> !isEmpty());
-        //actionAdapter.successRules.add(this::isEmpty);
+        actionAdapter.successRules.add(() -> false);
     }
 
     @Override

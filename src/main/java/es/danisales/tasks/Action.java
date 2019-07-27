@@ -1,8 +1,9 @@
 package es.danisales.tasks;
 
-import java.util.function.Consumer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public interface Action extends Runnable {
     static Action createPointless() {
@@ -13,14 +14,21 @@ public interface Action extends Runnable {
         return of(action.getMode(), action.getFunc());
     }
 
-    static <A extends Action> Action of(Mode m, Consumer<A> innerRun) {
-        checkNotNull(m);
-        checkNotNull(innerRun);
+    static <A extends Action> Action of(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
+        final AtomicReference<ActionAdapter> a = new AtomicReference<>();
+        a.set(
+                (ActionAdapter) builder(m, innerRun)
+                        .addSuccessRule(() -> a.get().status != ActionStatus.NONE)
+                        .build()
+        );
 
+        return a.get();
+    }
+
+    static <A extends Action> ActionBuilder<?, A> builder(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
         return new ActionAdapter.Builder<A>()
                 .setMode(m)
-                .setRun(innerRun)
-                .build();
+                .setRun(innerRun);
     }
 
     @SuppressWarnings("unused")

@@ -131,6 +131,7 @@ public class ActionListTest {
         ActionList al = ActionList.of(Action.Mode.CONCURRENT);
         al.run();
         sleep(runSleep);
+        assertTrue(al.isSuccessful());
         assertTrue(al.isDone());
         assertFalse(al.isRunning());
     }
@@ -153,7 +154,7 @@ public class ActionListTest {
         assertEquals(ActionTest.N, atomicInteger.get());
 
         for(int i = 0; i < ActionTest.N; i++)
-            assertTrue(sam.get(i).isDone());
+            assertTrue("" + i, sam.get(i).isDone());
 
         for(int i = 0; i <ActionTest. N; i++)
             assertFalse(sam.get(i).isRunning());
