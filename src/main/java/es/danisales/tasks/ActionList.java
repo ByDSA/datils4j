@@ -22,15 +22,16 @@ public class ActionList implements Action, List<Action> {
 	private final List<Consumer<Action>> onAddListeners = new ArrayList<>();
 	private final AtomicBoolean doneAll = new AtomicBoolean(false);
 
-	protected ActionList(Mode m) {
-		times = new ConcurrentHashMap<>();
-		actionAdapter = new ActionAdapter.Builder<ActionList>()
-				.setMode(m)
-				.setRun(this::innerRun)
-				.setCaller(this)
-				.addSuccessRule(doneAll::get)
-				.build();
-	}
+    @SuppressWarnings("WeakerAccess")
+    protected ActionList(Mode m) {
+        times = new ConcurrentHashMap<>();
+        actionAdapter = new ActionAdapter.Builder<ActionList>()
+                .setMode(m)
+                .setRun(this::innerRun)
+                .setCaller(this)
+                .addSuccessRule(doneAll::get)
+                .build();
+    }
 
 	public static ActionList of(@NonNull Mode mode, Action... actions) {
 		return of(mode, Arrays.asList(actions));
@@ -43,7 +44,9 @@ public class ActionList implements Action, List<Action> {
 		return ret;
 	}
 
-	private void innerRun(@NonNull ActionList self) {
+
+    @SuppressWarnings("WeakerAccess")
+    protected void innerRun(@NonNull ActionList self) {
 		doneAll.set(false);
 		self.secureForEach((Action action) -> {
 			synchronized (self.beforeEachList) {
@@ -111,11 +114,7 @@ public class ActionList implements Action, List<Action> {
 
 	@SuppressWarnings("WeakerAccess")
 	public void waitForChildren() {
-		//Logging.log("WaitForChildren " + this);
-		secureForEach((Action a) -> {
-			//Logging.log("WaitForChildren " + this + " " + a);
-			a.waitFor();
-		});
+        secureForEach(Action::waitFor);
 	}
 
 	@Override
@@ -264,6 +263,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
+    @NonNull
 	public Iterator<Action> iterator() {
 		synchronized (listAdapter) {
 			return listAdapter.iterator();
@@ -271,13 +271,14 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void forEach(Consumer<? super Action> action) {
+    public void forEach(@NonNull Consumer<? super Action> action) {
 		synchronized (listAdapter) {
 			listAdapter.forEach(action);
 		}
 	}
 
 	@Override
+    @NonNull
 	public Object[] toArray() {
 		synchronized (listAdapter) {
 			return listAdapter.toArray();
@@ -286,7 +287,7 @@ public class ActionList implements Action, List<Action> {
 
 	@SuppressWarnings("SuspiciousToArrayCall")
 	@Override
-	public <T> T[] toArray(T[] a) {
+    public @NonNull <T> T[] toArray(@NonNull T[] a) {
 		synchronized (listAdapter) {
 			return listAdapter.toArray(a);
 		}
@@ -324,28 +325,28 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@NonNull Collection<?> c) {
 		synchronized (listAdapter) {
 			return listAdapter.containsAll(c);
 		}
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends Action> c) {
+    public boolean addAll(@NonNull Collection<? extends Action> c) {
 		synchronized (listAdapter) {
 			return listAdapter.addAll(c);
 		}
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends Action> c) {
+    public boolean addAll(int index, @NonNull Collection<? extends Action> c) {
 		synchronized (listAdapter) {
 			return listAdapter.addAll(c);
 		}
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@NonNull Collection<?> c) {
 		synchronized (listAdapter) {
 			return listAdapter.removeAll(c);
 		}
@@ -359,7 +360,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NonNull Collection<?> c) {
 		synchronized (listAdapter) {
 			return listAdapter.retainAll(c);
 		}
@@ -429,6 +430,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
+    @NonNull
 	public ListIterator<Action> listIterator() {
 		synchronized (listAdapter) {
 			return listAdapter.listIterator();
@@ -436,6 +438,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
+    @NonNull
 	public ListIterator<Action> listIterator(int index) {
 		synchronized (listAdapter) {
 			return listAdapter.listIterator(index);
@@ -443,6 +446,7 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
+    @NonNull
 	public List<Action> subList(int fromIndex, int toIndex) {
 		synchronized (listAdapter) {
 			return listAdapter.subList(fromIndex, toIndex);
