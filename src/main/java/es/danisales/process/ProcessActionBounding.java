@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 public class ProcessActionBounding implements ProcessAction {
     private final ProcessAction processAction;
 
-    public ProcessActionBounding(ProcessAction processAction) {
+    protected ProcessActionBounding(ProcessAction processAction) {
         this.processAction = processAction;
     }
 
@@ -110,6 +110,11 @@ public class ProcessActionBounding implements ProcessAction {
     @Override
     public String getFileName() {
         return processAction.getFileName();
+    }
+
+    @Override
+    public void setFilenameAndParams(String file, String... params) {
+        processAction.setFilenameAndParams(file, params);
     }
 
     @Override

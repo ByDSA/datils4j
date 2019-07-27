@@ -19,6 +19,10 @@ public interface ProcessAction extends Action {
         return ret;
     }
 
+    static ProcessAction newInstance() {
+        return ProcessActionAdapter.newInstance();
+    }
+
     @SuppressWarnings("unused")
     boolean addNotFoundListener(Consumer<IOException> consumer);
 
@@ -77,6 +81,8 @@ public interface ProcessAction extends Action {
 
     @SuppressWarnings("unused")
     String getFileName();
+
+    void setFilenameAndParams(String file, String... params);
 
     @SuppressWarnings("WeakerAccess")
     class NoArgumentsException extends RuntimeException {

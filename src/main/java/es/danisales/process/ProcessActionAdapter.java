@@ -3,6 +3,7 @@ package es.danisales.process;
 import es.danisales.log.string.Logging;
 import es.danisales.strings.StringUtils;
 import es.danisales.tasks.Action;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 class ProcessActionAdapter implements ProcessAction {
     private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
@@ -35,6 +38,10 @@ class ProcessActionAdapter implements ProcessAction {
         ret.setFilenameAndParams(fname, params);
 
         return ret;
+    }
+
+    public static ProcessActionAdapter newInstance() {
+        return new ProcessActionAdapter();
     }
 
     public static ProcessActionAdapter of(String fname, String... params) {
@@ -175,13 +182,15 @@ class ProcessActionAdapter implements ProcessAction {
         setFilenameAndParams(fname, params.toArray(new String[0]));
     }
 
-    private void setFilenameAndParams(String fname, String... params) {
+    public void setFilenameAndParams(String fname, String... params) {
         paramsWithName = new String[params.length + 1];
         paramsWithName[0] = fname;
         System.arraycopy(params, 0, paramsWithName, 1, params.length);
     }
 
-    private void innerRun(ProcessActionAdapter self) {
+    private void innerRun(@NonNull ProcessActionAdapter self) {
+        checkNotNull(paramsWithName);
+
         synchronized (self.beforeListeners) {
             for (Runnable r : self.beforeListeners)
                 r.run();

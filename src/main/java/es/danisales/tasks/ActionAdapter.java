@@ -18,7 +18,7 @@ class ActionAdapter<A extends Action> implements Action {
     private final List<Runnable> afterListeners = new ArrayList<>();
     private final List<Runnable> interruptionListeners = new ArrayList<>();
     private final Object statusLock = new Object();
-    protected boolean redoOnFail = false;
+    boolean redoOnFail;
     RuleList readyRules, successRules;
 
     private final Mode mode;
@@ -29,7 +29,7 @@ class ActionAdapter<A extends Action> implements Action {
     private A caller;
     private Thread checkThread;
     ActionStatus status = ActionStatus.NONE;
-    protected boolean once = false;
+    private boolean once = false;
 
     ActionAdapter(Builder<A> builder) {
         checkNotNull(builder.mode);
