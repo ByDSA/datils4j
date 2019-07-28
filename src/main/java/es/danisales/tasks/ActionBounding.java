@@ -8,7 +8,7 @@ public abstract class ActionBounding implements Action {
     final Action action;
 
     @SuppressWarnings("WeakerAccess")
-    protected <CALLER extends ActionBounding, THIS extends ActionBounding> ActionBounding(ActionBuilder<?, THIS, CALLER> actionBuilder) {
+    protected <CALLER extends ActionBounding> ActionBounding(ActionBuilder<?, ?, CALLER> actionBuilder) {
         actionBuilder.setCaller((CALLER) this);
         action = actionBuilder.build();
     }

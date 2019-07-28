@@ -23,19 +23,19 @@ public interface Action extends Runnable {
                 .build();
     }
 
-    static <A extends Action> Action of(@NonNull Mode m, @NonNull Consumer<A> innerRun, @NonNull A caller) {
+    static <CALLER extends Action> Action of(@NonNull Mode m, @NonNull Consumer<CALLER> innerRun, @NonNull CALLER caller) {
         checkNotNull(m);
         checkNotNull(innerRun);
         checkNotNull(caller);
 
-        ActionBuilder<?, ?, A> b = builder(m, innerRun)
+        ActionBuilder<?, ?, CALLER> b = builder(m, innerRun)
                 .setCaller(caller);
 
         return b.build();
     }
 
-    static <A extends Action> ActionBuilder<?, ?, A> builder(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
-        ActionBuilder<?, ?, A> b = new ActionAdapter.Builder<A>()
+    static <CALLER extends Action> ActionBuilder<?, ?, CALLER> builder(@NonNull Mode m, @NonNull Consumer<CALLER> innerRun) {
+        ActionBuilder<?, ?, CALLER> b = new ActionAdapter.Builder<CALLER>()
                 .setMode(m)
                 .setRun(innerRun);
 

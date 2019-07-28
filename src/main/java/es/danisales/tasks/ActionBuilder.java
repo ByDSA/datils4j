@@ -59,7 +59,7 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, INSTANCE, CALLER>
         return self();
     }
 
-    public abstract Action build();
+    public abstract INSTANCE build();
 
     protected INSTANCE getInstance() {
         return Objects.requireNonNull(instance, "Instance not built");
