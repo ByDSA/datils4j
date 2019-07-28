@@ -8,8 +8,8 @@ public abstract class ActionBounding implements Action {
     final Action action;
 
     @SuppressWarnings("WeakerAccess")
-    protected ActionBounding(Action a) {
-        action = a;
+    protected ActionBounding(ActionBuilder actionBuilder) {
+        action = actionBuilder.build();
     }
 
     @Override
