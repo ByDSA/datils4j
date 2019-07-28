@@ -27,7 +27,7 @@ class ProcessActionAdapter implements ProcessAction {
     private AtomicInteger resultCode = new AtomicInteger();
     private Thread normalOutputThread;
     private Thread errorOutputThread;
-    private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun);
+    private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun, this);
 
     private ProcessActionAdapter() {
     }
@@ -261,6 +261,11 @@ class ProcessActionAdapter implements ProcessAction {
     @Override
     public boolean isSuccessful() {
         return actionAdapter.isSuccessful();
+    }
+
+    @Override
+    public boolean isLaunched() {
+        return actionAdapter.isLaunched();
     }
 
     @Override

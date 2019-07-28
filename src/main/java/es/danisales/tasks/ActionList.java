@@ -212,6 +212,11 @@ public class ActionList implements Action, List<Action> {
 		return actionAdapter.isSuccessful();
 	}
 
+    @Override
+    public boolean isLaunched() {
+        return actionAdapter.isLaunched();
+    }
+
 	@Override
 	public void interrupt() {
 		actionAdapter.interrupt();

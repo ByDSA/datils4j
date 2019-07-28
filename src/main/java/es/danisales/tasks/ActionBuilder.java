@@ -4,20 +4,22 @@ import es.danisales.rules.Rule;
 import es.danisales.rules.RuleList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Action> {
+public abstract class ActionBuilder<T extends ActionBuilder<T, INSTANCE, CALLER>, INSTANCE extends Action, CALLER extends Action> {
     Action.Mode mode;
-    Consumer<A> function;
+    protected INSTANCE instance = null;
     RuleList readyRules = RuleList.of(true),
             successRules = RuleList.of(false);
-    A caller;
+    Consumer<CALLER> function;
     boolean redoOnFail = false;
+    CALLER caller;
 
     @SuppressWarnings("WeakerAccess")
-    public T setCaller(A caller) {
+    public T setCaller(CALLER caller) {
         this.caller = caller;
 
         return self();
@@ -35,7 +37,7 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
         return self();
     }
 
-    public T setRun(@NonNull Consumer<A> f) {
+    public T setRun(@NonNull Consumer<CALLER> f) {
         checkNotNull(f);
         function = f;
 
@@ -58,6 +60,10 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
     }
 
     public abstract Action build();
+
+    protected INSTANCE getInstance() {
+        return Objects.requireNonNull(instance, "Instance not built");
+    }
 
     protected abstract T self();
 }

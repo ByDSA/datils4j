@@ -150,6 +150,11 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
+    public boolean isLaunched() {
+        return processAction.isLaunched();
+    }
+
+    @Override
     public void interrupt() {
         processAction.interrupt();
     }
