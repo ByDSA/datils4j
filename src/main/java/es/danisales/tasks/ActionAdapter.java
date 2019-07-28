@@ -361,21 +361,6 @@ class ActionAdapter<A extends Action> implements Action {
     }
 
     static class Builder<A extends Action> extends ActionBuilder<Builder<A>, A> {
-        A caller;
-        boolean redoOnFail = false;
-
-        Builder<A> setCaller(A caller) {
-            this.caller = caller;
-
-            return self();
-        }
-
-        Builder<A> redoOnFail() {
-            redoOnFail = true;
-
-            return self();
-        }
-
         @Override
         public ActionAdapter<A> build() {
             return new ActionAdapter<>(this);

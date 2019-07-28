@@ -13,6 +13,21 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, A>, A extends Act
     Consumer<A> function;
     RuleList readyRules = RuleList.of(true),
             successRules = RuleList.of(false);
+    A caller;
+    boolean redoOnFail = false;
+
+    @SuppressWarnings("WeakerAccess")
+    public T setCaller(A caller) {
+        this.caller = caller;
+
+        return self();
+    }
+
+    public T redoOnFail() {
+        redoOnFail = true;
+
+        return self();
+    }
 
     public T setMode(Action.Mode mode) {
         checkNotNull(mode);
