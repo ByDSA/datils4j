@@ -193,6 +193,11 @@ public class CalendarTask implements Action, CalendarInterface {
 	}
 
 	@Override
+	public boolean isLaunched() {
+		return actionAdapter.isLaunched();
+	}
+
+	@Override
 	public void interrupt() {
 		actionAdapter.interrupt();
 	}

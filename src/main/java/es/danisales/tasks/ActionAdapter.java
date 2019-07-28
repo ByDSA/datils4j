@@ -7,6 +7,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 // todo: override hashCode()
@@ -121,6 +122,11 @@ class ActionAdapter<A extends Action> implements Action {
     @Override
     public boolean isSuccessful() {
         return successRules.check();
+    }
+
+    @Override
+    public boolean isLaunched() {
+        return status != ActionStatus.NONE;
     }
 
     public synchronized void interrupt() {
@@ -360,10 +366,12 @@ class ActionAdapter<A extends Action> implements Action {
         return name == null ? super.toString() : name;
     }
 
-    static class Builder<A extends Action> extends ActionBuilder<Builder<A>, A> {
+    static class Builder<A extends Action> extends ActionBuilder<Builder<A>, ActionAdapter<A>, A> {
         @Override
         public ActionAdapter<A> build() {
-            return new ActionAdapter<>(this);
+            checkArgument(instance == null, "Just one instantiation");
+            instance = new ActionAdapter<>(this);
+            return instance;
         }
 
         @Override

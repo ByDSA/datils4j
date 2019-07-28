@@ -1,7 +1,6 @@
 package es.danisales.tasks;
 
 import java.util.Date;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -10,7 +9,7 @@ public class EveryTask extends ActionBounding {
 	private long every;
 
 	private EveryTask(Builder builder) {
-		super(Action.of(Objects.requireNonNull(builder.mode), Objects.requireNonNull(builder.function)));
+        super(builder);
 		every = builder.every;
 	}
 
@@ -23,13 +22,15 @@ public class EveryTask extends ActionBounding {
 		return lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
 	}
 
-	public static class Builder extends ActionBuilder<Builder, EveryTask> {
+    public static class Builder extends ActionBuilder<Builder, EveryTask, EveryTask> {
 		long every = 0;
 
 		@Override
 		public EveryTask build() {
 			checkArgument(every > 0);
-			return new EveryTask(this);
+            checkArgument(instance == null, "Just one instantiation");
+            instance = new EveryTask(this);
+            return instance;
 		}
 
 		@SuppressWarnings("WeakerAccess")

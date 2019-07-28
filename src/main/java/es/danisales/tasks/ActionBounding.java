@@ -8,7 +8,8 @@ public abstract class ActionBounding implements Action {
     final Action action;
 
     @SuppressWarnings("WeakerAccess")
-    protected ActionBounding(ActionBuilder actionBuilder) {
+    protected <CALLER extends ActionBounding> ActionBounding(ActionBuilder<?, CALLER, CALLER> actionBuilder) {
+        actionBuilder.setCaller((CALLER) this);
         action = actionBuilder.build();
     }
 
@@ -40,6 +41,11 @@ public abstract class ActionBounding implements Action {
     @Override
     public boolean isSuccessful() {
         return action.isSuccessful();
+    }
+
+    @Override
+    public boolean isLaunched() {
+        return action.isLaunched();
     }
 
     @Override

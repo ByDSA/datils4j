@@ -2,7 +2,6 @@ package es.danisales.tasks;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -12,7 +11,7 @@ public interface Action extends Runnable {
         return Action.of(ActionAdapter.pointless);
     }
 
-    static <A extends Action> Action of(A action) {
+    static <A extends Action> Action of(@NonNull A action) {
         return of(action.getMode(), action.getFunc());
     }
 
@@ -20,20 +19,29 @@ public interface Action extends Runnable {
         checkNotNull(m);
         checkNotNull(innerRun);
 
-        final AtomicReference<ActionAdapter> a = new AtomicReference<>();
-        a.set(
-                (ActionAdapter) builder(m, innerRun)
-                        .addSuccessRule(() -> a.get().status != ActionStatus.NONE)
-                        .build()
-        );
-
-        return a.get();
+        return builder(m, innerRun)
+                .build();
     }
 
-    static <A extends Action> ActionBuilder<?, A> builder(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
-        return new ActionAdapter.Builder<A>()
+    static <A extends Action> Action of(@NonNull Mode m, @NonNull Consumer<A> innerRun, @NonNull A caller) {
+        checkNotNull(m);
+        checkNotNull(innerRun);
+        checkNotNull(caller);
+
+        ActionBuilder<?, ?, A> b = builder(m, innerRun)
+                .setCaller(caller);
+
+        return b.build();
+    }
+
+    static <A extends Action> ActionBuilder<?, ?, A> builder(@NonNull Mode m, @NonNull Consumer<A> innerRun) {
+        ActionBuilder<?, ?, A> b = new ActionAdapter.Builder<A>()
                 .setMode(m)
                 .setRun(innerRun);
+
+        b.addSuccessRule(() -> b.getInstance().isLaunched());
+
+        return b;
     }
 
     @SuppressWarnings("unused")
@@ -49,6 +57,8 @@ public interface Action extends Runnable {
     boolean isReady();
 
     boolean isSuccessful();
+
+    boolean isLaunched();
 
     void interrupt();
 

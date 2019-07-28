@@ -1,14 +1,18 @@
 package es.danisales.tasks;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class LoopTask extends ActionBounding {
 	private LoopTask(Builder builder) {
-		super(Action.of(builder.mode, builder.function));
+		super(builder);
 	}
 
-	public static class Builder extends ActionBuilder<Builder, LoopTask> {
+	public static class Builder extends ActionBuilder<Builder, LoopTask, LoopTask> {
 		@Override
 		public Action build() {
-			return new LoopTask(this);
+			checkArgument(instance == null, "Just one instantiation");
+			instance = new LoopTask(this);
+			return instance;
 		}
 
 		@Override
