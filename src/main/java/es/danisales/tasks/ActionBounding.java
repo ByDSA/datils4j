@@ -118,4 +118,14 @@ public abstract class ActionBounding implements Action {
     public void run() {
         action.run();
     }
+
+    @Override
+    public String toString() {
+        return action.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return action.hashCode();
+    }
 }
