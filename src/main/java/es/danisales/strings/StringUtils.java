@@ -1,44 +1,77 @@
 package es.danisales.strings;
 
-public class StringUtils {
+import com.google.common.collect.Range;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+@SuppressWarnings("unused")
+public final class StringUtils {
 	private StringUtils() {
 	} // noninstantiable
 
-	public static String replaceLast(String base, String find, String replacement) {
-		int ind = base.lastIndexOf(find);
-		if( ind>=0 )
-			base = new StringBuilder(base).replace(ind, ind+find.length(), replacement).toString();
+    public static String replaceLastOccurrence(String base, String toBeReplaced, String replacement) {
+        int ind = base.lastIndexOf(toBeReplaced);
+        if (ind >= 0)
+            base = new StringBuilder(base).replace(ind, ind + toBeReplaced.length(), replacement).toString();
 		return base;
 	}
 
-	public static String zerosPad(int n, int cifras) {
-		return leftPad(Integer.toString( n ), '0', cifras);
-	}
+    public final static class PadChar {
+        private PadChar() {
+        } // noninstantiable
 
-	public static String leftPad(String base, char padChar, int cifras) {
-		StringBuilder zs = new StringBuilder();
+        public static String zerosLeft(int n, int cifras) {
+            return left(Integer.toString(n), '0', cifras);
+        }
 
-		for (int i = 0; i < cifras - base.length(); i++)
-			zs.append( padChar );
+        @SuppressWarnings("WeakerAccess")
+        public static String left(String base, char padChar, int maxDigits) {
+            StringBuilder zs = new StringBuilder();
 
-		zs.append( base );
+            for (int i = 0; i < maxDigits - base.length(); i++)
+                zs.append(padChar);
 
-		return zs.toString();
-	}
+            zs.append(base);
 
-	public static String join(String delim, String[] array, int ini) {
-		int end = array.length-1;
-		return join(delim, array, ini, end);
-	}
+            return zs.toString();
+        }
+    }
 
-	public static String join(String delim, String[] array, int ini, int end) {
-		StringBuilder paramsStrBuilder = new StringBuilder();
-		for (int i = ini; i <= end; i++) {
-			paramsStrBuilder.append(array[i]);
-			if (i < end)
-				paramsStrBuilder.append(delim);
-		}
+    public final static class Join {
+        private Join() {
+        } // noninstantiable
 
-		return paramsStrBuilder.toString();
+        private static void checkValidLengthArray(String... array) throws IllegalArgumentException {
+            checkArgument(array.length > 0, "The array has no content");
+        }
+
+        @SuppressWarnings("WeakerAccess")
+        public static String from(@NonNull String delim, @NonNull String... array) throws IllegalArgumentException {
+            checkValidLengthArray(array);
+
+            int upperIndex = array.length - 1;
+            Range<Integer> range = Range.closed(0, upperIndex);
+
+            return fromRange(range, delim, array);
+        }
+
+        public static String from(@NonNull String... array) throws IllegalArgumentException {
+            return from(",", array);
+        }
+
+        @SuppressWarnings("WeakerAccess")
+        public static String fromRange(@NonNull Range<Integer> rangeOfIndexesToJoin, @NonNull String delim, @NonNull String... array) throws IllegalArgumentException {
+            checkValidLengthArray(array);
+
+            StringBuilder paramsStrBuilder = new StringBuilder();
+            for (int i = rangeOfIndexesToJoin.lowerEndpoint(); i <= rangeOfIndexesToJoin.upperEndpoint(); i++) {
+                paramsStrBuilder.append(array[i]);
+                if (i < rangeOfIndexesToJoin.upperEndpoint())
+                    paramsStrBuilder.append(delim);
+            }
+
+            return paramsStrBuilder.toString();
+        }
 	}
 }

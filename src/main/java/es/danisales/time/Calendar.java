@@ -2,12 +2,13 @@ package es.danisales.time;
 
 import es.danisales.rules.DayOfWeekRule;
 import es.danisales.rules.Rule;
-import es.danisales.strings.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static es.danisales.strings.StringUtils.PadChar.zerosLeft;
 
 public class Calendar extends ArrayList<Rule> implements CalendarInterface {	
 	List<Rule> exceptions;
@@ -34,12 +35,12 @@ public class Calendar extends ArrayList<Rule> implements CalendarInterface {
 		java.util.Calendar cal = java.util.Calendar.getInstance();
 		cal.setTime(d);
 
-		String year = StringUtils.zerosPad(cal.get( java.util.Calendar.YEAR ) , 4);
-		String month = StringUtils.zerosPad(cal.get( java.util.Calendar.MONTH )+1 , 2);
-		String day = StringUtils.zerosPad(cal.get( java.util.Calendar.DAY_OF_MONTH ) , 2);
-		String hour = StringUtils.zerosPad(cal.get( java.util.Calendar.HOUR_OF_DAY ) , 2);
-		String min = StringUtils.zerosPad(cal.get( java.util.Calendar.MINUTE ) , 2);
-		String sec = StringUtils.zerosPad(cal.get( java.util.Calendar.SECOND ) , 2);
+		String year = zerosLeft(cal.get(java.util.Calendar.YEAR), 4);
+		String month = zerosLeft(cal.get(java.util.Calendar.MONTH) + 1, 2);
+		String day = zerosLeft(cal.get(java.util.Calendar.DAY_OF_MONTH), 2);
+		String hour = zerosLeft(cal.get(java.util.Calendar.HOUR_OF_DAY), 2);
+		String min = zerosLeft(cal.get(java.util.Calendar.MINUTE), 2);
+		String sec = zerosLeft(cal.get(java.util.Calendar.SECOND), 2);
 		
 		return year + month + day + "_" + hour + min + sec;
 	}
