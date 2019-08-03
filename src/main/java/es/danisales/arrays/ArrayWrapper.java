@@ -3,10 +3,9 @@ package es.danisales.arrays;
 import java.util.Arrays;
 
 public class ArrayWrapper<T> {
-	@SuppressWarnings("WeakerAccess")
-	protected T[] data;
+    final T[] data;
 
-	@SuppressWarnings("all")
+    @SafeVarargs
 	public ArrayWrapper(T... v) {
 		data = v;
 	}
