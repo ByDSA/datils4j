@@ -1,25 +1,27 @@
 package es.danisales.time;
 
-public abstract class Sleep {
-	private static boolean _sleep(long ms) {
+@SuppressWarnings("unused")
+public final class Sleep {
+	private Sleep() {
+	} // noninstantiable
+
+	private static void _sleep(long ms) {
 		try {
 			Thread.sleep( ms );
-			return true;
-		} catch ( InterruptedException e ) {
-			return false;
+		} catch (InterruptedException ignored) {
 		}
 	}
 
-	public static boolean sleep(long ms) {
+	public static void sleep(long ms) {
 		//info("Sleep: " + ms + " milisegundos.");
-		return _sleep(ms);
+		_sleep(ms);
 	}
 
-	public static boolean sleepSec(long s) {
-		return _sleep(1000 * s);
+	public static void sleepSec(long s) {
+		_sleep(1000 * s);
 	}
 
-	public static boolean sleepMin(long m) {
-		return _sleep(60 * 1000 * m);
+	public static void sleepMin(long m) {
+		_sleep(60 * 1000 * m);
 	}
 }
