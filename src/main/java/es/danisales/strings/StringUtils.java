@@ -46,21 +46,6 @@ public final class StringUtils {
             checkArgument(array.length > 0, "The array has no content");
         }
 
-        @SuppressWarnings("WeakerAccess")
-        public static String from(@NonNull String delim, @NonNull String... array) throws IllegalArgumentException {
-            checkValidLengthArray(array);
-
-            int upperIndex = array.length - 1;
-            Range<Integer> range = Range.closed(0, upperIndex);
-
-            return fromRange(range, delim, array);
-        }
-
-        public static String from(@NonNull String... array) throws IllegalArgumentException {
-            return from(",", array);
-        }
-
-        @SuppressWarnings("WeakerAccess")
         public static String fromRange(@NonNull Range<Integer> rangeOfIndexesToJoin, @NonNull String delim, @NonNull String... array) throws IllegalArgumentException {
             checkValidLengthArray(array);
 

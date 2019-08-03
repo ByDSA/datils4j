@@ -1,7 +1,6 @@
 package es.danisales.process;
 
 import es.danisales.log.string.Logging;
-import es.danisales.strings.StringUtils;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -14,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.join;
 
 class ProcessActionAdapter implements ProcessAction {
     private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
@@ -204,7 +204,7 @@ class ProcessActionAdapter implements ProcessAction {
                     if (str == null)
                         throw new NoArgumentsException();
 
-            Logging.log("Executing " + self.paramsWithName[0] + " " + StringUtils.join(" ", self.paramsWithName, 1));
+            Logging.log("Executing " + join(" ", self.paramsWithName));
             final Process p = Runtime.getRuntime().exec(self.paramsWithName);
 
             self.normalOutputThread = self.startNormalOutputListener(p);
