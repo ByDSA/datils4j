@@ -15,7 +15,7 @@ public class CryptUtils {
 	public static byte[] hashFile(File f, HashingAlgorithm alg) throws NoSuchAlgorithmException, IOException {
 		byte[] buffer= new byte[8192];
 		int count;
-		MessageDigest digest = MessageDigest.getInstance(alg.get());
+        MessageDigest digest = MessageDigest.getInstance(alg.getStringCode());
 		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(f));
 		while ((count = bis.read(buffer)) > 0) {
 			digest.update(buffer, 0, count);

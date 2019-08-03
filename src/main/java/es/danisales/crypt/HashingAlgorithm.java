@@ -1,9 +1,6 @@
 package es.danisales.crypt;
 
-import java.util.function.Supplier;
-
-@SuppressWarnings("unused")
-public enum HashingAlgorithm implements Supplier<String> {
+public enum HashingAlgorithm {
     SHA256("SHA-256"), MD2("MD2"), MD5("MD5"), SHA1("SHA-1"), SHA384("SHA-384"), SHA512("SHA-512");
 
     String val;
@@ -12,8 +9,7 @@ public enum HashingAlgorithm implements Supplier<String> {
         val = v;
     }
 
-    @Override
-    public String get() {
+    String getStringCode() {
         return val;
     }
 }
