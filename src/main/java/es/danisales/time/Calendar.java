@@ -10,8 +10,8 @@ import java.util.List;
 
 import static es.danisales.strings.StringUtils.PadChar.zerosLeft;
 
-public class Calendar extends ArrayList<Rule> implements CalendarInterface {	
-	List<Rule> exceptions;
+public class Calendar extends ArrayList<Rule> implements CalendarInterface {
+    private List<Rule> exceptions;
 
 	public static final Calendar NO_LABORABLE = new Calendar() {
 		{

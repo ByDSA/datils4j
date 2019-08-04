@@ -10,7 +10,7 @@ import java.util.ListIterator;
 public class ListWrapper<T> implements List<T> {
     private final List<T> listAdapter;
 
-    private ListWrapper(List<T> listAdapter) {
+    protected ListWrapper(List<T> listAdapter) {
         this.listAdapter = listAdapter;
     }
 
