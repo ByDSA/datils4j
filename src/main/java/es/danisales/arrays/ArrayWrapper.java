@@ -2,6 +2,7 @@ package es.danisales.arrays;
 
 import java.util.Arrays;
 
+@Deprecated
 public class ArrayWrapper<T> {
     final T[] data;
 
