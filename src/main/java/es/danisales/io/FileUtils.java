@@ -2,7 +2,6 @@ package es.danisales.io;
 
 import es.danisales.arrays.ArrayUtils;
 import es.danisales.arrays.ArrayWrapper;
-import es.danisales.crypt.CryptUtils;
 import es.danisales.functions.ThrowingConsumer;
 
 import java.io.*;
