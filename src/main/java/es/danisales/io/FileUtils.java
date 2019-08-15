@@ -1,7 +1,6 @@
 package es.danisales.io;
 
-import es.danisales.arrays.ArrayUtils;
-import es.danisales.arrays.ArrayWrapper;
+import es.danisales.crypt.hash.Hash;
 import es.danisales.functions.ThrowingConsumer;
 
 import java.io.*;
@@ -221,23 +220,17 @@ public final class FileUtils {
 	}
 
 	public static List<List<java.io.File>> duplicatedFiles(List<java.io.File> files, boolean secure, Consumer<java.io.File> func) throws IOException {
-		Map<java.io.File, byte[]> file2hashMap = new HashMap();
-		Map<ArrayWrapper<Byte>, List<java.io.File>> hash2filesMap = new HashMap();
+        Map<java.io.File, Hash> file2hashMap = new HashMap();
+        Map<Hash, List<java.io.File>> hash2filesMap = new HashMap();
 
 		for (java.io.File f : files) {
 			func.accept( f );
-			byte[] hash = defaultHashFileFunction( f );
+            Hash hash = defaultHashFileFunction(f);
 
 			file2hashMap.put( f, hash );
 
-			Byte[] bytes = ArrayUtils.byteBoxing( hash );
-			ArrayWrapper<Byte> hashWrapper = new ArrayWrapper<>( bytes );
-			List<java.io.File> l = hash2filesMap.get( hashWrapper );
-			if (l == null) {
-				l = new ArrayList();
-				hash2filesMap.put( hashWrapper, l );
-			}
-			l.add( f );
+            List<java.io.File> filesList = hash2filesMap.computeIfAbsent(hash, k -> new ArrayList());
+            filesList.add(f);
 		}
 
 		List<List<java.io.File>> ret = null;
@@ -249,11 +242,11 @@ public final class FileUtils {
 		return ret;
 	}
 
-	static List<List<java.io.File>> duplicatedFilesInsecure(Map<ArrayWrapper<Byte>, List<java.io.File>> hash2filesMap) {
+    static List<List<java.io.File>> duplicatedFilesInsecure(Map<Hash, List<java.io.File>> hash2filesMap) {
 		List<List<java.io.File>> ret = new ArrayList<>();
 
-		for (Map.Entry<ArrayWrapper<Byte>, List<File>> e : hash2filesMap.entrySet()) {
-			ArrayWrapper<Byte> hash = e.getKey();
+        for (Map.Entry<Hash, List<File>> e : hash2filesMap.entrySet()) {
+            Hash hash = e.getKey();
 			List<File> list = e.getValue();
 
 			ret.add( list );
@@ -262,8 +255,8 @@ public final class FileUtils {
 		return ret;
 	}
 
-	public static byte[] defaultHashFileFunction(java.io.File f) throws IOException {
-		return CryptUtils.hashFileSHA256( f );
+    public static Hash defaultHashFileFunction(java.io.File f) throws IOException {
+        return Hash.sha256fromFile(f);
 	}
 
 	public static List<java.io.File> getEmptyFolders(Path p) {
