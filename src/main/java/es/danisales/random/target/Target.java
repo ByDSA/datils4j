@@ -5,6 +5,4 @@ public interface Target<RET> {
 	RET pick();
 	long getSurface();
 	void next();
-	void beforeOnPick();
-	void afterOnPick(RET picked);
 }

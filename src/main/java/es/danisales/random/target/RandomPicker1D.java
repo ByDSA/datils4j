@@ -1,6 +1,10 @@
 package es.danisales.random.target;
 
-public class RandomPicker1D<T> extends RandomPicker<T, T> {
+class RandomPicker1D<T> extends RandomPickerImp<T> {
+    RandomPicker1D(RandomPickerBuilder builder) {
+        super(builder);
+    }
+
     @Override
     public T pickDart(long dart) {
         return get((int)dart);
@@ -9,14 +13,6 @@ public class RandomPicker1D<T> extends RandomPicker<T, T> {
     @Override
     public long getSurface() {
         return size();
-    }
-
-    @Override
-    public void beforeOnPick() {
-    }
-
-    @Override
-    public void afterOnPick(T picked) {
     }
 
     @Override

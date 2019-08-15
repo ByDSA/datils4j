@@ -122,7 +122,7 @@ public class ActionListTest {
         assertNotEquals(20, ai.get());
         sleep(20*20-100);
         assertNotEquals(20, ai.get());
-        sleep(200);
+        sleep(400);
         assertEquals(20, ai.get());
     }
 

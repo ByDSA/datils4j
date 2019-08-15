@@ -1,10 +1,15 @@
 package es.danisales.random.target;
 
-@SuppressWarnings("unused")
-public class RandomPicker1DRemover<T> extends RandomPicker1D<T> {
+class RandomPicker1DRemover<T> extends RandomPicker1D<T> {
+    RandomPicker1DRemover(RandomPickerBuilder builder) {
+        super(builder);
+    }
+
     @Override
-    public void afterOnPick(T picked) {
+    public T pick() {
+        T picked = super.pick();
         int index = indexOf(picked);
         remove(index);
+        return picked;
     }
 }

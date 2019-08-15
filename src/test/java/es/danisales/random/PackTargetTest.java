@@ -1,18 +1,23 @@
 package es.danisales.random;
 
-import es.danisales.random.target.RandomPicker2D;
+import es.danisales.random.target.RandomPicker;
+import es.danisales.random.target.RandomPickerBuilder;
 import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class PackTargetTest {
+    private static RandomPicker createVariableSize() {
+        return new RandomPickerBuilder<>().surfaceVariable().build();
+    }
+
     @Test
     public void pick() {
         SimpleTarget t = new SimpleTarget();
 
         int SIZE = 1000;
-        long[] randomArray = ValueGenerator.longArray(SIZE);
+        long[] randomArray = ValueGenerator.Array.longInt(SIZE);
 
         for (int i = 0; i < SIZE; i++) {
             assertEquals(t, t.pickDart(randomArray[i]));
@@ -22,28 +27,28 @@ public class PackTargetTest {
 
     @Test
     public void defaultSurface() {
-        RandomPicker2D t = new RandomPicker2D();
+        RandomPicker t = createVariableSize();
 
         assertEquals(0, t.getSurface());
     }
 
-    @Test(expected = RandomPicker2D.EmptyException.class)
+    @Test(expected = IllegalStateException.class)
     public void defaultPickException() {
-        RandomPicker2D t = new RandomPicker2D();
+        RandomPicker t = createVariableSize();
 
         t.pickDart(0);
     }
 
-    @Test(expected = RandomPicker2D.EmptyException.class)
-    public void defaultPickException2() {
-        RandomPicker2D t = new RandomPicker2D();
+    @Test(expected = IllegalStateException.class)
+    public void pickOnZeroSurfaceNewCreation() {
+        RandomPicker t = createVariableSize();
 
         t.pick();
     }
 
-    @Test(expected = RandomPicker2D.NoSurfaceException.class)
-    public void surfaceException() {
-        RandomPicker2D t = new RandomPicker2D();
+    @Test(expected = IllegalStateException.class)
+    public void pickOnZeroSurface() {
+        RandomPicker t = createVariableSize();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(0);
         t.add(st);
@@ -51,9 +56,9 @@ public class PackTargetTest {
         t.pick();
     }
 
-    @Test
-    public void surfaceNoException() {
-        RandomPicker2D t = new RandomPicker2D();
+    @Test(expected = IllegalArgumentException.class)
+    public void negativeSurface() {
+        RandomPicker t = createVariableSize();
         SimpleTarget st = new SimpleTarget();
         st.setSurface(-1);
         t.add(st);

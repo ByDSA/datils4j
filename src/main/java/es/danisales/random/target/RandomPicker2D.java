@@ -2,14 +2,14 @@ package es.danisales.random.target;
 
 import java.util.Objects;
 
-public class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomPicker<Target<PICK_TYPE>, PICK_TYPE> {
-	public RandomPicker2D() {
+class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomPickerImp<PICK_TYPE> {
+    RandomPicker2D(RandomPickerBuilder builder) {
+        super(builder);
 	}
 
 	@Override
 	public final PICK_TYPE pickDart(long dart) {
-		if (size() == 0)
-			throw new RandomPicker1D.EmptyException();
+        checkNotEmpty();
 
 		long acc = 0;
         Target<PICK_TYPE> dartTarget = null;
@@ -38,14 +38,6 @@ public class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomP
 	}
 
 	@Override
-	public void beforeOnPick() {
-	}
-
-	@Override
-	public void afterOnPick(PICK_TYPE picked) {
-	}
-
-	@Override
 	public void next() {
 	}
 
@@ -61,31 +53,24 @@ public class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomP
 
     @Override
 	public final PICK_TYPE pick() {
-        if (size() == 0)
-            throw new RandomPicker1D.EmptyException();
+        checkNotEmpty();
 
-		beforeOnPick();
         long surface = surfaceWithNext();
-
-        if (surface <= 0)
-            throw new NoSurfaceException();
+        checkSurface(surface);
 
         if (size() == 1) { // Para evitar el rand y sea más eficiente, especialmente para el SecureRandom
             Target<PICK_TYPE> t = get(0);
             return t.pick();
         }
 
-        long dart = rand(surface);
+        long dart = randUntil(surface);
 
 		PICK_TYPE t = pickDart(dart);
-		afterOnPick(t);
 		return t;
     }
 
-	public static class NoSurfaceException extends RuntimeException {
-		@SuppressWarnings("WeakerAccess")
-		public NoSurfaceException() {
-			super("El tamaño de la suma de los target es 0");
-		}
+    void checkSurface(long surface) {
+        if (surface <= 0)
+            throw new IllegalStateException("El tamaño de la suma de los target es 0");
 	}
 }

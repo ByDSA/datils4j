@@ -5,7 +5,7 @@ import es.danisales.utils.Bean;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
-public class SimpleTargetBean<T> extends SimpleTarget implements Bean<T> {
+class SimpleTargetBean<T> extends SimpleTarget implements Bean<T> {
 	private T value;
 
 	public SimpleTargetBean(T v) {
