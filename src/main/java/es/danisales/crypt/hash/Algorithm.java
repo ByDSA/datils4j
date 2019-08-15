@@ -1,11 +1,11 @@
-package es.danisales.crypt;
+package es.danisales.crypt.hash;
 
-public enum HashingAlgorithm {
+public enum Algorithm {
     SHA256("SHA-256"), MD2("MD2"), MD5("MD5"), SHA1("SHA-1"), SHA384("SHA-384"), SHA512("SHA-512");
 
     String val;
 
-    HashingAlgorithm(String v) {
+    Algorithm(String v) {
         val = v;
     }
 
