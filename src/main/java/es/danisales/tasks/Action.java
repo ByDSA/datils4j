@@ -8,7 +8,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public interface Action extends Runnable {
     static Action createPointless() {
-        return Action.of(ActionAdapter.pointless);
+        return Action.of(ActionInternalAdapter.pointless);
     }
 
     static <A extends Action> Action of(@NonNull A action) {
@@ -35,7 +35,7 @@ public interface Action extends Runnable {
     }
 
     static <CALLER extends Action> ActionBuilder<?, ?, CALLER> builder(@NonNull Mode m, @NonNull Consumer<CALLER> innerRun) {
-        ActionBuilder<?, ?, CALLER> b = new ActionAdapter.Builder<CALLER>()
+        ActionBuilder<?, ?, CALLER> b = new ActionInternalAdapter.Builder<CALLER>()
                 .setMode(m)
                 .setRun(innerRun);
 

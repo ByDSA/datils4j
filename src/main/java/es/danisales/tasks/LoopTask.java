@@ -2,7 +2,7 @@ package es.danisales.tasks;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class LoopTask extends ActionBounding {
+public class LoopTask extends ActionAdapter {
 	private LoopTask(Builder builder) {
 		super(builder);
 	}

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ActionList implements Action, List<Action> {
-	final ActionAdapter<ActionList> actionAdapter;
+	final ActionInternalAdapter<ActionList> actionAdapter;
 	private final List<Action> listAdapter = new ArrayList<>();
 
 	private final ConcurrentHashMap<Action, Integer> times;
@@ -25,7 +25,7 @@ public class ActionList implements Action, List<Action> {
     @SuppressWarnings("WeakerAccess")
     protected ActionList(Mode m) {
         times = new ConcurrentHashMap<>();
-        actionAdapter = new ActionAdapter.Builder<ActionList>()
+		actionAdapter = new ActionInternalAdapter.Builder<ActionList>()
                 .setMode(m)
                 .setRun(this::innerRun)
                 .setCaller(this)

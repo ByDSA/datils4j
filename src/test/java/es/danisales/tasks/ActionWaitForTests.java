@@ -199,12 +199,12 @@ public class ActionWaitForTests {
         assertEquals(ActionTest.N + 1, atomicInteger.get());
     }
 */
-    public static class Action2 extends ActionAdapter<Action2> {
+    public static class Action2 extends ActionInternalAdapter<Action2> {
         static int N = 0;
         final AtomicInteger atomicInteger;
 
         public Action2(AtomicInteger ai) {
-            super(new ActionAdapter.Builder<Action2>()
+            super(new ActionInternalAdapter.Builder<Action2>()
                     .setMode(Action.Mode.CONCURRENT)
                     .setRun((Action2 self) -> self.atomicInteger.incrementAndGet()));
             atomicInteger = ai;

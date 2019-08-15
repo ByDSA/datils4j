@@ -4,7 +4,7 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class EveryTask extends ActionBounding {
+public class EveryTask extends ActionAdapter {
 	private Date lastApply = new Date(0);
 	private long every;
 

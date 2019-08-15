@@ -71,7 +71,7 @@ public class ActionTest {
 
 	@Test(expected = NullPointerException.class)
 	public void builderModeNull() {
-		new ActionAdapter.Builder<>()
+		new ActionInternalAdapter.Builder<>()
 				.setMode(null)
 				.setRun((Action) -> {
 				})
@@ -80,7 +80,7 @@ public class ActionTest {
 
 	@Test(expected = NullPointerException.class)
 	public void builderRunNull() {
-		new ActionAdapter.Builder<>()
+		new ActionInternalAdapter.Builder<>()
 				.setMode(Action.Mode.SEQUENTIAL)
 				.setRun(null)
 				.build();
