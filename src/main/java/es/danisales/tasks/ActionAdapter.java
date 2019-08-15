@@ -4,7 +4,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Consumer;
 
-public abstract class ActionAdapter implements Action {
+public class ActionAdapter implements Action {
     final Action action;
 
     @SuppressWarnings("WeakerAccess")
