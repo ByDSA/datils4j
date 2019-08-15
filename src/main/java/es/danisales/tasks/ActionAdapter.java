@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 // todo: override hashCode()
-class ActionAdapter<A extends Action> implements Action {
+public class ActionAdapter<A extends Action> implements Action {
     static final Action pointless = Action.of(Mode.SEQUENTIAL, (Action a) -> {
     });
     // Non-duplicated
@@ -31,9 +31,11 @@ class ActionAdapter<A extends Action> implements Action {
     private A caller;
     private Thread checkThread;
     ActionStatus status = ActionStatus.NONE;
-    private boolean once = false;
+    @SuppressWarnings("FieldCanBeLocal")
+    private boolean once = false; // todo: añadir para configurar en el builder
 
-    ActionAdapter(Builder<A> builder) {
+    @SuppressWarnings("WeakerAccess")
+    public ActionAdapter(Builder<A> builder) {
         checkNotNull(builder.mode);
         checkNotNull(builder.function);
 
