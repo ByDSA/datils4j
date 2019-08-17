@@ -1,10 +1,14 @@
 package es.danisales.tasks;
 
+import es.danisales.listeners.ListenerListZero;
 import es.danisales.log.string.Logging;
 import es.danisales.rules.RuleList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -17,8 +21,8 @@ class ActionInternalAdapter<A extends Action> implements Action {
     // Non-duplicated
     final private Set<Action> next = new HashSet<>();
     private final Set<Action> previous = new HashSet<>();
-    private final List<Runnable> afterListeners = new ArrayList<>();
-    private final List<Runnable> interruptionListeners = new ArrayList<>();
+    private final ListenerListZero afterListeners = ListenerListZero.newInstanceSequential();
+    private final ListenerListZero interruptionListeners = ListenerListZero.newInstanceSequential();
     private final Object statusLock = new Object();
     private final Mode mode;
     private final Consumer<A> innerRun;
@@ -86,7 +90,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
     }
 
     @SuppressWarnings("unused")
-    public final void addAfter(@NonNull Runnable r) {
+    public final void addAfterListener(@NonNull Runnable r) {
         checkNotNull(r);
         synchronized (afterListeners) {
             afterListeners.add(r);
@@ -94,7 +98,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
     }
 
     @SuppressWarnings("unused")
-    public final void addOnInterrupt(@NonNull Runnable a) {
+    public final void addOnInterruptListener(@NonNull Runnable a) {
         checkNotNull(a);
         synchronized (interruptionListeners) {
             interruptionListeners.add(a);
@@ -136,14 +140,17 @@ class ActionInternalAdapter<A extends Action> implements Action {
 
             Logging.log("Interrumpida acción " + this);
             status = ActionStatus.ABORTING;
-            if (thread != null && thread.isAlive())
-                thread.interrupt();
+            interruptIfRunning();
             synchronized (interruptionListeners) {
-                for (Runnable r : interruptionListeners)
-                    r.run();
+                interruptionListeners.call();
             }
             status = ActionStatus.INTERRUPTED;
         }
+    }
+
+    private void interruptIfRunning() {
+        if (thread != null && thread.isAlive())
+            thread.interrupt();
     }
 
     @Override

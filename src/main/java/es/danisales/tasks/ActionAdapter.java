@@ -14,13 +14,13 @@ public class ActionAdapter implements Action {
     }
 
     @Override
-    public void addAfter(@NonNull Runnable r) {
-        action.addAfter(r);
+    public void addAfterListener(@NonNull Runnable r) {
+        action.addAfterListener(r);
     }
 
     @Override
-    public void addOnInterrupt(@NonNull Runnable a) {
-        action.addOnInterrupt(a);
+    public void addOnInterruptListener(@NonNull Runnable a) {
+        action.addOnInterruptListener(a);
     }
 
     @Override

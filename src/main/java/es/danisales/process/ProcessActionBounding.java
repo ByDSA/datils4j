@@ -1,7 +1,7 @@
 package es.danisales.process;
 
-import es.danisales.listeners.Listener0;
-import es.danisales.listeners.Listener1;
+import es.danisales.listeners.ListenerListOne;
+import es.danisales.listeners.ListenerListZero;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,32 +17,32 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public Listener1<IOException> notFoundListeners() {
+    public ListenerListOne<IOException> notFoundListeners() {
         return processAction.notFoundListeners();
     }
 
     @Override
-    public Listener0 beforeListeners() {
+    public ListenerListZero beforeListeners() {
         return processAction.beforeListeners();
     }
 
     @Override
-    public Listener1<String> errorLineListeners() {
+    public ListenerListOne<String> errorLineListeners() {
         return processAction.errorLineListeners();
     }
 
     @Override
-    public Listener1<String> outLineListeners() {
+    public ListenerListOne<String> outLineListeners() {
         return processAction.outLineListeners();
     }
 
     @Override
-    public Listener1<Integer> errorListeners() {
+    public ListenerListOne<Integer> errorListeners() {
         return processAction.errorListeners();
     }
 
     @Override
-    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+    public ListenerListOne<NoArgumentsException> onNoArgumentsListeners() {
         return processAction.onNoArgumentsListeners();
     }
 
@@ -57,13 +57,13 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public void addAfter(@NonNull Runnable r) {
-        processAction.addAfter(r);
+    public void addAfterListener(@NonNull Runnable r) {
+        processAction.addAfterListener(r);
     }
 
     @Override
-    public void addOnInterrupt(@NonNull Runnable a) {
-        processAction.addOnInterrupt(a);
+    public void addOnInterruptListener(@NonNull Runnable a) {
+        processAction.addOnInterruptListener(a);
     }
 
     @Override

@@ -183,13 +183,13 @@ public class ActionList implements Action, List<Action> {
 	}
 
 	@Override
-	public void addAfter(@NonNull Runnable r) {
-		actionAdapter.addAfter(r);
+    public void addAfterListener(@NonNull Runnable r) {
+        actionAdapter.addAfterListener(r);
 	}
 
 	@Override
-	public void addOnInterrupt(@NonNull Runnable a) {
-		actionAdapter.addOnInterrupt(a);
+    public void addOnInterruptListener(@NonNull Runnable a) {
+        actionAdapter.addOnInterruptListener(a);
 	}
 
 	@Override

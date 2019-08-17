@@ -45,10 +45,10 @@ public interface Action extends Runnable {
     }
 
     @SuppressWarnings("unused")
-    void addAfter(@NonNull Runnable r);
+    void addAfterListener(@NonNull Runnable r);
 
     @SuppressWarnings("unused")
-    void addOnInterrupt(@NonNull Runnable a);
+    void addOnInterruptListener(@NonNull Runnable a);
 
     boolean isRunning();
 

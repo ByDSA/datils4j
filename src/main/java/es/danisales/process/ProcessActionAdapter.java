@@ -1,8 +1,8 @@
 package es.danisales.process;
 
 import es.danisales.arrays.ArrayUtils;
-import es.danisales.listeners.Listener0;
-import es.danisales.listeners.Listener1;
+import es.danisales.listeners.ListenerListOne;
+import es.danisales.listeners.ListenerListZero;
 import es.danisales.log.string.Logging;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,12 +27,12 @@ public class ProcessActionAdapter implements ProcessAction {
     /**
      * Listeners
      */
-    private final Listener1<IOException> notFoundListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener0 beforeListeners = Listener0.newInstanceSequentialThreadSafe();
-    private final Listener1<String> errorLineListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<String> outLineListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<Integer> errorListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<NoArgumentsException> onNoArgumentsListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final ListenerListOne<IOException> notFoundListeners = ListenerListOne.newInstanceSequentialThreadSafe();
+    private final ListenerListZero beforeListeners = ListenerListZero.newInstanceSequentialThreadSafe();
+    private final ListenerListOne<String> errorLineListeners = ListenerListOne.newInstanceSequentialThreadSafe();
+    private final ListenerListOne<String> outLineListeners = ListenerListOne.newInstanceSequentialThreadSafe();
+    private final ListenerListOne<Integer> errorListeners = ListenerListOne.newInstanceSequentialThreadSafe();
+    private final ListenerListOne<NoArgumentsException> onNoArgumentsListeners = ListenerListOne.newInstanceSequentialThreadSafe();
 
     private String[] paramsWithName;
     private Thread normalMessagesThread;
@@ -197,13 +197,13 @@ public class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public void addAfter(@NonNull Runnable r) {
-        actionAdapter.addAfter(r);
+    public void addAfterListener(@NonNull Runnable r) {
+        actionAdapter.addAfterListener(r);
     }
 
     @Override
-    public void addOnInterrupt(@NonNull Runnable a) {
-        actionAdapter.addOnInterrupt(a);
+    public void addOnInterruptListener(@NonNull Runnable a) {
+        actionAdapter.addOnInterruptListener(a);
     }
 
     @Override
@@ -353,32 +353,32 @@ public class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public Listener1<IOException> notFoundListeners() {
+    public ListenerListOne<IOException> notFoundListeners() {
         return notFoundListeners;
     }
 
     @Override
-    public Listener0 beforeListeners() {
+    public ListenerListZero beforeListeners() {
         return beforeListeners;
     }
 
     @Override
-    public Listener1<String> errorLineListeners() {
+    public ListenerListOne<String> errorLineListeners() {
         return errorLineListeners;
     }
 
     @Override
-    public Listener1<String> outLineListeners() {
+    public ListenerListOne<String> outLineListeners() {
         return outLineListeners;
     }
 
     @Override
-    public Listener1<Integer> errorListeners() {
+    public ListenerListOne<Integer> errorListeners() {
         return errorListeners;
     }
 
     @Override
-    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+    public ListenerListOne<NoArgumentsException> onNoArgumentsListeners() {
         return onNoArgumentsListeners;
     }
 

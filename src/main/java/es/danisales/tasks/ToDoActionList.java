@@ -30,7 +30,7 @@ public class ToDoActionList extends ActionList {
     public boolean add(final Action a) {
         Logging.log(this + " Adding action " + a);
 
-        a.addAfter(() -> {
+        a.addAfterListener(() -> {
             Logging.log("End remove ToDoActionList " + a);
             remove(a);
             if (isEmpty()) {
@@ -41,7 +41,7 @@ public class ToDoActionList extends ActionList {
             }
         });
 
-        a.addOnInterrupt(() -> {
+        a.addOnInterruptListener(() -> {
             remove(a);
             interrupt();
             returnCode = ActionValues.ABORT;

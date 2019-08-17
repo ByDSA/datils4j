@@ -1,7 +1,7 @@
 package es.danisales.process;
 
-import es.danisales.listeners.Listener0;
-import es.danisales.listeners.Listener1;
+import es.danisales.listeners.ListenerListOne;
+import es.danisales.listeners.ListenerListZero;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -18,22 +18,22 @@ public interface ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    Listener1<IOException> notFoundListeners();
+    ListenerListOne<IOException> notFoundListeners();
 
     @SuppressWarnings("unused")
-    Listener0 beforeListeners();
+    ListenerListZero beforeListeners();
 
     @SuppressWarnings("unused")
-    Listener1<String> errorLineListeners();
+    ListenerListOne<String> errorLineListeners();
 
     @SuppressWarnings("unused")
-    Listener1<String> outLineListeners();
+    ListenerListOne<String> outLineListeners();
 
     @SuppressWarnings("unused")
-    Listener1<Integer> errorListeners();
+    ListenerListOne<Integer> errorListeners();
 
     @SuppressWarnings("unused")
-    Listener1<NoArgumentsException> onNoArgumentsListeners();
+    ListenerListOne<NoArgumentsException> onNoArgumentsListeners();
 
     int getResultCode();
 

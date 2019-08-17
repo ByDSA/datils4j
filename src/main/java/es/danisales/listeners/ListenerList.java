@@ -2,7 +2,9 @@ package es.danisales.listeners;
 
 import es.danisales.tasks.Action;
 
-public interface Listener {
+import java.util.List;
+
+public interface ListenerList<T> extends List<T> {
     void call();
 
     Action.Mode getMode();

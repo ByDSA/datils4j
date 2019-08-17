@@ -22,7 +22,7 @@ public class ActionTest {
 			ai.incrementAndGet();
 		});
 		a2.setName("a2");
-		a.addAfter(a2);
+        a.addAfterListener(a2);
 		assertEquals(0, ai.get());
 		a.run();
 		assertEquals(0, ai.get());
