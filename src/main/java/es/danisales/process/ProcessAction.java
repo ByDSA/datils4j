@@ -1,60 +1,56 @@
 package es.danisales.process;
 
 import es.danisales.tasks.Action;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
 public interface ProcessAction extends Action {
-    static ProcessAction of(String fname, List<String> params) {
-        return ProcessActionAdapter.of(fname, params);
+    static @NonNull ProcessAction of(@NonNull String fname, @NonNull List<String> params) {
+        return ProcessActionAdapter.of(ProcessActionAdapter.class, fname, params);
     }
 
-    static ProcessAction of(String fname, String... params) {
-        return ProcessActionAdapter.of(fname, params);
-    }
-
-    @SuppressWarnings("unused")
-    static ProcessAction newInstance() {
-        return ProcessActionAdapter.newInstance();
+    static @NonNull ProcessAction of(@NonNull String fname, String... params) {
+        return ProcessActionAdapter.of(ProcessActionAdapter.class, fname, params);
     }
 
     @SuppressWarnings("unused")
-    boolean addNotFoundListener(Consumer<IOException> consumer);
+    boolean addNotFoundListener(@NonNull Consumer<IOException> consumer);
 
     @SuppressWarnings("unused")
-    boolean addBeforeListener(Runnable runnable);
+    boolean addBeforeListener(@NonNull Runnable runnable);
 
     @SuppressWarnings("unused")
-    boolean addErrorLineListener(Consumer<String> consumer);
+    boolean addErrorLineListener(@NonNull Consumer<String> consumer);
 
     @SuppressWarnings("unused")
-    boolean addOutLineListener(Consumer<String> consumer);
+    boolean addOutLineListener(@NonNull Consumer<String> consumer);
 
     @SuppressWarnings("unused")
-    boolean addErrorListener(Consumer<Integer> consumer);
+    boolean addErrorListener(@NonNull Consumer<Integer> consumer);
 
     @SuppressWarnings("unused")
-    boolean addOnNoArgumentsListener(Consumer<NoArgumentsException> consumer);
+    boolean addOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer);
 
     @SuppressWarnings("unused")
-    boolean removeNotFoundListener(Consumer<IOException> consumer);
+    boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer);
 
     @SuppressWarnings("unused")
-    boolean removeBeforeListener(Runnable runnable);
+    boolean removeBeforeListener(@NonNull Runnable runnable);
 
     @SuppressWarnings("unused")
-    boolean removeErrorLineListener(Consumer<String> consumer);
+    boolean removeErrorLineListener(@NonNull Consumer<String> consumer);
 
     @SuppressWarnings("unused")
-    boolean removeOutLineListener(Consumer<String> consumer);
+    boolean removeOutLineListener(@NonNull Consumer<String> consumer);
 
     @SuppressWarnings("unused")
-    boolean removeErrorListener(Consumer<Integer> consumer);
+    boolean removeErrorListener(@NonNull Consumer<Integer> consumer);
 
     @SuppressWarnings("unused")
-    boolean removeOnNoArgumentsListener(Consumer<NoArgumentsException> consumer);
+    boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer);
 
     @SuppressWarnings("unused")
     void clearNotFoundListeners();
@@ -77,8 +73,6 @@ public interface ProcessAction extends Action {
 
     @SuppressWarnings("unused")
     String getFileName();
-
-    void setFilenameAndParams(String file, String... params);
 
     @SuppressWarnings("WeakerAccess")
     class NoArgumentsException extends RuntimeException {

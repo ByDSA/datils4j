@@ -15,62 +15,62 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public boolean addNotFoundListener(Consumer<IOException> consumer) {
+    public boolean addNotFoundListener(@NonNull Consumer<IOException> consumer) {
         return processAction.addNotFoundListener(consumer);
     }
 
     @Override
-    public boolean addBeforeListener(Runnable runnable) {
+    public boolean addBeforeListener(@NonNull Runnable runnable) {
         return processAction.addBeforeListener(runnable);
     }
 
     @Override
-    public boolean addErrorLineListener(Consumer<String> consumer) {
+    public boolean addErrorLineListener(@NonNull Consumer<String> consumer) {
         return processAction.addErrorLineListener(consumer);
     }
 
     @Override
-    public boolean addOutLineListener(Consumer<String> consumer) {
+    public boolean addOutLineListener(@NonNull Consumer<String> consumer) {
         return processAction.addOutLineListener(consumer);
     }
 
     @Override
-    public boolean addErrorListener(Consumer<Integer> consumer) {
+    public boolean addErrorListener(@NonNull Consumer<Integer> consumer) {
         return processAction.addErrorListener(consumer);
     }
 
     @Override
-    public boolean addOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
+    public boolean addOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
         return processAction.addOnNoArgumentsListener(consumer);
     }
 
     @Override
-    public boolean removeNotFoundListener(Consumer<IOException> consumer) {
+    public boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer) {
         return processAction.removeNotFoundListener(consumer);
     }
 
     @Override
-    public boolean removeBeforeListener(Runnable runnable) {
+    public boolean removeBeforeListener(@NonNull Runnable runnable) {
         return processAction.removeBeforeListener(runnable);
     }
 
     @Override
-    public boolean removeErrorLineListener(Consumer<String> consumer) {
+    public boolean removeErrorLineListener(@NonNull Consumer<String> consumer) {
         return processAction.removeErrorLineListener(consumer);
     }
 
     @Override
-    public boolean removeOutLineListener(Consumer<String> consumer) {
+    public boolean removeOutLineListener(@NonNull Consumer<String> consumer) {
         return processAction.removeOutLineListener(consumer);
     }
 
     @Override
-    public boolean removeErrorListener(Consumer<Integer> consumer) {
+    public boolean removeErrorListener(@NonNull Consumer<Integer> consumer) {
         return processAction.removeErrorListener(consumer);
     }
 
     @Override
-    public boolean removeOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
+    public boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
         return processAction.removeOnNoArgumentsListener(consumer);
     }
 
@@ -112,11 +112,6 @@ public class ProcessActionBounding implements ProcessAction {
     @Override
     public String getFileName() {
         return processAction.getFileName();
-    }
-
-    @Override
-    public void setFilenameAndParams(String file, String... params) {
-        processAction.setFilenameAndParams(file, params);
     }
 
     @Override

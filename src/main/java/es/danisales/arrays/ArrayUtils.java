@@ -1,6 +1,7 @@
 package es.danisales.arrays;
 
 import java.lang.reflect.Array;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class ArrayUtils {
@@ -86,4 +87,11 @@ public class ArrayUtils {
 
 		return byteObjects;
 	}
+
+    public static String[] fromList(List<String> list) {
+        String[] ret = new String[list.size()];
+        ret = list.toArray(ret);
+
+        return ret;
+    }
 }

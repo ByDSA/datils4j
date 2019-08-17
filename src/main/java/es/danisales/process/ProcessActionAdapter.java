@@ -1,139 +1,176 @@
 package es.danisales.process;
 
+import es.danisales.arrays.ArrayUtils;
 import es.danisales.log.string.Logging;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.join;
 
-class ProcessActionAdapter implements ProcessAction {
+public class ProcessActionAdapter implements ProcessAction {
+    private static final Map<String[], ProcessActionAdapter> registeredProcessAction = new ConcurrentHashMap<>();
+
+    /**
+     * Listeners
+     */
     private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
     private final List<Runnable> beforeListeners = new ArrayList<>();
     private final List<Consumer<String>> errorLineListeners = new ArrayList<>();
     private final List<Consumer<String>> outLineListeners = new ArrayList<>();
     private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
     private final List<Consumer<NoArgumentsException>> onNoArgumentsListeners = new ArrayList<>();
-    @SuppressWarnings("WeakerAccess")
-    protected String[] paramsWithName;
+    private String[] paramsWithName;
+    private Thread normalMessagesThread;
     private AtomicInteger resultCode = new AtomicInteger();
-    private Thread normalOutputThread;
-    private Thread errorOutputThread;
+    private Thread errorMessagesThread;
     private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun, this);
 
-    private ProcessActionAdapter() {
+    protected ProcessActionAdapter() {
     }
 
-    public static ProcessActionAdapter of(String fname, List<String> params) {
-        ProcessActionAdapter ret = new ProcessActionAdapter();
+    @SuppressWarnings("SameParameterValue")
+    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String fname, String... params) {
+        return of(c, fname, Arrays.asList(params));
+    }
 
-        ret.setFilenameAndParams(fname, params);
+    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String... fnameAndparams) {
+        T ret = getFromRegister(fnameAndparams);
+
+        if (ret == null)
+            ret = newInstance(c, fnameAndparams);
 
         return ret;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static ProcessActionAdapter newInstance() {
-        return new ProcessActionAdapter();
+    private static @NonNull <T extends ProcessActionAdapter> T newInstance(@NonNull Class<T> c, String... fnameAndparams) {
+        try {
+            T ret = c.newInstance();
+            ret.setFilenameAndParamsAndRegister(fnameAndparams[0], getParams(fnameAndparams));
+
+            return ret;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
-    public static ProcessActionAdapter of(String fname, String... params) {
-        ProcessActionAdapter ret = new ProcessActionAdapter();
+    private static void registerInstance(ProcessActionAdapter p) {
+        registeredProcessAction.put(p.paramsWithName, p);
+    }
 
-        ret.setFilenameAndParams(fname, params);
+    private static @Nullable <T extends ProcessActionAdapter> T getFromRegister(String... fnameAndparams) {
+        T ret;
+        try {
+            //noinspection unchecked
+            ret = (T) registeredProcessAction.get(fnameAndparams);
+        } catch (ClassCastException e) {
+            ret = null;
+        }
 
         return ret;
+    }
+
+    private static List<String> getParams(@NonNull String[] fnameAndParams) {
+        return Arrays.asList(Arrays.copyOfRange(fnameAndParams, 1, fnameAndParams.length - 1));
+    }
+
+    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String fname, @NonNull List<String> params) {
+        String[] fnameAndParams = fnameAndParamsToStringArray(fname, params);
+        return of(c, fnameAndParams);
+    }
+
+    private static String[] fnameAndParamsToStringArray(@NonNull String fname, String... params) {
+        String[] paramsWithName = new String[params.length + 1];
+        paramsWithName[0] = fname;
+        System.arraycopy(params, 0, paramsWithName, 1, params.length);
+        return paramsWithName;
+    }
+
+    private static String[] fnameAndParamsToStringArray(@NonNull String fname, @NonNull List<String> paramsList) {
+        String[] paramsString = ArrayUtils.fromList(paramsList);
+        return fnameAndParamsToStringArray(fname, paramsString);
     }
 
     @Override
-    public boolean addNotFoundListener(Consumer<IOException> consumer) {
+    public boolean addNotFoundListener(@NonNull Consumer<IOException> consumer) {
         synchronized (notFoundListeners) {
             return notFoundListeners.add(consumer);
         }
     }
 
     @Override
-    public boolean addBeforeListener(Runnable runnable) {
+    public boolean addBeforeListener(@NonNull Runnable runnable) {
         synchronized (beforeListeners) {
             return beforeListeners.add(runnable);
         }
     }
 
     @Override
-    public boolean addErrorLineListener(Consumer<String> consumer) {
+    public boolean addErrorLineListener(@NonNull Consumer<String> consumer) {
         synchronized (errorLineListeners) {
             return errorLineListeners.add(consumer);
         }
     }
 
     @Override
-    public boolean addOutLineListener(Consumer<String> consumer) {
+    public boolean addOutLineListener(@NonNull Consumer<String> consumer) {
         synchronized (outLineListeners) {
             return outLineListeners.add(consumer);
         }
     }
 
     @Override
-    public boolean addErrorListener(Consumer<Integer> consumer) {
+    public boolean addErrorListener(@NonNull Consumer<Integer> consumer) {
         synchronized (errorListeners) {
             return errorListeners.add(consumer);
         }
     }
 
     @Override
-    public boolean addOnNoArgumentsListener(Consumer<ProcessAction.NoArgumentsException> consumer) {
+    public boolean addOnNoArgumentsListener(@NonNull Consumer<ProcessAction.NoArgumentsException> consumer) {
         synchronized (onNoArgumentsListeners) {
             return onNoArgumentsListeners.add(consumer);
         }
     }
 
     @Override
-    public boolean removeNotFoundListener(Consumer<IOException> consumer) {
+    public boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer) {
         synchronized (notFoundListeners) {
             return notFoundListeners.remove(consumer);
         }
     }
 
     @Override
-    public boolean removeBeforeListener(Runnable runnable) {
+    public boolean removeBeforeListener(@NonNull Runnable runnable) {
         synchronized (beforeListeners) {
             return beforeListeners.remove(runnable);
         }
     }
 
     @Override
-    public boolean removeErrorLineListener(Consumer<String> consumer) {
+    public boolean removeErrorLineListener(@NonNull Consumer<String> consumer) {
         synchronized (errorLineListeners) {
             return errorLineListeners.remove(consumer);
         }
     }
 
     @Override
-    public boolean removeOutLineListener(Consumer<String> consumer) {
+    public boolean removeOutLineListener(@NonNull Consumer<String> consumer) {
         synchronized (outLineListeners) {
             return outLineListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeErrorListener(Consumer<Integer> consumer) {
-        synchronized (errorListeners) {
-            return errorListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeOnNoArgumentsListener(Consumer<NoArgumentsException> consumer) {
-        synchronized (onNoArgumentsListeners) {
-            return onNoArgumentsListeners.remove(consumer);
         }
     }
 
@@ -179,58 +216,109 @@ class ProcessActionAdapter implements ProcessAction {
         }
     }
 
-    private void setFilenameAndParams(String fname, List<String> params) {
-        setFilenameAndParams(fname, params.toArray(new String[0]));
+    @Override
+    public boolean removeErrorListener(@NonNull Consumer<Integer> consumer) {
+        synchronized (errorListeners) {
+            return errorListeners.remove(consumer);
+        }
     }
 
-    public void setFilenameAndParams(String fname, String... params) {
-        paramsWithName = new String[params.length + 1];
-        paramsWithName[0] = fname;
-        System.arraycopy(params, 0, paramsWithName, 1, params.length);
+    @Override
+    public boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
+        synchronized (onNoArgumentsListeners) {
+            return onNoArgumentsListeners.remove(consumer);
+        }
+    }
+
+    void setFilenameAndParamsAndRegister(@NonNull String fname, @NonNull List<String> params) {
+        setFilenameAndParamsAndRegister(fname, params.toArray(new String[0]));
+    }
+
+    private void setFilenameAndParamsAndRegister(@NonNull String fname, String... params) {
+        if (paramsWithName != null) {
+            registeredProcessAction.remove(paramsWithName);
+        }
+
+        paramsWithName = fnameAndParamsToStringArray(fname, params);
+        registerInstance(this);
     }
 
     private void innerRun(@NonNull ProcessActionAdapter self) {
-        checkNotNull(paramsWithName);
+        checkNotNull(self.paramsWithName);
 
-        synchronized (self.beforeListeners) {
-            for (Runnable r : self.beforeListeners)
-                r.run();
-        }
+        self.runBeforeListenersSequentially();
+
         try {
-            if (self.paramsWithName == null || self.paramsWithName.length == 0)
-                throw new NoArgumentsException();
-            else
-                for (String str : self.paramsWithName)
-                    if (str == null)
-                        throw new NoArgumentsException();
+            self.checkValidArguments();
 
-            Logging.log("Executing " + join(" ", self.paramsWithName));
-            final Process p = Runtime.getRuntime().exec(self.paramsWithName);
+            Process p = self.startProcess(); // throws IOException
+            self.waitForProcess(p); // throws InterruptedException
 
-            self.normalOutputThread = self.startNormalOutputListener(p);
-            self.startErrorOutputListener(p);
-
-            self.resultCode.set(p.waitFor());
-            self.normalOutputThread.join();
-            if (self.resultCode.get() != 0) {
-                synchronized (self.errorListeners) {
-                    for (Consumer<Integer> c : self.errorListeners)
-                        c.accept(self.resultCode.get());
-                }
-            }
+            if (self.isErrorCodeReturned())
+                self.callErrorListenersSequentially();
         } catch (IOException e) {
-            synchronized (self.notFoundListeners) {
-                for (Consumer<IOException> c : self.notFoundListeners)
-                    c.accept(e);
-            }
+            self.callNotFoundListenersSequentially(e);
         } catch (InterruptedException e) {
             self.interrupt();
         } catch (NoArgumentsException e) {
-            synchronized (self.onNoArgumentsListeners) {
-                for (Consumer<NoArgumentsException> c : self.onNoArgumentsListeners)
-                    c.accept(e);
-            }
+            self.callNoArgumentListenersSequentially(e);
         }
+    }
+
+    private void waitForProcess(Process p) throws InterruptedException {
+        resultCode.set(p.waitFor());
+        normalMessagesThread.join();
+    }
+
+    private Process startProcess() throws IOException {
+        Logging.log("Executing " + join(" ", paramsWithName));
+        final Process p = Runtime.getRuntime().exec(paramsWithName);
+
+        initAndStartNormalMessagesOutput(p);
+        initAndStartErrorMessagesOutput(p);
+
+        return p;
+    }
+
+    private void callNoArgumentListenersSequentially(NoArgumentsException e) {
+        synchronized (onNoArgumentsListeners) {
+            for (Consumer<NoArgumentsException> c : onNoArgumentsListeners)
+                c.accept(e);
+        }
+    }
+
+    private void callNotFoundListenersSequentially(IOException e) {
+        synchronized (notFoundListeners) {
+            for (Consumer<IOException> c : notFoundListeners)
+                c.accept(e);
+        }
+    }
+
+    private void callErrorListenersSequentially() {
+        synchronized (errorListeners) {
+            for (Consumer<Integer> c : errorListeners)
+                c.accept(getResultCode());
+        }
+    }
+
+    private boolean isErrorCodeReturned() {
+        return getResultCode() != 0;
+    }
+
+    private void runBeforeListenersSequentially() {
+        synchronized (beforeListeners) {
+            for (Runnable r : beforeListeners)
+                r.run();
+        }
+    }
+
+    private void checkValidArguments() {
+        if (paramsWithName == null || paramsWithName.length == 0)
+            throw new NoArgumentsException();
+        else
+            for (String str : paramsWithName)
+                if (str == null)
+                    throw new NoArgumentsException();
     }
 
     @Override
@@ -270,10 +358,10 @@ class ProcessActionAdapter implements ProcessAction {
 
     @Override
     public synchronized void interrupt() {
-        if (normalOutputThread != null)
-            normalOutputThread.interrupt();
-        if (errorOutputThread != null)
-            errorOutputThread.interrupt();
+        if (normalMessagesThread != null)
+            normalMessagesThread.interrupt();
+        if (errorMessagesThread != null)
+            errorMessagesThread.interrupt();
         actionAdapter.interrupt();
     }
 
@@ -340,9 +428,9 @@ class ProcessActionAdapter implements ProcessAction {
         return actionAdapter.getFunc();
     }
 
-    private Thread startNormalOutputListener(Process p) {
-        assert normalOutputThread == null;
-        normalOutputThread = new Thread(() -> {
+    private void initAndStartNormalMessagesOutput(Process p) {
+        assert normalMessagesThread == null;
+        normalMessagesThread = new Thread(() -> {
             try {
                 String line;
                 BufferedReader input =
@@ -361,15 +449,13 @@ class ProcessActionAdapter implements ProcessAction {
             }
         });
 
-        normalOutputThread.start();
-
-        return normalOutputThread;
+        normalMessagesThread.start();
     }
 
-    private void startErrorOutputListener(Process p) {
-        if (errorOutputThread != null)
-            errorOutputThread.interrupt();
-        errorOutputThread = new Thread(() -> {
+    private void initAndStartErrorMessagesOutput(Process p) {
+        if (errorMessagesThread != null)
+            errorMessagesThread.interrupt();
+        errorMessagesThread = new Thread(() -> {
             try {
                 String line;
                 BufferedReader input =
@@ -388,7 +474,7 @@ class ProcessActionAdapter implements ProcessAction {
             }
         });
 
-        errorOutputThread.start();
+        errorMessagesThread.start();
     }
 
     @Override

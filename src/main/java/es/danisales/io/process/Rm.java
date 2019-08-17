@@ -1,28 +1,32 @@
 package es.danisales.io.process;
 
-import es.danisales.process.ProcessAction;
+import es.danisales.process.ProcessActionAdapter;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings({"unused"})
-public class Rm {
+public class Rm extends ProcessActionAdapter {
+    private static final String PROCESS_NAME = "rm";
+
     private Rm() {
     }
 
-    public static ProcessAction of(Path path, boolean recursive) {
-        List<String> paramList = new ArrayList<>();
-        if (recursive)
-            paramList.add("-r");
-        paramList.add( path.toAbsolutePath().toString() );
+    public static Rm of(Path path) {
+        String[] fnameAndParams = new String[]{
+                PROCESS_NAME,
+                path.toAbsolutePath().toString()
+        };
 
-        String[] args = paramList.toArray(new String[0]);
-
-        return ProcessAction.of("rm", args);
+        return ProcessActionAdapter.of(Rm.class, fnameAndParams);
     }
 
-    public static ProcessAction of(Path path) {
-        return of(path, false);
+    public static Rm recursiveOf(Path path) {
+        String[] fnameAndParams = new String[]{
+                PROCESS_NAME,
+                "-r",
+                path.toAbsolutePath().toString()
+        };
+
+        return ProcessActionAdapter.of(Rm.class, fnameAndParams);
     }
 }
