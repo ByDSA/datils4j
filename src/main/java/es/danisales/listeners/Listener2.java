@@ -23,7 +23,7 @@ public class Listener2<T, U> extends ListAdapter<BiConsumer<T, U>> implements Li
         return new Listener2<>(new ArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
-    public static <T, U> Listener2<T, U> newInstanceSequentialSafeThread() {
+    public static <T, U> Listener2<T, U> newInstanceSequentialThreadSafe() {
         return new Listener2<>(new CopyOnWriteArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
@@ -31,7 +31,7 @@ public class Listener2<T, U> extends ListAdapter<BiConsumer<T, U>> implements Li
         return new Listener2<>(new ArrayList<>(), Action.Mode.CONCURRENT);
     }
 
-    public static <T, U> Listener2<T, U> newInstanceConcurrentSafeThread() {
+    public static <T, U> Listener2<T, U> newInstanceConcurrentThreadSafe() {
         return new Listener2<>(new CopyOnWriteArrayList<>(), Action.Mode.CONCURRENT);
     }
 

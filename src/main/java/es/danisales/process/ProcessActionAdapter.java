@@ -27,12 +27,12 @@ public class ProcessActionAdapter implements ProcessAction {
     /**
      * Listeners
      */
-    private final Listener1<IOException> notFoundListeners = Listener1.newInstanceSequentialSafeThread();
-    private final Listener0 beforeListeners = Listener0.newInstanceSequentialSafeThread();
-    private final Listener1<String> errorLineListeners = Listener1.newInstanceSequentialSafeThread();
-    private final Listener1<String> outLineListeners = Listener1.newInstanceSequentialSafeThread();
-    private final Listener1<Integer> errorListeners = Listener1.newInstanceSequentialSafeThread();
-    private final Listener1<NoArgumentsException> onNoArgumentsListeners = Listener1.newInstanceSequentialSafeThread();
+    private final Listener1<IOException> notFoundListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final Listener0 beforeListeners = Listener0.newInstanceSequentialThreadSafe();
+    private final Listener1<String> errorLineListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final Listener1<String> outLineListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final Listener1<Integer> errorListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final Listener1<NoArgumentsException> onNoArgumentsListeners = Listener1.newInstanceSequentialThreadSafe();
 
     private String[] paramsWithName;
     private Thread normalMessagesThread;

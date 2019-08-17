@@ -20,7 +20,7 @@ public class Listener0 extends ListAdapter<Runnable> implements Listener {
         return new Listener0(new ArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
-    public static Listener0 newInstanceSequentialSafeThread() {
+    public static Listener0 newInstanceSequentialThreadSafe() {
         return new Listener0(new CopyOnWriteArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
@@ -28,7 +28,7 @@ public class Listener0 extends ListAdapter<Runnable> implements Listener {
         return new Listener0(new ArrayList<>(), Action.Mode.CONCURRENT);
     }
 
-    public static Listener0 newInstanceConcurrentSafeThread() {
+    public static Listener0 newInstanceConcurrentThreadSafe() {
         return new Listener0(new CopyOnWriteArrayList<>(), Action.Mode.CONCURRENT);
     }
 

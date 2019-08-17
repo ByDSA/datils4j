@@ -22,7 +22,7 @@ public class Listener1<T> extends ListAdapter<Consumer<T>> implements Listener {
         return new Listener1<>(new ArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
-    public static <T> Listener1<T> newInstanceSequentialSafeThread() {
+    public static <T> Listener1<T> newInstanceSequentialThreadSafe() {
         return new Listener1<>(new CopyOnWriteArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
@@ -30,7 +30,7 @@ public class Listener1<T> extends ListAdapter<Consumer<T>> implements Listener {
         return new Listener1<>(new ArrayList<>(), Action.Mode.CONCURRENT);
     }
 
-    public static <T> Listener1<T> newInstanceConcurrentSafeThread() {
+    public static <T> Listener1<T> newInstanceConcurrentThreadSafe() {
         return new Listener1<>(new CopyOnWriteArrayList<>(), Action.Mode.CONCURRENT);
     }
 
