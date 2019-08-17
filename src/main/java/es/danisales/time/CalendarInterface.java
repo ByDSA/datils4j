@@ -8,5 +8,6 @@ import java.util.List;
 public interface CalendarInterface extends Rule, List<Rule> {
 	void addException(@NonNull Rule r);
 
+    void addAllException(@NonNull List<? extends Rule> r);
 	@NonNull List<Rule> getExceptions();
 }

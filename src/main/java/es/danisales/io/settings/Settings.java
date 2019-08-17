@@ -51,7 +51,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	@Override
 	public void read(ByteBuffer buff) {
 		date = DateBin.of( buff );  /** TODO **/
-		//mapBin = MapBin.of( buff );
+        //mapBin = MapBin.from( buff );
 	}
 	/*
 	public boolean load() {

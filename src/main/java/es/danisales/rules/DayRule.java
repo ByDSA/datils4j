@@ -2,15 +2,42 @@ package es.danisales.rules;
 
 import es.danisales.time.Time;
 
-public class DayRule implements Rule {
-	private int day;
+import static com.google.common.base.Preconditions.checkArgument;
 
-	public DayRule(int d) {
+public class DayRule implements Rule {
+    private static final int MIN_VALUE = 1;
+    private static final int MAX_VALUE = 31;
+    private static final DayRule[] daysOfMonthRules = new DayRule[MAX_VALUE - MIN_VALUE + 1];
+
+    private final int day;
+
+    private DayRule(int d) {
 		day = d;
 	}
 
-	public boolean check() {
-		return Time.dayOfMonth() == day;
+    public static DayRule of(int day) {
+        checkArgument(day >= MIN_VALUE && day <= MAX_VALUE);
+        return getOrCreateDayOfTheWeekRule(day);
+    }
+
+    private static DayRule getOrCreateDayOfTheWeekRule(final int day) {
+        int dayIndex = day - 1;
+        DayRule ret = daysOfMonthRules[dayIndex];
+        if (ret == null) {
+            ret = new DayRule(day);
+            daysOfMonthRules[dayIndex] = ret;
+        }
+
+        return ret;
+    }
+
+    @Override
+    public boolean check() {
+        return checkFrom(Time.dayOfMonth());
+    }
+
+    public boolean checkFrom(int dayOfMonth) {
+        return dayOfMonth == day;
 	}
 
 }

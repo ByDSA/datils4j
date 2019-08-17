@@ -1,197 +1,86 @@
 package es.danisales.rules;
 
+import es.danisales.datastructures.ListAdapter;
+import es.danisales.utils.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class RuleList implements Rule, List<Rule> {
-    private final List<Rule> rulesListAdaptor = new ArrayList<>();
-    private final boolean defaultEmptyValue;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private RuleList(boolean d) {
-        defaultEmptyValue = d;
+public class RuleList extends ListAdapter<Rule> implements Rule, List<Rule> {
+    private final boolean whenEmptyValue;
+
+    private RuleList(Builder builder) {
+        super(builder.list);
+
+        whenEmptyValue = builder.whenEmptyValue;
     }
 
-    public static RuleList of(boolean defaultEmptyValue, Rule... r) {
-        RuleList l = new RuleList(defaultEmptyValue);
-        if (r != null)
-            l.addAll(Arrays.asList(r));
+    @SuppressWarnings("unused")
+    public static RuleList from(@NonNull Rule... r) {
+        checkNotNull(r);
+        Builder builder = new Builder()
+                .setList(new ArrayList<>())
+                .setWhenEmptyValue(true);
+        RuleList l = builder.build();
+        l.addAll(Arrays.asList(r));
 
         return l;
     }
 
+    @SuppressWarnings("unused")
+    public static RuleList fromDefaultValue(boolean whenEmptyValue) {
+        Builder builder = new Builder()
+                .setList(new ArrayList<>())
+                .setWhenEmptyValue(whenEmptyValue);
+        return builder.build();
+    }
+
     @Override
     public boolean check() {
-        synchronized (rulesListAdaptor) {
-            if (rulesListAdaptor.isEmpty())
-                return defaultEmptyValue;
+        synchronized (this) {
+            if (isEmpty())
+                return whenEmptyValue;
 
-            for (Rule r : rulesListAdaptor)
+            for (Rule r : this)
                 if (!r.check())
                     return false;
         }
         return true;
     }
 
-    @Override
-    public int size() {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.size();
-        }
-    }
+    static class Builder extends OnceBuilder<Builder, RuleList> {
+        List<Rule> list;
+        Boolean whenEmptyValue;
 
-    @Override
-    public boolean isEmpty() {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.isEmpty();
-        }
-    }
+        public Builder setList(List<Rule> list1) {
+            checkNotInstantiated();
+            checkNotNull(list1);
+            list = list1;
 
-    @Override
-    public boolean contains(Object o) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.contains(o);
+            return self();
         }
-    }
 
-    @Override
-    public @NonNull Iterator<Rule> iterator() {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.iterator();
+        public Builder setWhenEmptyValue(boolean whenEmptyValue1) {
+            checkNotInstantiated();
+            whenEmptyValue = whenEmptyValue1;
+
+            return self();
         }
-    }
 
-    @Override
-    public @NonNull Object[] toArray() {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.toArray();
+        @Override
+        protected RuleList buildOnce() {
+            checkNotNull(list);
+            checkNotNull(whenEmptyValue);
+            return new RuleList(self());
         }
-    }
 
-    @Override
-    public boolean add(Rule o) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.add(o);
-        }
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.remove(o);
-        }
-    }
-
-    @Override
-    public boolean addAll(@NonNull Collection<? extends Rule> c) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.addAll(c);
-        }
-    }
-
-    @Override
-    public boolean addAll(int index, @NonNull Collection<? extends Rule> c) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.addAll(c);
-        }
-    }
-
-    @Override
-    public void clear() {
-        synchronized (rulesListAdaptor) {
-            rulesListAdaptor.clear();
-        }
-    }
-
-    @Override
-    public Rule get(int index) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.get(index);
-        }
-    }
-
-    @Override
-    public Rule set(int index, Rule element) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.set(index, element);
-        }
-    }
-
-    @Override
-    public void add(int index, Rule element) {
-        synchronized (rulesListAdaptor) {
-            rulesListAdaptor.add(index, element);
-        }
-    }
-
-    @Override
-    public Rule remove(int index) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.remove(index);
-        }
-    }
-
-    @Override
-    public int indexOf(Object o) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.indexOf(o);
-        }
-    }
-
-    @Override
-    public int lastIndexOf(Object o) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.lastIndexOf(o);
-        }
-    }
-
-    @Override
-    public @NonNull ListIterator<Rule> listIterator() {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.listIterator();
-        }
-    }
-
-    @Override
-    public @NonNull ListIterator<Rule> listIterator(int index) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.listIterator(index);
-        }
-    }
-
-    @Override
-    public @NonNull List<Rule> subList(int fromIndex, int toIndex) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.subList(fromIndex, toIndex);
-        }
-    }
-
-    @Override
-    public boolean retainAll(@NonNull Collection<?> c) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.retainAll(c);
-        }
-    }
-
-    @Override
-    public boolean removeAll(@NonNull Collection<?> c) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.removeAll(c);
-        }
-    }
-
-    @Override
-    public boolean containsAll(@NonNull Collection<?> c) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.containsAll(c);
-        }
-    }
-
-    @SuppressWarnings("SuspiciousToArrayCall")
-    @Override
-    public @NonNull <T> T[] toArray(@NonNull T[] a) {
-        synchronized (rulesListAdaptor) {
-            return rulesListAdaptor.toArray(a);
+        @Override
+        protected Builder self() {
+            return this;
         }
     }
 }

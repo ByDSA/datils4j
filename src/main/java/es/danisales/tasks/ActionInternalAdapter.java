@@ -56,6 +56,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
     }
 
     // todo: para comparar next y prev en equal
+    @Deprecated
     private static boolean equalList(List<Action> l1, List<Action> l2, Action o1, Action o2) {
         if (l1.size() != l2.size())
             return false;
@@ -211,9 +212,9 @@ class ActionInternalAdapter<A extends Action> implements Action {
 
     private void doDependencies() {
         if (previous.size() > 0) {
-            Logging.log("Waiting for previous of " + this + "...");
+            Logging.log("Waiting for previous from " + this + "...");
             ActionList prevActionList = ActionList.of(Mode.CONCURRENT, previous);
-            prevActionList.setName("previous of " + this);
+            prevActionList.setName("previous from " + this);
             prevActionList.runAndWaitFor();
         }
     }
@@ -226,7 +227,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
             try {
                 if (checkThread == null) {
                     checkThread = Thread.currentThread();
-                    Logging.log("Waiting for " + this + " check...");
+                    Logging.log("Waiting for " + this + " checkFrom...");
                 }
                 long checkReadyEvery = 100;
                 Thread.sleep(checkReadyEvery);
@@ -284,7 +285,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
             // Next Actions
             if (next.size() > 0) {
                 ActionList nextActionList = ActionList.of(Mode.CONCURRENT, next);
-                nextActionList.setName("next of " + this);
+                nextActionList.setName("next from " + this);
                 nextActionList.run();
             }
 

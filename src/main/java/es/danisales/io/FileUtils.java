@@ -81,7 +81,7 @@ public final class FileUtils {
 
 		if (str == null) return null;
 
-		// Get position of last '.'.
+        // Get position from last '.'.
 
 		int pos = str.lastIndexOf(".");
 

@@ -15,11 +15,19 @@ public interface Binary extends Serializable {
 	IdTypeEnum ID_TYPE = IdTypeEnum.Integer;
 	String ID_VARNAME = "serialVersionUID";
 	/**
-	 * Size in bytes of es.danisales.io.binary.types data composed in function getBytes.
-	 * 
-	 * @return size
+     * Gets total sum up size from es.danisales.io.binary.types objects' list.
+     *
+     * @param <L> the generic type
+     * @param list List
+     * @return size in bytes
 	 */
-	int sizeBytes();
+    static <L extends Binary> int sizeBytes(List<L> list) {
+        int s = 0;
+        for (L b : list)
+            s += b.sizeBytes();
+
+        return s;
+    }
 
 	/**
 	 * Turns the object information into a byte array.
@@ -48,37 +56,10 @@ public interface Binary extends Serializable {
 	void read(ByteBuffer buff);
 
 	/**
-	 * Gets total sum up size of es.danisales.io.binary.types objects' list.
-	 *
-	 * @param <L> the generic type
-	 * @param list List
-	 * @return size in bytes
-	 */
-	static <L extends Binary> int sizeBytes(List<L> list) {
-		int s = 0;
-		for (L b : list)
-			s += b.sizeBytes();
-
-		return s;
-	}
-
-	/**
-	 * Write the es.danisales.io.binary.types objects contained in list into a buffer.
-	 *
-	 * @param buff the buffer
-	 * @param list the list
-	 */
-	static void writeList(ByteBuffer buff, List<Binary> list) {
-		buff.putInt( list.size() );
-		for(Binary b : list)
-			buff.put( b.getBytes() );
-	}
-
-	/**
 	 * Gets n bytes from a buffer at its current seek.
 	 *
 	 * @param buff the buff
-	 * @param N number of bytes to get
+     * @param N number from bytes to get
 	 * @return the got bytes
 	 */
 	static byte[] getNBytes(ByteBuffer buff, final int N) {
@@ -88,6 +69,25 @@ public interface Binary extends Serializable {
 
 		return ret;
 	}
+
+    /**
+     * Write the es.danisales.io.binary.types objects contained in list into a buffer.
+     *
+     * @param buff the buffer
+     * @param list the list
+     */
+    static void writeList(ByteBuffer buff, List<Binary> list) {
+        buff.putInt(list.size());
+        for (Binary b : list)
+            buff.put(b.getBytes());
+    }
+
+    /**
+     * Size in bytes from es.danisales.io.binary.types data composed in function getBytes.
+     *
+     * @return size
+     */
+    int sizeBytes();
 
 	static Object getId(Class<? extends Binary> c) {
 		try {
