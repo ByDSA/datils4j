@@ -2,37 +2,38 @@ package es.danisales.listeners;
 
 import es.danisales.datastructures.ListAdapter;
 import es.danisales.tasks.Action;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
-public class Listener2<T, U> extends ListAdapter<BiConsumer<T, U>> implements Listener {
+public class ListenerTwo<T, U> extends ListAdapter<BiConsumer<T, U>> implements Listener<BiConsumer<T, U>> {
     private final Action.Mode modeConcurrency;
     private T defaultArg1 = null;
     private U defaultArg2 = null;
 
-    private Listener2(List<BiConsumer<T, U>> listAdapter, Action.Mode mode) {
+    private ListenerTwo(List<BiConsumer<T, U>> listAdapter, Action.Mode mode) {
         super(listAdapter);
 
         this.modeConcurrency = mode;
     }
 
-    public static <T, U> Listener2<T, U> newInstanceSequential() {
-        return new Listener2<>(new ArrayList<>(), Action.Mode.SEQUENTIAL);
+    public static @NonNull <T, U> ListenerTwo<T, U> newInstanceSequential() {
+        return new ListenerTwo<>(new ArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
-    public static <T, U> Listener2<T, U> newInstanceSequentialThreadSafe() {
-        return new Listener2<>(new CopyOnWriteArrayList<>(), Action.Mode.SEQUENTIAL);
+    public static @NonNull <T, U> ListenerTwo<T, U> newInstanceSequentialThreadSafe() {
+        return new ListenerTwo<>(new CopyOnWriteArrayList<>(), Action.Mode.SEQUENTIAL);
     }
 
-    public static <T, U> Listener2<T, U> newInstanceConcurrent() {
-        return new Listener2<>(new ArrayList<>(), Action.Mode.CONCURRENT);
+    public static @NonNull <T, U> ListenerTwo<T, U> newInstanceConcurrent() {
+        return new ListenerTwo<>(new ArrayList<>(), Action.Mode.CONCURRENT);
     }
 
-    public static <T, U> Listener2<T, U> newInstanceConcurrentThreadSafe() {
-        return new Listener2<>(new CopyOnWriteArrayList<>(), Action.Mode.CONCURRENT);
+    public static @NonNull <T, U> ListenerTwo<T, U> newInstanceConcurrentThreadSafe() {
+        return new ListenerTwo<>(new CopyOnWriteArrayList<>(), Action.Mode.CONCURRENT);
     }
 
     public void call(T arg1, U arg2) {

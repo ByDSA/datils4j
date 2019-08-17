@@ -1,8 +1,8 @@
 package es.danisales.process;
 
 import es.danisales.arrays.ArrayUtils;
-import es.danisales.listeners.Listener0;
-import es.danisales.listeners.Listener1;
+import es.danisales.listeners.ListenerOne;
+import es.danisales.listeners.ListenerZero;
 import es.danisales.log.string.Logging;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,12 +27,12 @@ public class ProcessActionAdapter implements ProcessAction {
     /**
      * Listeners
      */
-    private final Listener1<IOException> notFoundListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener0 beforeListeners = Listener0.newInstanceSequentialThreadSafe();
-    private final Listener1<String> errorLineListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<String> outLineListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<Integer> errorListeners = Listener1.newInstanceSequentialThreadSafe();
-    private final Listener1<NoArgumentsException> onNoArgumentsListeners = Listener1.newInstanceSequentialThreadSafe();
+    private final ListenerOne<IOException> notFoundListeners = ListenerOne.newInstanceSequentialThreadSafe();
+    private final ListenerZero beforeListeners = ListenerZero.newInstanceSequentialThreadSafe();
+    private final ListenerOne<String> errorLineListeners = ListenerOne.newInstanceSequentialThreadSafe();
+    private final ListenerOne<String> outLineListeners = ListenerOne.newInstanceSequentialThreadSafe();
+    private final ListenerOne<Integer> errorListeners = ListenerOne.newInstanceSequentialThreadSafe();
+    private final ListenerOne<NoArgumentsException> onNoArgumentsListeners = ListenerOne.newInstanceSequentialThreadSafe();
 
     private String[] paramsWithName;
     private Thread normalMessagesThread;
@@ -353,32 +353,32 @@ public class ProcessActionAdapter implements ProcessAction {
     }
 
     @Override
-    public Listener1<IOException> notFoundListeners() {
+    public ListenerOne<IOException> notFoundListeners() {
         return notFoundListeners;
     }
 
     @Override
-    public Listener0 beforeListeners() {
+    public ListenerZero beforeListeners() {
         return beforeListeners;
     }
 
     @Override
-    public Listener1<String> errorLineListeners() {
+    public ListenerOne<String> errorLineListeners() {
         return errorLineListeners;
     }
 
     @Override
-    public Listener1<String> outLineListeners() {
+    public ListenerOne<String> outLineListeners() {
         return outLineListeners;
     }
 
     @Override
-    public Listener1<Integer> errorListeners() {
+    public ListenerOne<Integer> errorListeners() {
         return errorListeners;
     }
 
     @Override
-    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+    public ListenerOne<NoArgumentsException> onNoArgumentsListeners() {
         return onNoArgumentsListeners;
     }
 

@@ -1,7 +1,7 @@
 package es.danisales.process;
 
-import es.danisales.listeners.Listener0;
-import es.danisales.listeners.Listener1;
+import es.danisales.listeners.ListenerOne;
+import es.danisales.listeners.ListenerZero;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,32 +17,32 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public Listener1<IOException> notFoundListeners() {
+    public ListenerOne<IOException> notFoundListeners() {
         return processAction.notFoundListeners();
     }
 
     @Override
-    public Listener0 beforeListeners() {
+    public ListenerZero beforeListeners() {
         return processAction.beforeListeners();
     }
 
     @Override
-    public Listener1<String> errorLineListeners() {
+    public ListenerOne<String> errorLineListeners() {
         return processAction.errorLineListeners();
     }
 
     @Override
-    public Listener1<String> outLineListeners() {
+    public ListenerOne<String> outLineListeners() {
         return processAction.outLineListeners();
     }
 
     @Override
-    public Listener1<Integer> errorListeners() {
+    public ListenerOne<Integer> errorListeners() {
         return processAction.errorListeners();
     }
 
     @Override
-    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+    public ListenerOne<NoArgumentsException> onNoArgumentsListeners() {
         return processAction.onNoArgumentsListeners();
     }
 
