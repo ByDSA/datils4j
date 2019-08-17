@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface ListenerList<T> extends List<T> {
     void call();
-
     Action.Mode getMode();
 }
