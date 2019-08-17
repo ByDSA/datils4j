@@ -7,15 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ListWrapper<T> implements List<T> {
+public class ListAdapter<T> implements List<T> {
     private final List<T> listAdapter;
 
-    protected ListWrapper(List<T> listAdapter) {
+    protected ListAdapter(List<T> listAdapter) {
         this.listAdapter = listAdapter;
     }
 
-    public static <T> ListWrapper of(List<T> l) {
-        return new ListWrapper<>(l);
+    public static <T> ListAdapter of(List<T> l) {
+        return new ListAdapter<>(l);
 	}
 
 	@Override

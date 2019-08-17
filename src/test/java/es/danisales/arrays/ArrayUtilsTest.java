@@ -5,6 +5,20 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ArrayUtilsTest {
+    @Test
+    public void deepLengthOneLevel() {
+        Object[][] array = new Object[][]{
+                {1, 2, 3},
+                {4, 5, 6, new Object[]{7, new Object[]{7, 7, 7}, 7}},
+                {8, 9, new Object[]{
+                        10, 10
+                }}
+        };
+
+        int len = ArrayUtils.deepLengthOneLevel(array);
+        assertEquals(10, len);
+    }
+
     /**
      * Concat (Two Arrays)
      */
@@ -29,6 +43,40 @@ public class ArrayUtilsTest {
         ConcatTestClass[] result = ArrayUtils.concat(param1, param2, param3);
 
         assertEquals(param1.length + param2.length + param3.length, result.length);
+    }
+
+    @Test
+    public void concat2EmptyLength() {
+        ConcatTestClass[] param1 = ConcatTestClass.DATA_TEST[6];
+        ConcatTestClass[] param2 = ConcatTestClass.DATA_TEST[7];
+        ConcatTestClass[] param3 = ConcatTestClass.DATA_TEST[8];
+        ConcatTestClass[] result = ArrayUtils.concat(param1, param2, param3);
+
+        assertEquals(0, result.length);
+        assertEquals(param1.length + param2.length + param3.length, result.length);
+    }
+
+    @Test
+    public void concat2ArrayOfArray() {
+        ConcatTestClass[] result = ArrayUtils.concat(ConcatTestClass.DATA_TEST);
+
+        assertEquals(ArrayUtils.deepLengthOneLevel(ConcatTestClass.DATA_TEST), result.length);
+    }
+
+    @Test
+    public void concat2EmptyLengthOneArgument() {
+        ConcatTestClass[] param1 = ConcatTestClass.DATA_TEST[6];
+        ConcatTestClass[] result = ArrayUtils.concat(param1);
+
+        assertEquals(0, result.length);
+        assertEquals(param1.length, result.length);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void concat2EmptyLengthNoArgument() {
+        ConcatTestClass[] result = ArrayUtils.concat();
+
+        assertEquals(0, result.length);
     }
 
     @Test

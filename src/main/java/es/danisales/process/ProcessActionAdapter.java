@@ -1,6 +1,8 @@
 package es.danisales.process;
 
 import es.danisales.arrays.ArrayUtils;
+import es.danisales.listeners.Listener0;
+import es.danisales.listeners.Listener1;
 import es.danisales.log.string.Logging;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -9,7 +11,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,16 +27,18 @@ public class ProcessActionAdapter implements ProcessAction {
     /**
      * Listeners
      */
-    private final List<Consumer<IOException>> notFoundListeners = new ArrayList<>();
-    private final List<Runnable> beforeListeners = new ArrayList<>();
-    private final List<Consumer<String>> errorLineListeners = new ArrayList<>();
-    private final List<Consumer<String>> outLineListeners = new ArrayList<>();
-    private final List<Consumer<Integer>> errorListeners = new ArrayList<>();
-    private final List<Consumer<NoArgumentsException>> onNoArgumentsListeners = new ArrayList<>();
+    private final Listener1<IOException> notFoundListeners = Listener1.newInstanceSequentialSafeThread();
+    private final Listener0 beforeListeners = Listener0.newInstanceSequentialSafeThread();
+    private final Listener1<String> errorLineListeners = Listener1.newInstanceSequentialSafeThread();
+    private final Listener1<String> outLineListeners = Listener1.newInstanceSequentialSafeThread();
+    private final Listener1<Integer> errorListeners = Listener1.newInstanceSequentialSafeThread();
+    private final Listener1<NoArgumentsException> onNoArgumentsListeners = Listener1.newInstanceSequentialSafeThread();
+
     private String[] paramsWithName;
     private Thread normalMessagesThread;
-    private AtomicInteger resultCode = new AtomicInteger();
     private Thread errorMessagesThread;
+    private AtomicInteger resultCode = new AtomicInteger();
+
     private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun, this);
 
     protected ProcessActionAdapter() {
@@ -104,132 +107,6 @@ public class ProcessActionAdapter implements ProcessAction {
         return fnameAndParamsToStringArray(fname, paramsString);
     }
 
-    @Override
-    public boolean addNotFoundListener(@NonNull Consumer<IOException> consumer) {
-        synchronized (notFoundListeners) {
-            return notFoundListeners.add(consumer);
-        }
-    }
-
-    @Override
-    public boolean addBeforeListener(@NonNull Runnable runnable) {
-        synchronized (beforeListeners) {
-            return beforeListeners.add(runnable);
-        }
-    }
-
-    @Override
-    public boolean addErrorLineListener(@NonNull Consumer<String> consumer) {
-        synchronized (errorLineListeners) {
-            return errorLineListeners.add(consumer);
-        }
-    }
-
-    @Override
-    public boolean addOutLineListener(@NonNull Consumer<String> consumer) {
-        synchronized (outLineListeners) {
-            return outLineListeners.add(consumer);
-        }
-    }
-
-    @Override
-    public boolean addErrorListener(@NonNull Consumer<Integer> consumer) {
-        synchronized (errorListeners) {
-            return errorListeners.add(consumer);
-        }
-    }
-
-    @Override
-    public boolean addOnNoArgumentsListener(@NonNull Consumer<ProcessAction.NoArgumentsException> consumer) {
-        synchronized (onNoArgumentsListeners) {
-            return onNoArgumentsListeners.add(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer) {
-        synchronized (notFoundListeners) {
-            return notFoundListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeBeforeListener(@NonNull Runnable runnable) {
-        synchronized (beforeListeners) {
-            return beforeListeners.remove(runnable);
-        }
-    }
-
-    @Override
-    public boolean removeErrorLineListener(@NonNull Consumer<String> consumer) {
-        synchronized (errorLineListeners) {
-            return errorLineListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeOutLineListener(@NonNull Consumer<String> consumer) {
-        synchronized (outLineListeners) {
-            return outLineListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public void clearNotFoundListeners() {
-        synchronized (notFoundListeners) {
-            notFoundListeners.clear();
-        }
-    }
-
-    @Override
-    public void clearBeforeListeners() {
-        synchronized (beforeListeners) {
-            beforeListeners.clear();
-        }
-    }
-
-    @Override
-    public void clearErrorLineListeners() {
-        synchronized (errorLineListeners) {
-            errorLineListeners.clear();
-        }
-    }
-
-    @Override
-    public void clearOutLineListener() {
-        synchronized (outLineListeners) {
-            outLineListeners.clear();
-        }
-    }
-
-    @Override
-    public void clearErrorListeners() {
-        synchronized (errorListeners) {
-            errorListeners.clear();
-        }
-    }
-
-    @Override
-    public void clearOnNoArgumentsListeners() {
-        synchronized (onNoArgumentsListeners) {
-            onNoArgumentsListeners.clear();
-        }
-    }
-
-    @Override
-    public boolean removeErrorListener(@NonNull Consumer<Integer> consumer) {
-        synchronized (errorListeners) {
-            return errorListeners.remove(consumer);
-        }
-    }
-
-    @Override
-    public boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
-        synchronized (onNoArgumentsListeners) {
-            return onNoArgumentsListeners.remove(consumer);
-        }
-    }
-
     void setFilenameAndParamsAndRegister(@NonNull String fname, @NonNull List<String> params) {
         setFilenameAndParamsAndRegister(fname, params.toArray(new String[0]));
     }
@@ -282,15 +159,13 @@ public class ProcessActionAdapter implements ProcessAction {
 
     private void callNoArgumentListenersSequentially(NoArgumentsException e) {
         synchronized (onNoArgumentsListeners) {
-            for (Consumer<NoArgumentsException> c : onNoArgumentsListeners)
-                c.accept(e);
+            onNoArgumentsListeners.call(e);
         }
     }
 
     private void callNotFoundListenersSequentially(IOException e) {
         synchronized (notFoundListeners) {
-            for (Consumer<IOException> c : notFoundListeners)
-                c.accept(e);
+            notFoundListeners.call(e);
         }
     }
 
@@ -475,6 +350,36 @@ public class ProcessActionAdapter implements ProcessAction {
         });
 
         errorMessagesThread.start();
+    }
+
+    @Override
+    public Listener1<IOException> notFoundListeners() {
+        return notFoundListeners;
+    }
+
+    @Override
+    public Listener0 beforeListeners() {
+        return beforeListeners;
+    }
+
+    @Override
+    public Listener1<String> errorLineListeners() {
+        return errorLineListeners;
+    }
+
+    @Override
+    public Listener1<String> outLineListeners() {
+        return outLineListeners;
+    }
+
+    @Override
+    public Listener1<Integer> errorListeners() {
+        return errorListeners;
+    }
+
+    @Override
+    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+        return onNoArgumentsListeners;
     }
 
     @Override

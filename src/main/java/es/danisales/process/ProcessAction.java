@@ -1,11 +1,12 @@
 package es.danisales.process;
 
+import es.danisales.listeners.Listener0;
+import es.danisales.listeners.Listener1;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
 
 public interface ProcessAction extends Action {
     static @NonNull ProcessAction of(@NonNull String fname, @NonNull List<String> params) {
@@ -17,57 +18,22 @@ public interface ProcessAction extends Action {
     }
 
     @SuppressWarnings("unused")
-    boolean addNotFoundListener(@NonNull Consumer<IOException> consumer);
+    Listener1<IOException> notFoundListeners();
 
     @SuppressWarnings("unused")
-    boolean addBeforeListener(@NonNull Runnable runnable);
+    Listener0 beforeListeners();
 
     @SuppressWarnings("unused")
-    boolean addErrorLineListener(@NonNull Consumer<String> consumer);
+    Listener1<String> errorLineListeners();
 
     @SuppressWarnings("unused")
-    boolean addOutLineListener(@NonNull Consumer<String> consumer);
+    Listener1<String> outLineListeners();
 
     @SuppressWarnings("unused")
-    boolean addErrorListener(@NonNull Consumer<Integer> consumer);
+    Listener1<Integer> errorListeners();
 
     @SuppressWarnings("unused")
-    boolean addOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer);
-
-    @SuppressWarnings("unused")
-    boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer);
-
-    @SuppressWarnings("unused")
-    boolean removeBeforeListener(@NonNull Runnable runnable);
-
-    @SuppressWarnings("unused")
-    boolean removeErrorLineListener(@NonNull Consumer<String> consumer);
-
-    @SuppressWarnings("unused")
-    boolean removeOutLineListener(@NonNull Consumer<String> consumer);
-
-    @SuppressWarnings("unused")
-    boolean removeErrorListener(@NonNull Consumer<Integer> consumer);
-
-    @SuppressWarnings("unused")
-    boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer);
-
-    @SuppressWarnings("unused")
-    void clearNotFoundListeners();
-
-    @SuppressWarnings("unused")
-    void clearBeforeListeners();
-
-    @SuppressWarnings("unused")
-    void clearErrorLineListeners();
-    @SuppressWarnings("unused")
-    void clearOutLineListener();
-
-    @SuppressWarnings("unused")
-    void clearErrorListeners();
-
-    @SuppressWarnings("unused")
-    void clearOnNoArgumentsListeners();
+    Listener1<NoArgumentsException> onNoArgumentsListeners();
 
     int getResultCode();
 

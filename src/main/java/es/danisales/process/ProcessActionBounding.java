@@ -1,5 +1,7 @@
 package es.danisales.process;
 
+import es.danisales.listeners.Listener0;
+import es.danisales.listeners.Listener1;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -15,93 +17,33 @@ public class ProcessActionBounding implements ProcessAction {
     }
 
     @Override
-    public boolean addNotFoundListener(@NonNull Consumer<IOException> consumer) {
-        return processAction.addNotFoundListener(consumer);
+    public Listener1<IOException> notFoundListeners() {
+        return processAction.notFoundListeners();
     }
 
     @Override
-    public boolean addBeforeListener(@NonNull Runnable runnable) {
-        return processAction.addBeforeListener(runnable);
+    public Listener0 beforeListeners() {
+        return processAction.beforeListeners();
     }
 
     @Override
-    public boolean addErrorLineListener(@NonNull Consumer<String> consumer) {
-        return processAction.addErrorLineListener(consumer);
+    public Listener1<String> errorLineListeners() {
+        return processAction.errorLineListeners();
     }
 
     @Override
-    public boolean addOutLineListener(@NonNull Consumer<String> consumer) {
-        return processAction.addOutLineListener(consumer);
+    public Listener1<String> outLineListeners() {
+        return processAction.outLineListeners();
     }
 
     @Override
-    public boolean addErrorListener(@NonNull Consumer<Integer> consumer) {
-        return processAction.addErrorListener(consumer);
+    public Listener1<Integer> errorListeners() {
+        return processAction.errorListeners();
     }
 
     @Override
-    public boolean addOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
-        return processAction.addOnNoArgumentsListener(consumer);
-    }
-
-    @Override
-    public boolean removeNotFoundListener(@NonNull Consumer<IOException> consumer) {
-        return processAction.removeNotFoundListener(consumer);
-    }
-
-    @Override
-    public boolean removeBeforeListener(@NonNull Runnable runnable) {
-        return processAction.removeBeforeListener(runnable);
-    }
-
-    @Override
-    public boolean removeErrorLineListener(@NonNull Consumer<String> consumer) {
-        return processAction.removeErrorLineListener(consumer);
-    }
-
-    @Override
-    public boolean removeOutLineListener(@NonNull Consumer<String> consumer) {
-        return processAction.removeOutLineListener(consumer);
-    }
-
-    @Override
-    public boolean removeErrorListener(@NonNull Consumer<Integer> consumer) {
-        return processAction.removeErrorListener(consumer);
-    }
-
-    @Override
-    public boolean removeOnNoArgumentsListener(@NonNull Consumer<NoArgumentsException> consumer) {
-        return processAction.removeOnNoArgumentsListener(consumer);
-    }
-
-    @Override
-    public void clearNotFoundListeners() {
-        processAction.clearNotFoundListeners();
-    }
-
-    @Override
-    public void clearBeforeListeners() {
-        processAction.clearBeforeListeners();
-    }
-
-    @Override
-    public void clearErrorLineListeners() {
-        processAction.clearErrorLineListeners();
-    }
-
-    @Override
-    public void clearOutLineListener() {
-        processAction.clearOutLineListener();
-    }
-
-    @Override
-    public void clearErrorListeners() {
-        processAction.clearErrorListeners();
-    }
-
-    @Override
-    public void clearOnNoArgumentsListeners() {
-        processAction.clearOnNoArgumentsListeners();
+    public Listener1<NoArgumentsException> onNoArgumentsListeners() {
+        return processAction.onNoArgumentsListeners();
     }
 
     @Override

@@ -1,6 +1,6 @@
 package es.danisales.log.string;
 
-import es.danisales.listeners.BiConsumerListener;
+import es.danisales.listeners.Listener2;
 
 import java.util.Date;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class Logging {
-	private static Map<SeverityLevel, BiConsumerListener<SeverityLevel, String>> map = new ConcurrentHashMap<>();
+	private static Map<SeverityLevel, Listener2<SeverityLevel, String>> map = new ConcurrentHashMap<>();
 	private static final Object lock = new Object();
 
 	private Logging() {
@@ -17,9 +17,9 @@ public class Logging {
 	@SuppressWarnings("WeakerAccess")
 	public static void addListener(SeverityLevel sl, BiConsumer<SeverityLevel, String> f) {
 		synchronized(lock) {
-			BiConsumerListener<SeverityLevel, String> l = map.get( sl );
+			Listener2<SeverityLevel, String> l = map.get(sl);
 			if (l == null) {
-				l = new BiConsumerListener<>();
+				l = Listener2.newInstanceSequential();
 				map.put( sl, l );
 			}
 
@@ -49,7 +49,7 @@ public class Logging {
 	
 	private static void callListeners(SeverityLevel sl, String msg) {
 		synchronized(lock) {
-			BiConsumerListener<SeverityLevel, String> l = map.get( sl );
+			Listener2<SeverityLevel, String> l = map.get(sl);
 			if (l != null)
 				l.call( sl, msg );
 		}

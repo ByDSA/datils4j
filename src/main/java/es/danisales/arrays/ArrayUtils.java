@@ -1,14 +1,19 @@
 package es.danisales.arrays;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.lang.reflect.Array;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @SuppressWarnings("WeakerAccess")
 public class ArrayUtils {
 	private ArrayUtils() {
 	} // noninstantiable
 
-	public static <T> T[] concat(T[] a, T[] b) {
+    public static <T> T[] concat(@NonNull T[] a, @NonNull T[] b) {
 		int aLen = a.length;
 		int bLen = b.length;
 
@@ -20,21 +25,33 @@ public class ArrayUtils {
 		return c;
 	}
 
-	public static <T> T[] concat(T[]... v) {
-		int len = 0;
-		for ( T[] t : v )
-			len += t.length;
+    public static <T> int deepLengthOneLevel(@NonNull T[][] v) {
+        checkNotNull(v);
 
-		@SuppressWarnings("unchecked")
-		T[] c = (T[]) Array.newInstance( v[0].getClass().getComponentType(), len );
-		int iLen = 0;
-		for ( T[] t : v ) {
-			System.arraycopy( t, 0, c, iLen, t.length );
-			iLen += t.length;
-		}
+        int len = 0;
+        for ( T[] t : v )
+            len += t.length;
 
-		return c;
-	}
+        return len;
+    }
+
+    @SafeVarargs
+    public static <T> @NonNull T[] concat(@NonNull T[]... v) {
+        checkNotNull(v);
+        checkArgument(v.length > 0);
+
+        int len = deepLengthOneLevel(v);
+
+        @SuppressWarnings("unchecked")
+        T[] c = (T[]) Array.newInstance( v[0].getClass().getComponentType(), len );
+        int iLen = 0;
+        for ( T[] t : v ) {
+            System.arraycopy( t, 0, c, iLen, t.length );
+            iLen += t.length;
+        }
+
+        return c;
+    }
 
 	public static <T> int deepLength(T[] array) {
 		int length = 0;
