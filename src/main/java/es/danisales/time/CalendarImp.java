@@ -1,29 +1,30 @@
 package es.danisales.time;
 
-import es.danisales.rules.DayOfTheWeekRule;
+import es.danisales.rules.DayOfWeekRule;
 import es.danisales.rules.Rule;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Calendar extends ArrayList<Rule> implements CalendarInterface {
-	public static final Calendar NO_LABORABLE = new Calendar() {
+public class CalendarImp extends ArrayList<Rule> implements CalendarInterface {
+	public static final CalendarImp NO_LABORABLE = new CalendarImp() {
 		{
-			add(DayOfTheWeekRule.of(java.util.Calendar.SATURDAY));
-			add(DayOfTheWeekRule.of(java.util.Calendar.SUNDAY));
+			add(DayOfWeekRule.of(DayOfWeek.SATURDAY));
+			add(DayOfWeekRule.of(DayOfWeek.SUNDAY));
 		}
 	};
 	private final List<Rule> exceptions;
-	
-	public static final Calendar LABORABLE = new Calendar() {
+
+	public static final CalendarImp LABORABLE = new CalendarImp() {
 		{
 			addException(NO_LABORABLE);
 		}
 	};
-	
 
-	public Calendar() {
+
+	public CalendarImp() {
 		exceptions = new ArrayList<>();
 	}
 

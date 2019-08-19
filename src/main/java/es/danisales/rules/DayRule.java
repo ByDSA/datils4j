@@ -1,6 +1,6 @@
 package es.danisales.rules;
 
-import es.danisales.time.Time;
+import es.danisales.time.TimeUtils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -33,11 +33,6 @@ public class DayRule implements Rule {
 
     @Override
     public boolean check() {
-        return checkFrom(Time.dayOfMonth());
+        return TimeUtils.Current.now().getDayOfMonth() == day;
     }
-
-    public boolean checkFrom(int dayOfMonth) {
-        return dayOfMonth == day;
-	}
-
 }

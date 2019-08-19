@@ -1,7 +1,7 @@
 package es.danisales.tasks;
 
 import es.danisales.rules.Rule;
-import es.danisales.time.Calendar;
+import es.danisales.time.CalendarImp;
 import es.danisales.time.CalendarInterface;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class CalendarAction extends ActionAdapter implements CalendarInterface {
-	private final Calendar calendar = new Calendar();
+	private final CalendarImp calendar = new CalendarImp();
 
 	private CalendarAction(Mode m, Consumer<CalendarAction> f) {
 		super(new CalendarTaskBuilder().setMode(m).setRun(f));
@@ -28,7 +28,7 @@ public class CalendarAction extends ActionAdapter implements CalendarInterface {
 		return false;
 	}
 
-	public void add(@NonNull Calendar c) {
+	public void add(@NonNull CalendarImp c) {
 		calendar.addAll(c);
 		calendar.addAllException(c.getExceptions());
 	}
@@ -207,7 +207,7 @@ public class CalendarAction extends ActionAdapter implements CalendarInterface {
 
 	static class CalendarTaskBuilder extends ActionBuilder<CalendarTaskBuilder, CalendarAction, CalendarAction> {
 		@Override
-		public CalendarAction build() {
+		protected CalendarAction buildOnce() {
 			return new CalendarAction(mode, function);
 		}
 

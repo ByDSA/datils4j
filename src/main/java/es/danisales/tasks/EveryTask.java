@@ -26,7 +26,7 @@ public class EveryTask extends ActionAdapter {
 		long every = 0;
 
 		@Override
-		public EveryTask build() {
+        public EveryTask buildOnce() {
 			checkArgument(every > 0);
             checkArgument(instance == null, "Just one instantiation");
             instance = new EveryTask(this);

@@ -9,7 +9,7 @@ public class LoopTask extends ActionAdapter {
 
 	public static class Builder extends ActionBuilder<Builder, LoopTask, LoopTask> {
 		@Override
-        public LoopTask build() {
+        public LoopTask buildOnce() {
 			checkArgument(instance == null, "Just one instantiation");
 			instance = new LoopTask(this);
 			return instance;

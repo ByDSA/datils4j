@@ -376,7 +376,7 @@ class ActionInternalAdapter<A extends Action> implements Action {
 
     static class Builder<A extends Action> extends ActionBuilder<Builder<A>, ActionInternalAdapter<A>, A> {
         @Override
-        public ActionInternalAdapter<A> build() {
+        public ActionInternalAdapter<A> buildOnce() {
             checkArgument(instance == null, "Just one instantiation");
             instance = new ActionInternalAdapter<>(this);
             return instance;

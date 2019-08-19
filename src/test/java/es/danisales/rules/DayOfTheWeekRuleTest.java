@@ -1,34 +1,29 @@
 package es.danisales.rules;
 
-import es.danisales.time.Time;
+import es.danisales.time.TimeUtils;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.time.DayOfWeek;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class DayOfTheWeekRuleTest {
     @Test
     public void of() {
-        for (int i = 1; i <= 7; i++) {
-            DayOfTheWeekRule dayOfTheWeekRule = DayOfTheWeekRule.of(i);
-            assertSame(dayOfTheWeekRule, DayOfTheWeekRule.of(i));
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            DayOfWeekRule dayOfTheWeekRule = DayOfWeekRule.of(dayOfWeek);
+            assertSame(dayOfTheWeekRule, DayOfWeekRule.of(dayOfWeek));
         }
     }
 
     @Test
     public void check() {
-        int currentDayOfTheWeek = Time.dayOfWeek();
+        DayOfWeek currentDayOfTheWeek = TimeUtils.Current.now().getDayOfWeek();
 
-        for (int i = 1; i <= 7; i++) {
-            DayOfTheWeekRule dayOfTheWeekRule = DayOfTheWeekRule.of(i);
-            assertEquals(currentDayOfTheWeek == i, dayOfTheWeekRule.check());
-        }
-    }
-
-    @Test
-    public void checkFrom() {
-        for (int i = 1; i <= 7; i++) {
-            DayOfTheWeekRule dayOfTheWeekRule = DayOfTheWeekRule.of(i);
-            assertTrue(dayOfTheWeekRule.checkFrom(i));
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            DayOfWeekRule dayOfTheWeekRule = DayOfWeekRule.of(dayOfWeek);
+            assertEquals(currentDayOfTheWeek == dayOfWeek, dayOfTheWeekRule.check());
         }
     }
 }
