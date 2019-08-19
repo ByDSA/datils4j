@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ListenerZero extends ListAdapter<Runnable> implements Listener<Runnable> {
+public class ListenerZero extends ListAdapter<Runnable> implements ListenerList<Runnable> {
     private final Action.Mode modeConcurrency;
 
     private ListenerZero(List<Runnable> listAdapter, Action.Mode mode) {
