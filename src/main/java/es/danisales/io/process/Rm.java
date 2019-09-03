@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 @SuppressWarnings({"unused"})
 public class Rm extends ProcessActionAdapter {
-    private static final String PROCESS_NAME = "rm";
+    static final String PROCESS_NAME = "rm";
 
     private Rm() {
     }
