@@ -4,12 +4,6 @@ install: true
 jdk:
   - openjdk8
 
-# https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-130860338
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
-
 notifications:
   email: false
 
