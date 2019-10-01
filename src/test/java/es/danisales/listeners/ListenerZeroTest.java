@@ -75,7 +75,7 @@ public class ListenerZeroTest {
         l0.call();
     }
 
-    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED - 1))
+    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED))
     public void newInstanceConcurrent() {
         ListenerListZero listenerZero = ListenerListZero.newInstanceConcurrent();
 
@@ -86,7 +86,7 @@ public class ListenerZeroTest {
         assertEquals(TEST_VALUE_CONCURRENT_EXPECTED, atomicInteger.get());
     }
 
-    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED - 1))
+    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED))
     public void newInstanceConcurrentConcurrentModification() {
         ListenerListZero listenerZero = ListenerListZero.newInstanceConcurrent();
 
@@ -95,7 +95,7 @@ public class ListenerZeroTest {
         listenerZero.call();
     }
 
-    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED - 1))
+    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED))
     public void newInstanceConcurrentThreadSafe() {
         ListenerListZero l0 = ListenerListZero.newInstanceConcurrentThreadSafe();
 
@@ -106,7 +106,7 @@ public class ListenerZeroTest {
         assertEquals(TEST_VALUE_CONCURRENT_EXPECTED, atomicInteger.get());
     }
 
-    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED - 1))
+    @Test(timeout = TIME_SLEEP * (TEST_VALUE_CONCURRENT_EXPECTED))
     public void newInstanceConcurrentThreadSafeConcurrentModification() {
         ListenerListZero l0 = ListenerListZero.newInstanceConcurrentThreadSafe();
 
