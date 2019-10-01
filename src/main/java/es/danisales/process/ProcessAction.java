@@ -17,10 +17,6 @@ public interface ProcessAction extends Action {
         return new ProcessActionBuilder().addArg(params).build();
     }
 
-    static @NonNull ProcessAction from(@NonNull String fname, @NonNull String... params) {
-        return new ProcessActionBuilder().addArg(fname).addArg(params).build();
-    }
-
     static @NonNull ProcessAction from(@NonNull String fname, @NonNull List<String> params) {
         return new ProcessActionBuilder().addArg(fname).addArg(params).build();
     }

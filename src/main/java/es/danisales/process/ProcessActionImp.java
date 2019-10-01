@@ -37,6 +37,24 @@ public class ProcessActionImp implements ProcessAction {
     protected ProcessActionImp(ProcessActionBuilder builder) {
         paramsWithName = ArrayUtils.fromList(builder.args);
         ProcessActionBuilder.registerInstance(this);
+
+        /* Default Logging and Interrupt */
+        outLineListeners().add(Logging::log);
+        errorLineListeners().add(Logging::error);
+
+        onNoArgumentsListeners().add((ProcessAction.NoArgumentsException e) -> {
+            Logging.error(e.getMessage());
+            interrupt();
+        });
+        notFoundListeners().add((IOException e) -> {
+            Logging.error(e.getMessage());
+            interrupt();
+        });
+
+        errorListeners().add((Integer code) -> {
+            Logging.error("Error code = " + code);
+            interrupt();
+        });
     }
 
     private void innerRun(@NonNull ProcessActionImp self) {
