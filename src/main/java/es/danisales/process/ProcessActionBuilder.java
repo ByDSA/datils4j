@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProcessActionBuilder extends Builder {
     private static final Map<String[], ProcessAction> registeredProcessAction = new ConcurrentHashMap<>();
 
-    List<String> args = new ArrayList<>();
+    protected List<String> args = new ArrayList<>();
 
     static void registerInstance(ProcessActionImp p) {
         registeredProcessAction.put(p.paramsWithName, p);
