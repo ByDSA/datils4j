@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ProcessAction extends Action {
-    static @NonNull ProcessAction of(@NonNull String fname, @NonNull List<String> params) {
-        return ProcessActionAdapter.of(ProcessActionAdapter.class, fname, params);
+    static @NonNull ProcessAction from(@NonNull String... params) {
+        return new ProcessActionBuilder().addArg(params).build();
     }
 
-    static @NonNull ProcessAction of(@NonNull String fname, String... params) {
-        return ProcessActionAdapter.of(ProcessActionAdapter.class, fname, params);
+    static @NonNull ProcessAction from(@NonNull List<String> params) {
+        return new ProcessActionBuilder().addArg(params).build();
     }
 
     @SuppressWarnings("unused")

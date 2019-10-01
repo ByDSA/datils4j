@@ -30,7 +30,7 @@ public class ActionListTest {
         assertTrue(al.isRunning());
         sleep(runSleep);
         assertTrue(al.isRunning());
-        sleep(runSleep * 3);
+        sleep(runSleep * 4);
         assertEquals(100, ai.get());
         assertTrue(action1.isDone());
         assertTrue(al.isDone());
@@ -122,7 +122,7 @@ public class ActionListTest {
         assertNotEquals(20, ai.get());
         sleep(20*20-100);
         assertNotEquals(20, ai.get());
-        sleep(400);
+        sleep(500);
         assertEquals(20, ai.get());
     }
 

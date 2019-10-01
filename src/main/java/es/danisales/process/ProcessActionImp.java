@@ -6,24 +6,17 @@ import es.danisales.listeners.ListenerListZero;
 import es.danisales.log.string.Logging;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.join;
 
-public class ProcessActionAdapter implements ProcessAction {
-    private static final Map<String[], ProcessActionAdapter> registeredProcessAction = new ConcurrentHashMap<>();
-
+public class ProcessActionImp implements ProcessAction {
     /**
      * Listeners
      */
@@ -34,93 +27,19 @@ public class ProcessActionAdapter implements ProcessAction {
     private final ListenerListOne<Integer> errorListeners = ListenerListOne.newInstanceSequentialThreadSafe();
     private final ListenerListOne<NoArgumentsException> onNoArgumentsListeners = ListenerListOne.newInstanceSequentialThreadSafe();
 
-    private String[] paramsWithName;
+    final String[] paramsWithName;
     private Thread normalMessagesThread;
     private Thread errorMessagesThread;
     private AtomicInteger resultCode = new AtomicInteger();
 
     private final Action actionAdapter = Action.of(Mode.CONCURRENT, this::innerRun, this);
 
-    protected ProcessActionAdapter() {
+    protected ProcessActionImp(ProcessActionBuilder builder) {
+        paramsWithName = ArrayUtils.fromList(builder.args);
+        ProcessActionBuilder.registerInstance(this);
     }
 
-    @SuppressWarnings("SameParameterValue")
-    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String fname, String... params) {
-        return of(c, fname, Arrays.asList(params));
-    }
-
-    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String... fnameAndparams) {
-        T ret = getFromRegister(fnameAndparams);
-
-        if (ret == null)
-            ret = newInstance(c, fnameAndparams);
-
-        return ret;
-    }
-
-    private static @NonNull <T extends ProcessActionAdapter> T newInstance(@NonNull Class<T> c, String... fnameAndparams) {
-        try {
-            T ret = c.newInstance();
-            ret.setFilenameAndParamsAndRegister(fnameAndparams[0], getParams(fnameAndparams));
-
-            return ret;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    private static void registerInstance(ProcessActionAdapter p) {
-        registeredProcessAction.put(p.paramsWithName, p);
-    }
-
-    private static @Nullable <T extends ProcessActionAdapter> T getFromRegister(String... fnameAndparams) {
-        T ret;
-        try {
-            //noinspection unchecked
-            ret = (T) registeredProcessAction.get(fnameAndparams);
-        } catch (ClassCastException e) {
-            ret = null;
-        }
-
-        return ret;
-    }
-
-    private static List<String> getParams(@NonNull String[] fnameAndParams) {
-        return Arrays.asList(Arrays.copyOfRange(fnameAndParams, 1, fnameAndParams.length - 1));
-    }
-
-    protected static @NonNull <T extends ProcessActionAdapter> T of(@NonNull Class<T> c, @NonNull String fname, @NonNull List<String> params) {
-        String[] fnameAndParams = fnameAndParamsToStringArray(fname, params);
-        return of(c, fnameAndParams);
-    }
-
-    private static String[] fnameAndParamsToStringArray(@NonNull String fname, String... params) {
-        String[] paramsWithName = new String[params.length + 1];
-        paramsWithName[0] = fname;
-        System.arraycopy(params, 0, paramsWithName, 1, params.length);
-        return paramsWithName;
-    }
-
-    private static String[] fnameAndParamsToStringArray(@NonNull String fname, @NonNull List<String> paramsList) {
-        String[] paramsString = ArrayUtils.fromList(paramsList);
-        return fnameAndParamsToStringArray(fname, paramsString);
-    }
-
-    void setFilenameAndParamsAndRegister(@NonNull String fname, @NonNull List<String> params) {
-        setFilenameAndParamsAndRegister(fname, params.toArray(new String[0]));
-    }
-
-    private void setFilenameAndParamsAndRegister(@NonNull String fname, String... params) {
-        if (paramsWithName != null) {
-            registeredProcessAction.remove(paramsWithName);
-        }
-
-        paramsWithName = fnameAndParamsToStringArray(fname, params);
-        registerInstance(this);
-    }
-
-    private void innerRun(@NonNull ProcessActionAdapter self) {
+    private void innerRun(@NonNull ProcessActionImp self) {
         checkNotNull(self.paramsWithName);
 
         self.runBeforeListenersSequentially();
