@@ -1,18 +1,21 @@
 package es.danisales.io.text.csv;
 
+import com.google.common.collect.ImmutableList;
 import es.danisales.io.text.TextFile;
 import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
     private String separator = ";";
 
     private Map<ID, L> map = new HashMap<>();
+    private List<L> csvLines = new ArrayList<>();
 
     @SuppressWarnings("WeakerAccess")
     public CsvFile(File file) {
@@ -30,8 +33,10 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
 		String[] o = lStr.split( separator );
         try {
             L l = readLine(o);
-            if (l != null)
+            if (l != null) {
                 map.put(l.getKey(), l);
+                csvLines.add(l);
+            }
 
             return l;
         } catch (Exception e) {
@@ -47,7 +52,8 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
         separator = s;
 	}
 
-    public Collection<L> lines() {
-        return map.values();
+    @SuppressWarnings("unused")
+    public ImmutableList<L> lines() {
+        return ImmutableList.copyOf(csvLines);
     }
 }
