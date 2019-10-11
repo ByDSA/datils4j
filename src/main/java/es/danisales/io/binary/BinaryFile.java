@@ -1,13 +1,14 @@
 package es.danisales.io.binary;
 
+import es.danisales.io.FileAutosavable;
+import es.danisales.io.FileReadable;
+import es.danisales.io.binary.types.Binary;
+import es.danisales.log.string.Logging;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-
-import es.danisales.log.string.Logging;
-import es.danisales.io.binary.types.Binary;
-import es.danisales.io.FileAutosavable;
-import es.danisales.io.FileReadable;
 
 /**
  * A readable/writable es.danisales.io.binary.types File
@@ -17,10 +18,10 @@ public abstract class BinaryFile extends FileAutosavable implements Binary, File
 	/**
 	 * Instantiates a new file es.danisales.io.binary.types.
 	 *
-	 * @param str pathname
+     * @param file in/out file
 	 */
-	public BinaryFile(String str) {
-		super( str );
+    public BinaryFile(File file) {
+        super(file);
 	}
 
 	/* (non-Javadoc)

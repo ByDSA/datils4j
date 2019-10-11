@@ -6,6 +6,7 @@ import es.danisales.io.binary.BinaryFile;
 import es.danisales.io.binary.types.Binary;
 import es.danisales.log.string.Logging;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -19,8 +20,8 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>> ext
 	private CopyOnWriteArrayList<L> _buffer;
 	private List<L> lines;
 
-	public BinaryLog(String path) {
-		super( path );
+	public BinaryLog(File file) {
+		super(file);
 	}
 
 	@Override

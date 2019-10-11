@@ -2,6 +2,8 @@ package es.danisales.io.binary;
 
 import es.danisales.io.binary.types.auto.AutoBin;
 
+import java.io.File;
+
 /**
  * A readable/writeable es.danisales.io.binary.types File auto es.danisales.io.binary.types
  */
@@ -9,9 +11,9 @@ public class BinaryFileAutoBin extends BinaryFile implements AutoBin {
 	/**
 	 * Instantiates a new file es.danisales.io.binary.types.
 	 *
-	 * @param path path
+	 * @param file in/out file
 	 */
-	public BinaryFileAutoBin(String path) {
-		super( path );
+	public BinaryFileAutoBin(File file) {
+		super(file);
 	}
 }

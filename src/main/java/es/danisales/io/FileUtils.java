@@ -94,6 +94,14 @@ public final class FileUtils {
 		return str.substring(0, pos);
 	}
 
+	public static void createParentFolder(File file) {
+		File parent = file.getParentFile();
+		boolean done = parent.mkdirs();
+
+		if (!done && !parent.exists())
+			throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
+	}
+
 	public static boolean fileExists(String filePathString) {
 		java.io.File f = new java.io.File(filePathString);
 		return f.exists() && !f.isDirectory();

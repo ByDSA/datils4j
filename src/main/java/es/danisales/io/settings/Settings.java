@@ -4,7 +4,9 @@ import es.danisales.io.binary.BinaryFile;
 import es.danisales.io.binary.types.DateBin;
 import es.danisales.io.binary.types.MapBin;
 import es.danisales.log.string.Logging;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,16 +16,16 @@ import java.util.Set;
 @Deprecated
 public class Settings extends BinaryFile implements Map<String, Object> {
 	private static final long serialVersionUID = 781110217776323164L;
-	
-	public static String defaultSettingsPath = "data/main.es.danisales.settings";
 
-	DateBin date;
-	Map<String, Object> map;
-	MapBin mapBin;
+	private static String defaultSettingsPath = "data/settings";
 
-	public Settings(String path) {
-		super(path);
-		map = new HashMap();
+	private DateBin date;
+	private Map<String, Object> map;
+	private MapBin mapBin;
+
+	public Settings(File file) {
+		super(file);
+		map = new HashMap<>();
 	}
 
 	@Override
@@ -34,10 +36,10 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 		mapBin.write( buff );
 	}
 
-	void initializeMapBinIfNull() {
-		if (mapBin == null) {
-			mapBin = new MapBin(map);
-			mapBin.setPutType( true );
+	private static void loadIfNotExists() {
+		if (_settings == null) {
+			_settings = new Settings(new File(defaultSettingsPath));
+			_settings.load();
 		}
 	}
 
@@ -103,10 +105,10 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 
 	private static Settings _settings;
 
-	private static void loadIfNotExists() {
-		if (_settings == null) {
-			_settings = new Settings(defaultSettingsPath);
-			_settings.load();
+	private void initializeMapBinIfNull() {
+		if (mapBin == null) {
+			mapBin = new MapBin(map);
+			mapBin.setPutType(true);
 		}
 	}
 
@@ -131,6 +133,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	}
 
 	@Override
+	@NonNull
 	public Set<Entry<String, Object>> entrySet() {
 		return map.entrySet();
 	}
@@ -146,6 +149,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	}
 
 	@Override
+	@NonNull
 	public Set<String> keySet() {
 		return map.keySet();
 	}
@@ -156,7 +160,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	}
 
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
+	public void putAll(@NonNull Map<? extends String, ?> m) {
 		map.putAll( m );
 	}
 
@@ -171,6 +175,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	}
 
 	@Override
+	@NonNull
 	public Collection<Object> values() {
 		return map.values();
 	}

@@ -3,6 +3,7 @@ package es.danisales.io.text;
 import es.danisales.io.FileAppendable;
 import es.danisales.io.FileAutosavable;
 import es.danisales.io.FileReadable;
+import es.danisales.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
@@ -124,11 +125,7 @@ public abstract class TextFile<L> extends FileAutosavable implements FileAppenda
 	}
 
 	private void createParents() {
-		File parent = getParentFile();
-		boolean done = parent.mkdirs();
-
-		if (!done && !parent.exists())
-			throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
+		FileUtils.createParentFolder(this);
 	}
 
 	@Override
