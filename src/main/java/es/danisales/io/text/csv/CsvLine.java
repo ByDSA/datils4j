@@ -28,4 +28,20 @@ public class CsvLine implements Keyable<String> {
     public int size() {
         return values.length;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        boolean first = true;
+        for (String v : values) {
+            if (first)
+                first = false;
+            else
+                sb.append(";");
+            sb.append(v);
+        }
+
+        return sb.toString();
+    }
 }
