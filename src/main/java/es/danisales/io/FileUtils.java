@@ -96,6 +96,8 @@ public final class FileUtils {
 
 	public static void createParentFolder(File file) {
 		File parent = file.getParentFile();
+        if (parent == null)
+            return;
 		boolean done = parent.mkdirs();
 
 		if (!done && !parent.exists())
