@@ -81,20 +81,16 @@ public abstract class TextFile<L> extends FileAutosavable implements FileAppenda
 		final AtomicLong i = new AtomicLong(0);
 		return readLargeTextFile(
 				lineStr -> {
-					try {
 						L l = stringToLine(i.getAndIncrement(), lineStr);
 						if (l != null)
 							lines.add(l);
 						return true;
-					} catch (SkipLineException e) {
-						return true;
-					}
 				}
 
 		);
 	}
 
-	abstract protected L stringToLine(long i, String l) throws SkipLineException; // Load. ret null = stop read
+	abstract protected L stringToLine(long i, String l);
 
 	@Override
 	public boolean append(L f) {

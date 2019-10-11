@@ -1,10 +1,10 @@
 package es.danisales.io.text.csv;
 
-import es.danisales.io.text.SkipLineException;
 import es.danisales.io.text.TextFile;
 import es.danisales.others.Keyable;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +23,9 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
 	}
 
 	@Override
-	protected L stringToLine(long i, String lStr) throws SkipLineException {
+    protected L stringToLine(long i, String lStr) {
 		if (lStr.startsWith( "//" ))
-			throw new SkipLineException();
+            return null;
 		String[] o = lStr.split( separator );
 		L l = readLine(o);
 		if (l != null)
@@ -40,4 +40,8 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
     public void setSeparator(String s) {
         separator = s;
 	}
+
+    public Collection<L> lines() {
+        return map.values();
+    }
 }
