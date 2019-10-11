@@ -1,5 +1,10 @@
 package es.danisales.io.text;
 
+import es.danisales.io.FileAppendable;
+import es.danisales.io.FileAutosavable;
+import es.danisales.io.FileReadable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -7,26 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import es.danisales.io.FileAppendable;
-import es.danisales.io.FileAutosavable;
-import es.danisales.io.FileReadable;
-
-public abstract class TextFile<L extends Object> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L> {
-	protected Charset encoding = defaultCharset;
-	protected String lineSeparator = defaultLineSeparator;
-	protected List<L> lines = new ArrayList();
-
-	public static Charset defaultCharset = StandardCharsets.UTF_8;
-	public static String defaultLineSeparator = "\n";
+public abstract class TextFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L> {
+	Charset encoding = StandardCharsets.UTF_8;
+	List<L> lines = new ArrayList<>();
+	private String lineSeparator = "\n";
 
 	public TextFile(String pathname) {
 		super( pathname );
@@ -57,7 +50,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	public boolean save() {
 		Path path = toPath();
 		try {
-			List<String> linesStr = new ArrayList();
+			List<String> linesStr = new ArrayList<>();
 			for (L l : lines) {
 				linesStr.add( l.toString() );
 			}
@@ -69,7 +62,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		}
 	}
 
-	protected boolean readLargeTextFile(Function<String, Boolean> fReadLine) {
+	private boolean readLargeTextFile(Function<String, Boolean> fReadLine) {
 		Path path = toPath();
 		try (Scanner scanner =  new Scanner(path, encoding.name())){
 			while (scanner.hasNextLine()){
@@ -86,17 +79,14 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	public boolean load() {
 		final AtomicLong i = new AtomicLong(0);
 		return readLargeTextFile(
-				new Function<String, Boolean>() {
-					@Override
-					public Boolean apply(String lineStr) {
-						try {
-							L l = stringToLine(i.getAndIncrement(), lineStr);
-							if (l != null)
-								lines.add( l );
-							return true;
-						} catch(SkipLineException e) {
-							return true;
-						}
+				lineStr -> {
+					try {
+						L l = stringToLine(i.getAndIncrement(), lineStr);
+						if (l != null)
+							lines.add(l);
+						return true;
+					} catch (SkipLineException e) {
+						return true;
 					}
 				}
 
@@ -112,10 +102,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 
 	@Override
 	public boolean add(L f) {
-		// Crea las carpetas si no existe
-		File parent = getParentFile();
-		if (parent != null)
-			parent.mkdirs();
+		createParents();
 
 		lines.add( f );
 
@@ -132,40 +119,51 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		}
 	}
 
+	private void saveIfAutosave() {
+		boolean done = save();
+	}
+
+	private void createParents() {
+		File parent = getParentFile();
+		boolean done = parent.mkdirs();
+
+		if (!done && !parent.exists())
+			throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
+	}
+
 	@Override
 	public void add(int index, L f) {
-		// Crea las carpetas si no existe
-		File parent = getParentFile();
-		if (parent != null)
-			parent.mkdirs();
+		createParents();
 
 		lines.add( index, f );
 
-		save();
+		saveIfAutosave();
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Override
-	public boolean addAll(Collection<? extends L> c) {
+	public boolean addAll(@NonNull Collection<? extends L> c) {
 		boolean a = true;
 		for (L l : c)
 			a &= add(l);
-		return false;
+		return a;
 	}
 
 	@Override
-	public boolean addAll(int index, Collection<? extends L> c) {
-		// Crea las carpetas si no existe
-		this.getParentFile().mkdirs();
+	public boolean addAll(int index, @NonNull Collection<? extends L> c) {
+		createParents();
 
-		lines.addAll( index, c );
+		boolean ret = lines.addAll(index, c);
 
-		return save();
+		saveIfAutosave();
+
+		return ret;
 	}
 
 	@Override
 	public void clear() {
 		lines.clear();
-		save();
+		saveIfAutosave();
 	}
 
 	@Override
@@ -174,7 +172,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(@NonNull Collection<?> c) {
 		return lines.containsAll(c);
 	}
 
@@ -194,6 +192,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	}
 
 	@Override
+	@NonNull
 	public Iterator<L> iterator() {
 		return lines.iterator();
 	}
@@ -204,11 +203,13 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	}
 
 	@Override
+	@NonNull
 	public ListIterator<L> listIterator() {
 		return lines.listIterator();
 	}
 
 	@Override
+	@NonNull
 	public ListIterator<L> listIterator(int index) {
 		return lines.listIterator( index );
 	}
@@ -218,7 +219,7 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		boolean ret = lines.remove( o );
 
 		if (ret)
-			save();
+			saveIfAutosave();
 
 		return ret;
 	}
@@ -228,30 +229,30 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 		L ret = lines.remove( index );
 
 		if (ret != null)
-			save();
+			saveIfAutosave();
 
 		return ret;
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(@NonNull Collection<?> c) {
 		boolean ret = lines.removeAll( c );
 
 		if (ret)
-			save();
+			saveIfAutosave();
 
 		return ret;
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(@NonNull Collection<?> c) {
 		return lines.retainAll( c );
 	}
 
 	@Override
 	public L set(int index, L element) {
 		L ret = lines.set( index, element );
-		save();
+		saveIfAutosave();
 		return ret;
 	}
 
@@ -261,21 +262,21 @@ public abstract class TextFile<L extends Object> extends FileAutosavable impleme
 	}
 
 	@Override
+	@NonNull
 	public List<L> subList(int fromIndex, int toIndex) {
 		return lines.subList( fromIndex, toIndex );
 	}
 
 	@Override
+	@NonNull
 	public Object[] toArray() {
 		return lines.toArray();
 	}
 
+	@SuppressWarnings("SuspiciousToArrayCall")
 	@Override
-	public <T> T[] toArray(T[] a) {
+	@NonNull
+	public <T> T[] toArray(@NonNull T[] a) {
 		return lines.toArray(a);
-	}
-
-	public static class SkipLineException extends Exception {
-
 	}
 }
