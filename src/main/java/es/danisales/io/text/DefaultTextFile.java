@@ -1,12 +1,13 @@
 package es.danisales.io.text;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DefaultTextFile extends TextFile<String> {
-	public DefaultTextFile(String pathname) {
-		super( pathname );
+	public DefaultTextFile(File file) {
+		super(file);
 	}
 
 	@Override

@@ -13,8 +13,8 @@ public abstract class FileAutosavable extends File {
     private AtomicBoolean _dirty = new AtomicBoolean(false);
     private AtomicBoolean _autosaving = new AtomicBoolean(false);
 
-	public FileAutosavable(String pathname) {
-		super( pathname );
+	public FileAutosavable(File file) {
+		super(file.toString());
 	}
 
 	public final String filename() {

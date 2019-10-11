@@ -1,5 +1,5 @@
 package es.danisales.io.text;
 
-class SkipLineException extends Exception {
+public class SkipLineException extends Exception {
 
 }

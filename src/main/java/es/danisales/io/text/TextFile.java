@@ -21,8 +21,8 @@ public abstract class TextFile<L> extends FileAutosavable implements FileAppenda
 	List<L> lines = new ArrayList<>();
 	private String lineSeparator = "\n";
 
-	public TextFile(String pathname) {
-		super( pathname );
+	public TextFile(File file) {
+		super(file);
 	}
 
 	@Override
