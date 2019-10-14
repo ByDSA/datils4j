@@ -69,7 +69,7 @@ class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomPickerIm
 		return t;
     }
 
-    void checkSurface(long surface) {
+    private void checkSurface(long surface) {
         if (surface <= 0)
             throw new IllegalStateException("El tamaño de la suma de los target es 0");
 	}
