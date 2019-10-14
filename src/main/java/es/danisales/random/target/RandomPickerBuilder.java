@@ -7,7 +7,7 @@ public class RandomPickerBuilder<T> {
     private boolean isRemoveOnPick = false;
     private boolean isSurfaceVariable = false;
 
-    public RandomPickerImp build() {
+    public RandomPicker<T> build() {
         if (isRemoveOnPick)
             if (isSurfaceVariable)
                 throw new RuntimeException("No existe");
@@ -15,13 +15,13 @@ public class RandomPickerBuilder<T> {
                 return new RandomPicker1DRemover<>(this);
         else {
             if (isSurfaceVariable)
-                return new RandomPicker2D<>(this);
+                return new RandomPicker2D(this); // Warning: si T no extiende de Target, dará error
             else
                 return new RandomPicker1D<>(this);
         }
     }
 
-    @SuppressWarnings({"WeakerAccess"})
+    @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
     public RandomPickerBuilder<T> removeOnPick() {
         isRemoveOnPick = true;
 
