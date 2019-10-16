@@ -121,7 +121,7 @@ public abstract class TextFile<L> extends FileAutosavable implements FileAppenda
 	}
 
 	private void createParents() {
-		FileUtils.createParentFolder(this);
+        FileUtils.createParentFolders(this);
 	}
 
 	@Override

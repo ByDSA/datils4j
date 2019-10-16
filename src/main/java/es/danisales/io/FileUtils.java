@@ -2,99 +2,19 @@ package es.danisales.io;
 
 import es.danisales.crypt.hash.Hash;
 import es.danisales.functions.ThrowingConsumer;
+import es.danisales.io.search.Finder;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @SuppressWarnings("WeakerAccess")
 public final class FileUtils {
 	private FileUtils() {
 	} // noninstantiable
 
-	public static final String DATA_FOLDER = "data/";
-
-	public static ArrayList<java.io.File> finderRecursive(String dirName, String ext){
-		Path dir = new java.io.File(dirName).toPath();
-
-		return finderRecursive(dir, ext);
-	}
-
-	public static boolean deleteEmptyChildren(File f) {
-		if (f.isFile())
-			return false;
-
-		File[] children = f.listFiles();
-		if (children != null)
-			for (File f2 : children)
-				deleteEmptyChildren(f2);
-
-		children = f.listFiles();
-		if (children == null || children.length == 0)
-			return f.delete();
-
-		return false;
-	}
-
-	public static ArrayList<java.io.File> finderRecursive(Path dir, String ext) {
-		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
-
-		java.io.File[] files = dir.toFile().listFiles();
-		if (files == null) {
-			//error("El directorio no existe: " + dir);
-			return null;
-		}
-		for (java.io.File file : files) {
-			if (file.isFile()) {
-				if (file.getName().endsWith("." + ext))
-					ret.add(file);
-			} else if (file.isDirectory()) {
-				ret.addAll( finderRecursive(file.toPath(), ext) );
-			}
-		}
-
-		return ret;
-	}
-
-	public static ArrayList<java.io.File> find(Path dir, String ext){
-		ArrayList<java.io.File> ret = new ArrayList<java.io.File>();
-
-		java.io.File[] files = dir.toFile().listFiles();
-		if (files == null) {
-			//error("El directorio no existe: " + dir);
-			return null;
-		}
-		for (java.io.File file : files) {
-			if (file.isFile()) {
-				if (file.getName().endsWith("." + ext))
-					ret.add(file);
-			}
-		}
-
-		return ret;
-	}
-
-	public static String stripExtension(String str) {
-		// Handle null case specially.
-
-		if (str == null) return null;
-
-        // Get position from last '.'.
-
-		int pos = str.lastIndexOf(".");
-
-		// If there wasn't any '.' just return the string as is.
-
-		if (pos == -1) return str;
-
-		// Otherwise return the string, up to the dot.
-
-		return str.substring(0, pos);
-	}
-
-	public static void createParentFolder(File file) {
+    public static void createParentFolders(File file) {
 		File parent = file.getParentFile();
         if (parent == null)
             return;
@@ -104,16 +24,17 @@ public final class FileUtils {
 			throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
 	}
 
-	public static boolean fileExists(String filePathString) {
-		java.io.File f = new java.io.File(filePathString);
+    public static boolean fileExists(Path filePath) {
+        File f = filePath.toFile();
 		return f.exists() && !f.isDirectory();
 	}
 
-	public static boolean appendObject(String filename, ThrowingConsumer<ObjectOutputStream, Exception> f) {
+    @Deprecated
+    public static boolean appendObject(Path filepath, ThrowingConsumer<ObjectOutputStream, Exception> f) {
 		ObjectOutputStream output;
 		try {
-			boolean exists = fileExists(filename );
-			FileOutputStream fos = new FileOutputStream(filename, exists);
+            boolean exists = fileExists(filepath);
+            FileOutputStream fos = new FileOutputStream(filepath.toString(), exists);
 			if (!exists) {
 				output = new ObjectOutputStream( fos );
 			} else {
@@ -130,249 +51,179 @@ public final class FileUtils {
 		}
 	}
 
-	public static boolean writeObject(String filename, ThrowingConsumer<ObjectOutputStream, Exception> f) {
-		try {
-			ObjectOutputStream output;
-			FileOutputStream fos = new FileOutputStream(filename);
-			output = new ObjectOutputStream( fos );
+    @Deprecated
+    public static boolean writeObject(String filename, ThrowingConsumer<ObjectOutputStream, Exception> f) {
+        try {
+            ObjectOutputStream output;
+            FileOutputStream fos = new FileOutputStream(filename);
+            output = new ObjectOutputStream( fos );
 
-			f.acceptThrows( output );
-			output.close();
-			fos.close();
-			return true;
-		} catch(IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+            f.acceptThrows( output );
+            output.close();
+            fos.close();
+            return true;
+        } catch(IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	public static boolean readObject(String filename, ThrowingConsumer<ObjectInputStream, Exception> f) {
-		try {
-			ObjectInputStream input;
-			FileInputStream fos = new FileInputStream(filename);
-			input = new ObjectInputStream( fos );
+    @Deprecated
+    public static boolean readObject(String filename, ThrowingConsumer<ObjectInputStream, Exception> f) {
+        try {
+            ObjectInputStream input;
+            FileInputStream fos = new FileInputStream(filename);
+            input = new ObjectInputStream( fos );
 
-			f.acceptThrows( input );
-			input.close();
-			fos.close();
-			return true;
-		} catch(IOException e) {
-			//e.printStackTrace();
-			return false;
-		}
-	}
+            f.acceptThrows( input );
+            input.close();
+            fos.close();
+            return true;
+        } catch(IOException e) {
+            //e.printStackTrace();
+            return false;
+        }
+    }
 
-	public final static Comparator<java.io.File> fullpathComparator = new Comparator<java.io.File>() {
-		@Override
-		public int compare(java.io.File arg0, java.io.File arg1) {
-			return arg0.getAbsolutePath().compareTo( arg1.getAbsolutePath() );
-		}
-	};
+    @SuppressWarnings("unused")
+    public static class Paths {
+        public static String stripExtensionFrom(String str) {
+            // Handle null case specially.
 
-	public final static Comparator<java.io.File> filenameComparator = new Comparator<java.io.File>() {
-		@Override
-		public int compare(java.io.File arg0, java.io.File arg1) {
-			return arg0.getName().compareTo( arg1.getName() );
-		}
-	};
+            if (str == null) return null;
 
+            // Get position from last '.'.
 
-	public static List<java.io.File> findFilesRecursive(Path dir, Function<java.io.File, Boolean> funcFile, Function<java.io.File, Boolean> funcFolder) {
-		List<java.io.File> ret = new ArrayList<java.io.File>();
+            int pos = str.lastIndexOf(".");
 
-		java.io.File[] files = dir.toFile().listFiles();
-		if (files == null) {
-			//error("El directorio no existe: " + dir);
-			return null;
-		}
-		for (java.io.File file : files) {
-			if (file.isFile() && (funcFile == null || funcFile.apply( file ) )) {
-				ret.add(file);
-			} else if (file.isDirectory() && (funcFolder == null || funcFolder.apply( file ) )) {
-				ret.addAll( findFilesRecursive(file.toPath(), funcFile, funcFolder) );
-			}
-		}
+            // If there wasn't any '.' just return the string as is.
 
-		return ret;
-	}
+            if (pos == -1) return str;
 
-	public static List<java.io.File> findRecursive(Path dir, Function<java.io.File, Boolean> funcFile, Function<java.io.File, Boolean> funcFolder) {
-		List<java.io.File> ret = new ArrayList<java.io.File>();
+            // Otherwise return the string, up to the dot.
 
-		java.io.File[] files = dir.toFile().listFiles();
-		if (files == null) {
-			//error("El directorio no existe: " + dir);
-			return null;
-		}
-		for (java.io.File file : files) {
-			assert file != null;
-			if (funcFile == null || funcFile.apply( file ) )
-				ret.add(file);
+            return str.substring(0, pos);
+        }
+    }
 
-			if (file.isDirectory() && (funcFolder == null || funcFolder.apply( file ) )) {
-				ret.addAll( findRecursive(file.toPath(), funcFile, funcFolder) );
-			}
-		}
+    @SuppressWarnings("unused")
+    public static class Comparators {
+        public final static Comparator<File> fullpathComparator = Comparator.comparing(File::getAbsolutePath);
+        public final static Comparator<File> filenameComparator = Comparator.comparing(File::getName);
+    }
 
-		return ret;
-	}
+    @SuppressWarnings("unused")
+    public static class Duplicates {
+        public static List<List<File>> duplicatedFiles(List<File> files, boolean secure, Consumer<File> func) throws IOException {
+            Map<File, Hash> file2hashMap = new HashMap<>();
+            Map<Hash, List<File>> hash2filesMap = new HashMap<>();
 
-	public static List<java.io.File> findFilesRecursive(List<Path> dirs) {
-		return findFilesRecursive(dirs, null, null);
-	}
+            for (File f : files) {
+                func.accept(f);
+                Hash hash = defaultHashFileFunction(f);
 
-	public static List<java.io.File> findFilesRecursive(List<Path> dirs, Function<java.io.File, Boolean> funcFile, Function<java.io.File, Boolean> funcFolder) {
-		List<java.io.File> ret = new ArrayList<java.io.File>();
-		for (Path p : dirs)
-			ret.addAll( findFilesRecursive(p, funcFile, funcFolder) );
+                file2hashMap.put(f, hash);
 
-		return ret;
-	}
+                List<File> filesList = hash2filesMap.computeIfAbsent(hash, k -> new ArrayList<>());
+                filesList.add(f);
+            }
 
-	public static List<List<java.io.File>> duplicatedFiles(List<java.io.File> files, boolean secure, Consumer<java.io.File> func) throws IOException {
-        Map<java.io.File, Hash> file2hashMap = new HashMap();
-        Map<Hash, List<java.io.File>> hash2filesMap = new HashMap();
+            List<List<File>> ret = null;
 
-		for (java.io.File f : files) {
-			func.accept( f );
-            Hash hash = defaultHashFileFunction(f);
+            if (secure) ;
+            else
+                ret = duplicatedFilesInsecure(hash2filesMap);
 
-			file2hashMap.put( f, hash );
+            return ret;
+        }
 
-            List<java.io.File> filesList = hash2filesMap.computeIfAbsent(hash, k -> new ArrayList());
-            filesList.add(f);
-		}
+        static List<List<File>> duplicatedFilesInsecure(Map<Hash, List<File>> hash2filesMap) {
+            List<List<File>> ret = new ArrayList<>();
 
-		List<List<java.io.File>> ret = null;
+            for (Map.Entry<Hash, List<File>> e : hash2filesMap.entrySet()) {
+                Hash hash = e.getKey();
+                List<File> list = e.getValue();
 
-		if (secure);
-		else
-			ret = duplicatedFilesInsecure(hash2filesMap);
+                ret.add(list);
+            }
 
-		return ret;
-	}
+            return ret;
+        }
 
-    static List<List<java.io.File>> duplicatedFilesInsecure(Map<Hash, List<java.io.File>> hash2filesMap) {
-		List<List<java.io.File>> ret = new ArrayList<>();
+        public static Hash defaultHashFileFunction(File f) throws IOException {
+            return Hash.sha256fromFile(f);
+        }
+    }
 
-        for (Map.Entry<Hash, List<File>> e : hash2filesMap.entrySet()) {
-            Hash hash = e.getKey();
-			List<File> list = e.getValue();
+    @SuppressWarnings("unused")
+    public static class EmptyFiles {
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        public static void deleteFrom(File folder) {
+            List<File> files = getRecursively(folder);
+            for (File f : files)
+                f.delete();
+        }
 
-			ret.add( list );
-		}
+        public static void deleteAndEmptyParentsFrom(File folder) {
+            List<File> files = getRecursively(folder);
+            for (File f : files)
+                EmptyFolders.deleteFileAndEmptyParents(f);
+        }
 
-		return ret;
-	}
+        static List<File> getRecursively(File folder) {
+            return new Finder()
+                    .from(folder)
+                    .addRule(f -> f.length() == 0)
+                    .onlyFiles()
+                    .recursively()
+                    .find();
+        }
+    }
 
-    public static Hash defaultHashFileFunction(java.io.File f) throws IOException {
-        return Hash.sha256fromFile(f);
-	}
+    @SuppressWarnings("unused")
+    public static class EmptyFolders {
+        public static boolean deleteFrom(File folder) {
+            boolean ret = false;
+            List<File> folders = getRecursively(folder);
+            for (File f : folders)
+                ret |= deleteFileAndEmptyParents(f);
 
-	public static List<java.io.File> getEmptyFolders(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive(p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				return f.isDirectory() && f.list().length == 0;
-			}
-		}, null );
+            return ret;
+        }
 
-		return files;
-	}
+        @SuppressWarnings("ConstantConditions")
+        static List<File> getRecursively(File folder) {
+            return new Finder()
+                    .from(folder)
+                    .addRule(f -> f.listFiles().length == 0)
+                    .onlyFolders()
+                    .recursively()
+                    .find();
+        }
 
-	public static List<java.io.File> getEmptyFiles(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findFilesRecursive( p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				return f.length() == 0;
-			}
-		}, null );
+        public static boolean deleteFileAndEmptyParents(File f) {
+            boolean ret = false;
+            if (f.delete()) {
+                File parent = f.getParentFile();
 
-		return files;
-	}
+                deleteEmptyParents(parent);
 
-	public static List<java.io.File> getEmptyElements(Path p) {
-		List<java.io.File> files = es.danisales.io.FileUtils.findRecursive( p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				assert f != null;
-				//assert f.exists() && (f.isDirectory() && f.list() != null || f.isFile()) : f;
-				return f.exists() && (f.isDirectory() && f.listFiles() != null && f.list().length == 0 || f.isFile() && f.length() == 0);
-			}}, null );
+                ret = true;
+            }
+            return ret;
+        }
 
-		return files;
-	}
+        @SuppressWarnings({"ConstantConditions", "UnusedReturnValue"})
+        static boolean deleteEmptyParents(File parent) {
+            boolean ret = false;
+            while (parent != null && parent.exists() && parent.isDirectory() && parent.list().length == 0) {
+                if (parent.delete()) {
+                    parent = parent.getParentFile();
+                    ret = true;
+                }
+            }
 
-	public static List<java.io.File> deleteEmptyElements(Path p) {
-		List<java.io.File> files = getEmptyElements(p);
-		List<java.io.File> ret = new ArrayList();
-
-		for(java.io.File f : files)
-			ret.addAll( deleteItAndEmptyParents(f) );
-
-		return ret;
-	}
-
-	public static List<java.io.File> deleteItAndEmptyParents(java.io.File f) {
-		List<java.io.File> ret = new ArrayList();
-		if ( f.delete() ) {
-			ret.add( f );
-
-			java.io.File parent = f.getParentFile();
-
-			ret.addAll( deleteEmptyParents(parent) );
-		}
-		return ret;
-	}
-
-	public static List<java.io.File> deleteEmptyParents(java.io.File parent) {
-		List<java.io.File> ret = new ArrayList();
-		while (parent != null && parent.exists() && parent.isDirectory() && parent.list().length == 0) {
-			if ( parent.delete() ) {
-				ret.add( parent );
-				parent = parent.getParentFile();
-			}
-		}
-
-		return ret;
-	}
-
-	public static List<java.io.File> getUniqueElements(Path p) {
-		List<java.io.File> folders = findRecursive(p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				java.io.File parent = f.getParentFile();
-				return parent.listFiles().length == 1;
-			}
-		}, null);
-
-		return folders;
-	}
-
-	public static List<java.io.File> getUniqueFiles(Path p) {
-		List<java.io.File> files = findFilesRecursive(p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				java.io.File parent = f.getParentFile();
-				return parent.listFiles().length == 1;
-			}
-		}, null);
-
-		return files;
-	}
-
-	public static List<java.io.File> getUniqueFolders(Path p) {
-		List<java.io.File> folders = findRecursive(p, new Function<File, Boolean>() {
-			@Override
-			public Boolean apply(File f) {
-				if (f.isDirectory()) {
-					java.io.File parent = f.getParentFile();
-					return parent.listFiles().length == 1;
-				} else
-					return false;
-			}
-		}, null);
-
-		return folders;
+            return ret;
+        }
 	}
 }

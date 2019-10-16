@@ -18,7 +18,7 @@ public abstract class FileAutosavable extends File {
 	}
 
 	public final String filename() {
-		return FileUtils.stripExtension( this.getName() );
+        return FileUtils.Paths.stripExtensionFrom(this.getName());
 	}
 
 	public final String extension() {
