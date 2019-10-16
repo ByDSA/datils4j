@@ -1,7 +1,7 @@
 package es.danisales.rules;
 
 import es.danisales.datastructures.ListAdapter;
-import es.danisales.utils.OnceBuilder;
+import es.danisales.utils.building.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
@@ -52,9 +52,16 @@ public class RuleList extends ListAdapter<Rule> implements Rule, List<Rule> {
         return true;
     }
 
-    static class Builder extends OnceBuilder<Builder, RuleList> {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder extends OnceBuilder<Builder, RuleList> {
         List<Rule> list;
         Boolean whenEmptyValue;
+
+        private Builder() {
+        }
 
         public Builder setList(List<Rule> list1) {
             checkNotInstantiated();

@@ -17,6 +17,10 @@ public class EveryTask extends ActionAdapter {
 		return new Builder().setEvery(every).build();
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	@Override
 	public boolean isReady() {
 		return lastApply.getTime() == 0 || lastApply.getTime() + every - new Date().getTime() < 0;
@@ -24,6 +28,9 @@ public class EveryTask extends ActionAdapter {
 
     public static class Builder extends ActionBuilder<Builder, EveryTask, EveryTask> {
 		long every = 0;
+
+		private Builder() {
+		}
 
 		@Override
         public EveryTask buildOnce() {

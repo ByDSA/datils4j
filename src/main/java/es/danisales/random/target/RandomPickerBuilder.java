@@ -1,11 +1,15 @@
 package es.danisales.random.target;
 
 import es.danisales.random.RandomMode;
+import es.danisales.utils.building.Builder;
 
-public class RandomPickerBuilder<T> {
+public class RandomPickerBuilder<T> extends Builder {
     RandomMode randomMode = RandomMode.Normal;
     private boolean isRemoveOnPick = false;
     private boolean isSurfaceVariable = false;
+
+    RandomPickerBuilder() {
+    } // Sólo se puede llamar desde RandomPicker.builder()
 
     public RandomPicker<T> build() {
         if (isRemoveOnPick)
@@ -34,7 +38,7 @@ public class RandomPickerBuilder<T> {
         return self();
     }
 
-    private RandomPickerBuilder<T> self() {
+    protected RandomPickerBuilder<T> self() {
         return this;
     }
 

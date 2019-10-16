@@ -41,7 +41,7 @@ public abstract class FileAutosavable extends File {
 		if (getAndSetAutosaving(true))
 			return;
 
-        Action action = new LoopTask.Builder()
+        Action action = LoopTask.builder()
                 .setMode(Action.Mode.CONCURRENT)
                 .setRun((LoopTask self) -> {
                     synchronized (this) {

@@ -205,7 +205,14 @@ public class CalendarAction extends ActionAdapter implements CalendarInterface {
 		calendar.addException(r);
 	}
 
-	static class CalendarTaskBuilder extends ActionBuilder<CalendarTaskBuilder, CalendarAction, CalendarAction> {
+	public static CalendarTaskBuilder builder() {
+		return new CalendarTaskBuilder();
+	}
+
+	public static class CalendarTaskBuilder extends ActionBuilder<CalendarTaskBuilder, CalendarAction, CalendarAction> {
+		private CalendarTaskBuilder() {
+		}
+
 		@Override
 		protected CalendarAction buildOnce() {
 			return new CalendarAction(mode, function);

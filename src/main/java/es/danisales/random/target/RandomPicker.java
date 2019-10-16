@@ -16,11 +16,15 @@ public interface RandomPicker<RET> extends Target<RET>, Set<RET> {
     }
 
     static <RET> RandomPicker<RET> from(RET... values) {
-        RandomPickerBuilder<RET> builder = new RandomPickerBuilder<>();
+        RandomPickerBuilder<RET> builder = builder();
         RandomPicker<RET> picker = builder.build();
         picker.addAll(Arrays.asList(values));
         return picker;
     }
 
     void setRandomMode(RandomMode randomMode);
+
+    static <T> RandomPickerBuilder<T> builder() {
+        return new RandomPickerBuilder<>();
+    }
 }

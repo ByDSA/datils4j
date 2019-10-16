@@ -21,6 +21,10 @@ public interface ProcessAction extends Action {
         return new ProcessActionBuilder().addArg(fname).addArg(params).build();
     }
 
+    static ProcessActionBuilder builder() {
+        return new ProcessActionBuilder();
+    }
+
     @SuppressWarnings("unused")
     ListenerListOne<IOException> notFoundListeners();
 

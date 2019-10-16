@@ -1,6 +1,6 @@
 package es.danisales.process;
 
-import es.danisales.utils.Builder;
+import es.danisales.utils.building.Builder;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +9,9 @@ public class ProcessActionBuilder extends Builder {
     private static final Map<String[], ProcessAction> registeredProcessAction = new ConcurrentHashMap<>();
 
     protected List<String> args = new ArrayList<>();
+
+    ProcessActionBuilder() {
+    } // Sólo se puede llamar desde ProcessAction.builder()
 
     static void registerInstance(ProcessActionImp p) {
         registeredProcessAction.put(p.paramsWithName, p);

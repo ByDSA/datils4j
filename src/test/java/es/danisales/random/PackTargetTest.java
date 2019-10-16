@@ -1,7 +1,6 @@
 package es.danisales.random;
 
 import es.danisales.random.target.RandomPicker;
-import es.danisales.random.target.RandomPickerBuilder;
 import es.danisales.random.target.SimpleTarget;
 import org.junit.Test;
 
@@ -9,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PackTargetTest {
     private static RandomPicker createVariableSize() {
-        return new RandomPickerBuilder<>().surfaceVariable().build();
+        return RandomPicker.builder().surfaceVariable().build();
     }
 
     @Test

@@ -2,7 +2,7 @@ package es.danisales.tasks;
 
 import es.danisales.rules.Rule;
 import es.danisales.rules.RuleList;
-import es.danisales.utils.OnceBuilder;
+import es.danisales.utils.building.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.function.Consumer;
@@ -16,6 +16,9 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, INSTANCE, CALLER>
     Consumer<CALLER> function;
     boolean redoOnFail = false;
     CALLER caller;
+
+    ActionBuilder() {
+    }
 
     @SuppressWarnings("WeakerAccess")
     public T setCaller(CALLER caller) {
