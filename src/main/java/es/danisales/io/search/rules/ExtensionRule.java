@@ -3,7 +3,7 @@ package es.danisales.io.search.rules;
 import java.io.File;
 
 public class ExtensionRule implements FinderRule {
-    String extension;
+    private String extension;
 
     public ExtensionRule(String ext) {
         extension = ext;

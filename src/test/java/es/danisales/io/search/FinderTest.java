@@ -15,7 +15,7 @@ public class FinderTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private static void testCase1(TemporaryFolder temporaryFolder) throws IOException {
+    private void testCase1() throws IOException {
         temporaryFolder.create();
         File sub1 = temporaryFolder.newFolder("sub1");
         File sub2 = temporaryFolder.newFolder("sub2");
@@ -39,17 +39,21 @@ public class FinderTest {
         assertTrue(new File(sub2.getPath() + "/3.doc").createNewFile());
     }
 
-    @Test
-    public void nonRecursively() {
-    }
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void testCase2() throws IOException {
+        temporaryFolder.create();
+        File emptyFolder = temporaryFolder.newFolder("empty");
+        for (int i = 0; i < 10; i++) {
+            emptyFolder = new File(emptyFolder.getPath() + "/empty");
+            assertTrue(emptyFolder.mkdir());
+        }
 
-    @Test
-    public void recursively() {
+        new File(temporaryFolder.newFolder("nonempty").getPath() + "/a").createNewFile();
     }
 
     @Test
     public void byExtensionNonRecursively() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFiles = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -65,7 +69,7 @@ public class FinderTest {
 
     @Test
     public void byExtensionRecursively() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFiles = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -86,7 +90,7 @@ public class FinderTest {
 
     @Test
     public void addRule() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFiles = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -103,7 +107,7 @@ public class FinderTest {
 
     @Test
     public void onlyFiles() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFiles = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -119,7 +123,7 @@ public class FinderTest {
 
     @Test
     public void onlyFolders() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFiles = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -138,7 +142,7 @@ public class FinderTest {
 
     @Test
     public void filesAndFolders() throws IOException {
-        testCase1(temporaryFolder);
+        testCase1();
 
         List<File> foundFilesAndFolders = new Finder()
                 .from(temporaryFolder.getRoot())
@@ -153,5 +157,49 @@ public class FinderTest {
         assertEquals("sub2", foundFilesAndFolders.get(4).getName());
 
         assertEquals(5, foundFilesAndFolders.size());
+    }
+
+    @Test
+    public void emptyFolders() throws IOException {
+        testCase2();
+        assertEquals(1, numberOfEmptyFolders());
+    }
+
+    @Test
+    public void deleteEmptyFolders() throws IOException {
+        testCase2();
+        assertEquals(12, numberOfFolders());
+
+        assertTrue(new Finder()
+                .from(temporaryFolder.getRoot())
+                .emptyFolders()
+                .recursively()
+                .findAndDelete()
+        );
+
+        assertEquals(1, numberOfFolders());
+        assertEquals(0, numberOfEmptyFolders());
+    }
+
+    private int numberOfFolders() {
+        List<File> folders = new Finder()
+                .from(temporaryFolder.getRoot())
+                .onlyFolders()
+                .recursively()
+                .find();
+
+        return folders.size();
+    }
+
+    private int numberOfEmptyFolders() {
+        return findEmptyFoldersRecursively(temporaryFolder.getRoot()).size();
+    }
+
+    private List<File> findEmptyFoldersRecursively(File root) {
+        return new Finder()
+                .from(root)
+                .recursively()
+                .emptyFolders()
+                .find();
     }
 }

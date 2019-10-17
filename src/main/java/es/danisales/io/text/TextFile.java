@@ -116,12 +116,13 @@ public abstract class TextFile<L> extends FileAutosavable implements FileAppenda
 		}
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private void saveIfAutosave() {
-		boolean done = save();
+		save();
 	}
 
 	private void createParents() {
-        FileUtils.createParentFolders(this);
+		FileUtils.mkdirsParent(this);
 	}
 
 	@Override

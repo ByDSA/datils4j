@@ -1,5 +1,7 @@
 package es.danisales.io.search;
 
+import es.danisales.io.FileUtils;
+import es.danisales.io.search.rules.EmptyFolderRule;
 import es.danisales.io.search.rules.ExtensionRule;
 import es.danisales.io.search.rules.FinderRule;
 
@@ -11,27 +13,46 @@ final public class Finder {
     private Boolean recursively;
     private File folderBase;
     private List<FinderRule> rules = new ArrayList<>();
-    private boolean onlyReturnFiles = false;
-    private boolean onlyReturnFolders = false;
+    private Deleter deleter;
+    private ReturnMode returnMode = ReturnMode.Misc;
 
+    @SuppressWarnings("WeakerAccess")
     public Finder nonRecursively() {
         recursively = false;
 
         return self();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Finder recursively() {
         recursively = true;
 
         return self();
     }
 
-    public Finder byExtension(String ext) {
-        rules.add(new ExtensionRule(ext));
-
-        onlyReturnFiles = true;
+    public Finder deleter(Deleter deleter) {
+        this.deleter = deleter;
 
         return self();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Finder byExtension(String ext) {
+        setReturnMode(ReturnMode.Files);
+
+        return addRule(new ExtensionRule(ext));
+    }
+
+    private void setReturnMode(ReturnMode mode) {
+        if (returnMode == ReturnMode.Misc)
+            returnMode = mode;
+        else
+            throw new IllegalStateException("Return type cannot be changed twice");
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Finder emptyFolders() {
+        return addRule(new EmptyFolderRule());
     }
 
     public Finder from(File folder) {
@@ -40,12 +61,30 @@ final public class Finder {
         return self();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Finder addRule(FinderRule rule) {
         rules.add(rule);
 
         return self();
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public boolean findAndDelete() {
+        if (deleter == null)
+            deleter = new Deleter();
+
+        List<File> files = find();
+
+        boolean ret = deleter
+                .from(files)
+                .delete();
+
+        checkChangesAfterDeletion(files);
+
+        return ret;
+    }
+
+    @SuppressWarnings("WeakerAccess")
     public List<File> find() {
         if (recursively == null)
             throw new IllegalStateException("Recursively not defined");
@@ -56,6 +95,54 @@ final public class Finder {
         List<File> ret = findingProcess(folderBase);
         if (ret == null)
             ret = new ArrayList<>();
+        return ret;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void checkChangesAfterDeletion(List<File> files) {
+        do {
+            for (int i = 0; i < files.size(); i++) {
+                File file = files.get(i);
+                File parent = file.getParentFile();
+
+                if (!checkRules(parent)) {
+                    files.remove(i);
+                    i--;
+                } else {
+                    if (parent.isFile())
+                        parent.delete();
+                    else
+                        FileUtils.deleteFolder(parent);
+                    files.set(i, parent);
+                }
+            }
+        } while (files.size() > 0);
+    }
+
+    private ArrayList<File> findingProcess(File dir) {
+        ArrayList<File> ret = new ArrayList<>();
+
+        File[] files = dir.listFiles();
+        if (files == null) {
+            //error("El directorio no existe: " + dir);
+            return null;
+        }
+        for (File file : files) {
+            if (file.isFile()) {
+                if (checkRules(file) && returnMode != ReturnMode.Folders)
+                    ret.add(file);
+            } else if (file.isDirectory()) {
+                if (checkRules(file) && returnMode != ReturnMode.Files)
+                    ret.add(file);
+
+                if (recursively) {
+                    List<File> ret2 = findingProcess(file);
+                    if (ret2 != null)
+                        ret.addAll(ret2);
+                }
+            }
+        }
+
         return ret;
     }
 
@@ -71,40 +158,21 @@ final public class Finder {
         return true;
     }
 
-    private ArrayList<File> findingProcess(File dir) {
-        ArrayList<File> ret = new ArrayList<>();
-
-        File[] files = dir.listFiles();
-        if (files == null) {
-            //error("El directorio no existe: " + dir);
-            return null;
-        }
-        for (File file : files) {
-            if (file.isFile()) {
-                if (checkRules(file) && !onlyReturnFolders)
-                    ret.add(file);
-            } else if (recursively && file.isDirectory()) {
-                if (checkRules(file) && !onlyReturnFiles)
-                    ret.add(file);
-
-                List<File> ret2 = findingProcess(file);
-                if (ret2 != null)
-                    ret.addAll(ret2);
-            }
-        }
-
-        return ret;
-    }
-
+    @SuppressWarnings("WeakerAccess")
     public Finder onlyFiles() {
-        onlyReturnFiles = true;
+        setReturnMode(ReturnMode.Files);
 
         return self();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Finder onlyFolders() {
-        onlyReturnFolders = true;
+        setReturnMode(ReturnMode.Folders);
 
         return self();
+    }
+
+    private enum ReturnMode {
+        Misc, Files, Folders
     }
 }
