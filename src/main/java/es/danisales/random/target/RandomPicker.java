@@ -15,8 +15,9 @@ public interface RandomPicker<RET> extends Target<RET>, Set<RET> {
         return picker;
     }
 
+    @SuppressWarnings("unchecked")
     static <RET> RandomPicker<RET> from(RET... values) {
-        RandomPickerBuilder<RET> builder = builder();
+        RandomPickerBuilder<RET> builder = (RandomPickerBuilder<RET>) builder(values[0].getClass());
         RandomPicker<RET> picker = builder.build();
         picker.addAll(Arrays.asList(values));
         return picker;
@@ -24,7 +25,7 @@ public interface RandomPicker<RET> extends Target<RET>, Set<RET> {
 
     void setRandomMode(RandomMode randomMode);
 
-    static <T> RandomPickerBuilder<T> builder() {
+    static <T> RandomPickerBuilder<T> builder(Class<T> tClass) {
         return new RandomPickerBuilder<>();
     }
 }
