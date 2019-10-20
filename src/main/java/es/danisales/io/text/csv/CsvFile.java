@@ -4,18 +4,15 @@ import com.google.common.collect.ImmutableList;
 import es.danisales.io.text.TextFile;
 import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
+import es.danisales.utils.datastructures.ListMap;
+import es.danisales.utils.datastructures.ListMapIterator;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
+public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> implements Iterable<L> {
     private String separator = ";";
 
-    private Map<ID, L> map = new HashMap<>();
-    private List<L> csvLines = new ArrayList<>();
+    private ListMap<ID, L> listMap = new ListMap<>();
 
     @SuppressWarnings("WeakerAccess")
     public CsvFile(File file) {
@@ -23,7 +20,7 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
 	}
 
 	public L get(ID id) {
-		return map.get( id );
+        return listMap.get(id);
 	}
 
 	@Override
@@ -34,8 +31,7 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
         try {
             L l = readLine(o);
             if (l != null) {
-                map.put(l.getKey(), l);
-                csvLines.add(l);
+                listMap.put(l.getKey(), l);
             }
 
             return l;
@@ -54,6 +50,10 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> {
 
     @SuppressWarnings("unused")
     public ImmutableList<L> lines() {
-        return ImmutableList.copyOf(csvLines);
+        return ImmutableList.copyOf(listMap.values());
+    }
+
+    public ListMapIterator<ID, L> listMapIterator() {
+        return listMap.iterator();
     }
 }
