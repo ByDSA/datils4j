@@ -1,10 +1,11 @@
-package es.danisales.utils;
+package es.danisales.utils.datastructures;
 
 import es.danisales.others.Keyable;
 
 import java.io.Serializable;
+import java.util.Map;
 
-public class Pair<K, V> implements Serializable, Keyable<K> {
+public class Pair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
     private K key;
     private V value;
 
@@ -19,6 +20,13 @@ public class Pair<K, V> implements Serializable, Keyable<K> {
 
     public V getValue() {
         return value;
+    }
+
+    @Override
+    public V setValue(V newValue) {
+        V old = value;
+        value = newValue;
+        return old;
     }
 
     @Override
