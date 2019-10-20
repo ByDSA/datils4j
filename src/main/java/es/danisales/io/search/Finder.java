@@ -7,14 +7,15 @@ import es.danisales.io.search.rules.FinderRule;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 final public class Finder {
     private Boolean recursively;
     private File folderBase;
     private List<FinderRule> rules = new ArrayList<>();
-    private Deleter deleter;
     private ReturnMode returnMode = ReturnMode.Misc;
+    private Comparator<File> sorter;
 
     @SuppressWarnings("WeakerAccess")
     public Finder nonRecursively() {
@@ -26,12 +27,6 @@ final public class Finder {
     @SuppressWarnings("WeakerAccess")
     public Finder recursively() {
         recursively = true;
-
-        return self();
-    }
-
-    public Finder deleter(Deleter deleter) {
-        this.deleter = deleter;
 
         return self();
     }
@@ -70,12 +65,9 @@ final public class Finder {
 
     @SuppressWarnings("WeakerAccess")
     public boolean findAndDelete() {
-        if (deleter == null)
-            deleter = new Deleter();
-
         List<File> files = find();
 
-        boolean ret = deleter
+        boolean ret = new Deleter()
                 .from(files)
                 .delete();
 
@@ -95,6 +87,8 @@ final public class Finder {
         List<File> ret = findingProcess(folderBase);
         if (ret == null)
             ret = new ArrayList<>();
+        else if (sorter != null)
+            ret.sort(sorter);
         return ret;
     }
 
@@ -169,6 +163,11 @@ final public class Finder {
     public Finder onlyFolders() {
         setReturnMode(ReturnMode.Folders);
 
+        return self();
+    }
+
+    public Finder sort(Comparator<File> comparator) {
+        sorter = comparator;
         return self();
     }
 
