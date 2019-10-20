@@ -8,8 +8,8 @@ import java.util.Comparator;
 
 @SuppressWarnings("WeakerAccess")
 public final class FileUtils {
-	private FileUtils() {
-	} // noninstantiable
+    private FileUtils() {
+    } // noninstantiable
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     // Source: https://stackoverflow.com/a/7768086
@@ -28,15 +28,15 @@ public final class FileUtils {
 
     @SuppressWarnings("UnusedReturnValue")
     public static boolean mkdirsParent(File file) {
-		File parent = file.getParentFile();
+        File parent = file.getParentFile();
 
         if (parent == null)
             return false;
 
-		boolean done = parent.mkdirs();
+        boolean done = parent.mkdirs();
 
-		if (!done && !parent.exists())
-			throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
+        if (!done && !parent.exists())
+            throw new RuntimeException("No se pudo crear la carpeta parent " + parent);
 
         return done;
     }
@@ -47,11 +47,31 @@ public final class FileUtils {
         return f.exists() && !f.isDirectory();
     }
 
-    @SuppressWarnings("unused")
-    public static class Comparators {
-        public final static Comparator<File> fullpathComparator = Comparator.comparing(File::getAbsolutePath);
-        public final static Comparator<File> filenameComparator = Comparator.comparing(File::getName);
+    public static boolean rename(File file, String newNameWithExtension) {
+        boolean ret = !file.getName().equals(newNameWithExtension);
+        return ret && file.renameTo(new File(file.getAbsolutePath() + "/" + newNameWithExtension));
+    }
 
+    @Deprecated
+    public static boolean appendObject(Path filepath, ThrowingConsumer<ObjectOutputStream, Exception> f) {
+        ObjectOutputStream output;
+        try {
+            boolean exists = fileExists(filepath);
+            FileOutputStream fos = new FileOutputStream(filepath.toString(), exists);
+            if (!exists) {
+                output = new ObjectOutputStream(fos);
+            } else {
+                output = new AppendingObjectOutputStream(fos);
+            }
+
+            f.acceptThrows(output);
+            output.close();
+            fos.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static class Paths {
@@ -74,27 +94,15 @@ public final class FileUtils {
         }
     }
 
-    @Deprecated
-    public static boolean appendObject(Path filepath, ThrowingConsumer<ObjectOutputStream, Exception> f) {
-		ObjectOutputStream output;
-		try {
-            boolean exists = fileExists(filepath);
-            FileOutputStream fos = new FileOutputStream(filepath.toString(), exists);
-			if (!exists) {
-				output = new ObjectOutputStream( fos );
-			} else {
-				output = new AppendingObjectOutputStream(fos);
-			}
-
-			f.acceptThrows( output );
-			output.close();
-			fos.close();
-			return true;
-		} catch(IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    @SuppressWarnings("unused")
+    public static class Comparators {
+        public final static Comparator<File> fullpathComparator = Comparator.comparing(File::getAbsolutePath);
+        public final static Comparator<File> filenameComparator = (o1, o2) -> {
+            String fname1 = o1.getName().toLowerCase();
+            String fname2 = o2.getName().toLowerCase();
+            return fname1.compareTo(fname2);
+        };
+    }
 
     @Deprecated
     public static boolean writeObject(String filename, ThrowingConsumer<ObjectOutputStream, Exception> f) {
