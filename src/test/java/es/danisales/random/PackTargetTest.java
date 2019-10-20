@@ -2,13 +2,17 @@ package es.danisales.random;
 
 import es.danisales.random.target.RandomPicker;
 import es.danisales.random.target.SimpleTarget;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class PackTargetTest {
-    private static RandomPicker createVariableSize() {
-        return RandomPicker.builder().surfaceVariable().build();
+    private RandomPicker<SimpleTarget> randomPicker;
+
+    @Before
+    public void init() {
+        randomPicker = RandomPicker.builder(SimpleTarget.class).surfaceVariable().build();
     }
 
     @Test
@@ -26,38 +30,32 @@ public class PackTargetTest {
 
     @Test
     public void defaultSurface() {
-        RandomPicker t = createVariableSize();
-
-        assertEquals(0, t.getSurface());
+        assertEquals(0, randomPicker.getSurface());
     }
 
     @Test(expected = IllegalStateException.class)
     public void defaultPickException() {
-        RandomPicker t = createVariableSize();
-
-        t.pickDart(0);
+        randomPicker.pickDart(0);
     }
 
     @Test(expected = IllegalStateException.class)
     public void pickOnZeroSurfaceNewCreation() {
-        RandomPicker t = createVariableSize();
-
-        t.pick();
+        randomPicker.pick();
     }
 
     @Test(expected = IllegalStateException.class)
     public void pickOnZeroSurface() {
-        RandomPicker t = createVariableSize();
+        RandomPicker<SimpleTarget> t = randomPicker;
         SimpleTarget st = new SimpleTarget();
         st.setSurface(0);
-        t.add(st);
+        randomPicker.add(st);
 
         t.pick();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void negativeSurface() {
-        RandomPicker t = createVariableSize();
+        RandomPicker<SimpleTarget> t = randomPicker;
         SimpleTarget st = new SimpleTarget();
         st.setSurface(-1);
         t.add(st);
