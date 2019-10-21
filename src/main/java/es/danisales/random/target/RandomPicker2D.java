@@ -38,13 +38,13 @@ class RandomPicker2D<PICK_TYPE extends Target<PICK_TYPE>> extends RandomPickerIm
 	}
 
 	@Override
-	public void next() {
+    public void onRollDice() {
 	}
 
 	private long surfaceWithNext() {
 		long size = 0;
         for (Target t : this) {
-			t.next();
+            t.onRollDice();
             size += Math.max(t.getSurface(), 0);
 		}
 

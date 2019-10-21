@@ -30,6 +30,6 @@ public class SimpleTarget implements Target<SimpleTarget> {
     }
 
     @Override
-    public void next() {
+    public void onRollDice() {
     }
 }

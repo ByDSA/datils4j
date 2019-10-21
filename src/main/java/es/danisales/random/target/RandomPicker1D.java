@@ -16,6 +16,6 @@ class RandomPicker1D<T> extends RandomPickerImp<T> {
     }
 
     @Override
-    public void next() {
+    public void onRollDice() {
     }
 }
