@@ -6,7 +6,7 @@ import java.util.*;
 
 public class ListMap<ID, T> implements Map<ID, T>, Iterable<Map.Entry<ID, T>> {
     List<Map.Entry<ID, T>> list = new ArrayList<>();
-    Map<ID, T> map = new HashMap<>();
+    Map<ID, T> map = new LinkedHashMap<>();
 
     @Override
     public int size() {
@@ -25,7 +25,7 @@ public class ListMap<ID, T> implements Map<ID, T>, Iterable<Map.Entry<ID, T>> {
 
     @Override
     public boolean containsValue(Object value) {
-        return false;
+        return map.containsValue(value);
     }
 
     @Override
@@ -40,13 +40,20 @@ public class ListMap<ID, T> implements Map<ID, T>, Iterable<Map.Entry<ID, T>> {
     }
 
     public T setIndex(int index, T v) {
-        return list.get(index).setValue(v);
+        Entry<ID, T> entry = list.get(index);
+        map.put(entry.getKey(), v);
+        return entry.setValue(v);
     }
 
     @Override
     public T put(ID id, T t) {
-        list.add(new Pair<>(id, t));
-        return map.put(id, t);
+        Pair<ID, T> newPair = new Pair<>(id, t);
+        T oldValue = map.put(id, t);
+        if (oldValue == null)
+            list.add(newPair);
+        else
+            list.set(list.indexOf(new Pair<>(id, oldValue)), newPair);
+        return oldValue;
     }
 
     @Override
@@ -90,11 +97,25 @@ public class ListMap<ID, T> implements Map<ID, T>, Iterable<Map.Entry<ID, T>> {
     }
 
     public int indexOf(T o) {
-        return list.indexOf(o);
+        int i = 0;
+        for (Entry<ID, T> entry : list) {
+            if (entry.getValue().equals(o))
+                return i;
+            i++;
+        }
+
+        return -1;
     }
 
     public int lastIndexOf(T o) {
-        return list.lastIndexOf(o);
+        for (int i = size() - 1; i >= 0; i--) {
+            Entry<ID, T> entry = list.get(i);
+            if (entry.getValue().equals(o))
+                return i;
+            i--;
+        }
+
+        return -1;
     }
 
     public Map.Entry<ID, T> getIndex(int index) {
