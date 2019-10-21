@@ -4,13 +4,13 @@ import es.danisales.random.RandomMode;
 import es.danisales.utils.building.Builder;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class RandomPickerBuilder<T> extends Builder {
     RandomMode randomMode = RandomMode.Normal;
     private boolean isRemoveOnPick = false;
     private boolean isSurfaceVariable = false;
-    private List<T> fromList;
+    private Collection<T> fromList;
 
     RandomPickerBuilder() {
     } // Sólo se puede llamar desde RandomPicker.builder()
@@ -48,7 +48,7 @@ public class RandomPickerBuilder<T> extends Builder {
         return self();
     }
 
-    public RandomPickerBuilder<T> from(List<T> list) {
+    public RandomPickerBuilder<T> from(Collection<T> list) {
         if (fromList == null)
             fromList = new ArrayList<>();
 
