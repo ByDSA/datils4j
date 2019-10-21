@@ -68,13 +68,14 @@ public class ListMapTest {
             listMap.put("2x2", 4);
             listMap.put("2x3", 6);
             listMap.put("2x4", 8);
+            listMap.put("1+1", 2);
         }
 
         @Test
         public void removeIndexSize() {
-            assertEquals(4, listMap.size());
+            assertEquals(5, listMap.size());
             listMap.removeIndex(0);
-            assertEquals(3, listMap.size());
+            assertEquals(4, listMap.size());
         }
 
         @Test
@@ -91,7 +92,7 @@ public class ListMapTest {
 
         @Test(expected = IndexOutOfBoundsException.class)
         public void removeIndexOutIndexUpperBound() {
-            listMap.removeIndex(4);
+            listMap.removeIndex(5);
         }
 
         @Test
@@ -105,13 +106,13 @@ public class ListMapTest {
 
         @Test
         public void removeObjectSize() {
-            assertEquals(4, listMap.size());
-            assertEquals(4, listMap.list.size());
-            assertEquals(4, listMap.map.size());
+            assertEquals(5, listMap.size());
+            assertEquals(5, listMap.list.size());
+            assertEquals(5, listMap.map.size());
             listMap.remove("2x2");
-            assertEquals(3, listMap.map.size());
-            assertEquals(3, listMap.list.size());
-            assertEquals(3, listMap.size());
+            assertEquals(4, listMap.map.size());
+            assertEquals(4, listMap.list.size());
+            assertEquals(4, listMap.size());
         }
 
         @Test
@@ -123,9 +124,9 @@ public class ListMapTest {
         @SuppressWarnings("SuspiciousMethodCalls")
         @Test
         public void removeObjectTypeMismatch() {
-            assertEquals(4, listMap.size());
+            assertEquals(5, listMap.size());
             listMap.remove(123456.789);
-            assertEquals(4, listMap.size());
+            assertEquals(5, listMap.size());
         }
 
         @Test
@@ -159,14 +160,14 @@ public class ListMapTest {
 
         @Test(expected = IndexOutOfBoundsException.class)
         public void getIndexOutUpperBound() {
-            listMap.getIndex(4);
+            listMap.getIndex(5);
         }
 
         @Test
         public void keySet() {
             Set<String> s = listMap.keySet();
             int i = 0;
-            String[] keys = new String[]{"2x1", "2x2", "2x3", "2x4"};
+            String[] keys = new String[]{"2x1", "2x2", "2x3", "2x4", "1+1"};
             for (String key : s) {
                 assertEquals(keys[i++], key);
             }
@@ -176,7 +177,7 @@ public class ListMapTest {
         public void valueSet() {
             Collection<Integer> s = listMap.values();
             int i = 0;
-            Integer[] values = new Integer[]{2, 4, 6, 8};
+            Integer[] values = new Integer[]{2, 4, 6, 8, 2};
             for (Integer value : s) {
                 assertEquals(values[i++], value);
             }
@@ -200,21 +201,78 @@ public class ListMapTest {
         @Test
         public void putNewValue() {
             listMap.put("2x5", 10);
-            assertEquals(5, listMap.size());
-            assertEquals(5, listMap.list.size());
-            assertEquals(5, listMap.map.size());
+            assertEquals(6, listMap.size());
+            assertEquals(6, listMap.list.size());
+            assertEquals(6, listMap.map.size());
             assertEquals((Integer) 10, listMap.get("2x5"));
-            assertEquals((Integer) 10, listMap.getIndex(4).getValue());
+            assertEquals((Integer) 10, listMap.getIndex(5).getValue());
         }
 
         @Test
         public void putChangeValue() {
             listMap.put("2x4", 10);
-            assertEquals(4, listMap.size());
-            assertEquals(4, listMap.list.size());
-            assertEquals(4, listMap.map.size());
+            assertEquals(5, listMap.map.size());
+            assertEquals(5, listMap.list.size());
+            assertEquals(5, listMap.size());
             assertEquals((Integer) 10, listMap.get("2x4"));
             assertEquals((Integer) 10, listMap.getIndex(3).getValue());
+        }
+
+        @Test
+        public void containsKey1() {
+            assertTrue(listMap.containsKey("2x1"));
+            listMap.remove("2x1");
+            assertFalse(listMap.containsKey("2x1"));
+        }
+
+        @Test
+        public void containsKey2() {
+            assertTrue(listMap.containsKey("2x1"));
+            listMap.removeIndex(0);
+            assertFalse(listMap.containsKey("2x1"));
+        }
+
+        @Test
+        public void containsValue1() {
+            assertTrue(listMap.containsValue(4));
+            listMap.remove("2x2");
+            assertFalse(listMap.containsValue(4));
+        }
+
+        @Test
+        public void containsValue2() {
+            assertTrue(listMap.containsValue(4));
+            listMap.removeIndex(1);
+            assertFalse(listMap.containsValue(4));
+        }
+
+        @Test
+        public void indexOf() {
+            assertEquals(0, listMap.indexOf(2));
+        }
+
+        @Test
+        public void indexOfNotFound() {
+            assertEquals(-1, listMap.indexOf(22));
+        }
+
+        @Test
+        public void lastIndexOf() {
+            assertEquals(4, listMap.lastIndexOf(2));
+        }
+
+        @Test
+        public void lastIndexOfNotFound() {
+            assertEquals(-1, listMap.lastIndexOf(22));
+        }
+
+        @Test
+        public void setIndex() {
+            assertEquals((Integer) 2, listMap.get("2x1"));
+            listMap.setIndex(0, 45);
+            assertEquals("2x1", listMap.getIndex(0).getKey());
+            assertEquals((Integer) 45, listMap.getIndex(0).getValue());
+            assertEquals((Integer) 45, listMap.get("2x1"));
         }
     }
 }
