@@ -3,26 +3,36 @@ package es.danisales.random.target;
 import es.danisales.random.RandomMode;
 import es.danisales.utils.building.Builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RandomPickerBuilder<T> extends Builder {
     RandomMode randomMode = RandomMode.Normal;
     private boolean isRemoveOnPick = false;
     private boolean isSurfaceVariable = false;
+    private List<T> fromList;
 
     RandomPickerBuilder() {
     } // Sólo se puede llamar desde RandomPicker.builder()
 
     public RandomPicker<T> build() {
+        RandomPicker<T> ret;
         if (isRemoveOnPick)
             if (isSurfaceVariable)
                 throw new RuntimeException("No existe");
             else
-                return new RandomPicker1DRemover<>(this);
+                ret = new RandomPicker1DRemover<>(this);
         else {
             if (isSurfaceVariable)
-                return new RandomPicker2D(this); // Warning: si T no extiende de Target, dará error
+                ret = new RandomPicker2D(this); // Warning: si T no extiende de Target, dará error
             else
-                return new RandomPicker1D<>(this);
+                ret = new RandomPicker1D<>(this);
         }
+
+        if (fromList != null)
+            ret.addAll(fromList);
+
+        return ret;
     }
 
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
@@ -34,6 +44,15 @@ public class RandomPickerBuilder<T> extends Builder {
 
     public RandomPickerBuilder<T> surfaceVariable() {
         isSurfaceVariable = true;
+
+        return self();
+    }
+
+    public RandomPickerBuilder<T> from(List<T> list) {
+        if (fromList == null)
+            fromList = new ArrayList<>();
+
+        fromList.addAll(list);
 
         return self();
     }
