@@ -1,5 +1,7 @@
 package es.danisales.tasks;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -33,7 +35,7 @@ public class EveryTask extends ActionAdapter {
 		}
 
 		@Override
-        public EveryTask buildOnce() {
+        public @NonNull EveryTask buildOnce() {
 			checkArgument(every > 0);
             checkArgument(instance == null, "Just one instantiation");
             instance = new EveryTask(this);
@@ -41,7 +43,7 @@ public class EveryTask extends ActionAdapter {
 		}
 
 		@SuppressWarnings("WeakerAccess")
-		public Builder setEvery(long every) {
+        public @NonNull Builder setEvery(long every) {
 			checkArgument(every > 0);
 			this.every = every;
 
@@ -49,7 +51,7 @@ public class EveryTask extends ActionAdapter {
 		}
 
 		@Override
-		protected Builder self() {
+        protected @NonNull Builder self() {
 			return this;
 		}
 	}

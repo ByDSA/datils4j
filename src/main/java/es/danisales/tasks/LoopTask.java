@@ -1,5 +1,7 @@
 package es.danisales.tasks;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class LoopTask extends ActionAdapter {
@@ -16,14 +18,14 @@ public class LoopTask extends ActionAdapter {
 		}
 
 		@Override
-        public LoopTask buildOnce() {
+        public @NonNull LoopTask buildOnce() {
 			checkArgument(instance == null, "Just one instantiation");
 			instance = new LoopTask(this);
 			return instance;
 		}
 
 		@Override
-		protected Builder self() {
+        protected @NonNull Builder self() {
 			return this;
 		}
 	}

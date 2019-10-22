@@ -1,6 +1,6 @@
 package es.danisales.listeners;
 
-import es.danisales.datastructures.ListAdapter;
+import es.danisales.datastructures.ListProxy;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ListenerZero extends ListAdapter<Runnable> implements ListenerList<Runnable> {
+public class ListenerZero extends ListProxy<Runnable> implements ListenerList<Runnable> {
     private final Action.Mode modeConcurrency;
 
     private ListenerZero(List<Runnable> listAdapter, Action.Mode mode) {

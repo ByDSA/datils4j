@@ -1,14 +1,13 @@
-package es.danisales.utils.datastructures;
-
-import es.danisales.others.Keyable;
+package es.danisales.datastructures;
 
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Supplier;
 
+@Deprecated
 public class ListMapIterator<ID, T> implements Supplier<Map.Entry<ID, T>>, ListIterator<Map.Entry<ID, T>> {
     private ListMap<ID, T> reference;
-    private boolean cyclic;
+    private boolean cyclic = false;
     private int cursor = -1;
 
     ListMapIterator(ListMap<ID, T> reference) {
@@ -16,22 +15,25 @@ public class ListMapIterator<ID, T> implements Supplier<Map.Entry<ID, T>>, ListI
     }
 
     public boolean hasNext() {
-        return cursor != nextIndex(); // TODO: no sirve para random
+        return cursor != nextIndex();
+    }
+
+    public void setCyclic(boolean cyclic) {
+        this.cyclic = cyclic;
     }
 
     @Override
     public Map.Entry<ID, T> get() {
-        return reference.getIndex(cursor);
+        return reference.get(cursor);
     }
 
 
     public ID getKey() {
-        return reference.list.get(cursor).getKey();
+        return reference.get(cursor).getKey();
     }
 
     public boolean goTo(ID id) {
-        T obj = reference.get(id);
-        int index = reference.indexOf(obj);
+        int index = reference.indexOf(id);
 
         return goToIndex(index);
     }
@@ -82,41 +84,28 @@ public class ListMapIterator<ID, T> implements Supplier<Map.Entry<ID, T>>, ListI
     }
 
     public void remove() {
-        reference.removeIndex(cursor);
+        reference.remove(cursor);
     }
 
     @Override
     public void set(Map.Entry<ID, T> entry) {
-        reference.map.put(entry.getKey(), entry.getValue());
-        reference.list.set(cursor, entry);
+        reference.set(cursor, entry);
     }
 
     @Override
     public void add(Map.Entry<ID, T> entry) {
-        reference.map.put(entry.getKey(), entry.getValue());
-        reference.list.add(cursor, entry);
+        //reference.mapKeyPosition.put(entry.getKey(), entry.getValue());
+        reference.add(cursor, entry);
     }
+/**
+ public void setValue(T t) {
+ Map.Entry<ID, T> entry = reference.list.get(cursor);
+ entry.setValue(t);
+ reference.mapKeyPosition.put(entry.getKey(), t);
+ }
 
-    public void setValue(T t) {
-        Map.Entry<ID, T> entry = reference.list.get(cursor);
-        entry.setValue(t);
-        reference.map.put(entry.getKey(), t);
-    }
-
-    public void add(ID key, T t) {
-        reference.list.add(new Pair<>(key, t));
-        reference.map.put(key, t);
-    }
-
-    public class Builder<ID, T extends Keyable<ID>> extends es.danisales.utils.building.Builder<Builder<ID, T>, ListMapIterator<ID, T>> {
-        @Override
-        public ListMapIterator<ID, T> build() {
-            return null;
-        }
-
-        @Override
-        protected Builder self() {
-            return null;
-        }
-    }
+ public void put(ID key, T t) {
+ reference.list.put(new Pair<>(key, t));
+ reference.mapKeyPosition.put(key, t);
+ }*/
 }

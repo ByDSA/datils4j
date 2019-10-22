@@ -2,10 +2,10 @@ package es.danisales.io.text.csv;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import es.danisales.datastructures.ListMap;
 import es.danisales.io.text.TextFile;
 import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
-import es.danisales.utils.datastructures.ListMap;
 
 import java.io.File;
 import java.util.Map;
@@ -21,7 +21,7 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> imp
 	}
 
 	public L get(ID id) {
-        return listMap.get(id);
+        return listMap.getByKey(id);
 	}
 
 	@Override

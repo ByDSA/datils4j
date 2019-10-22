@@ -68,5 +68,5 @@ public abstract class ActionBuilder<T extends ActionBuilder<T, INSTANCE, CALLER>
         return self();
     }
 
-    protected abstract T self();
+    protected abstract @NonNull T self();
 }

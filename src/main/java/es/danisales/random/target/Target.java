@@ -1,6 +1,6 @@
 package es.danisales.random.target;
 
-import es.danisales.utils.datastructures.Picker;
+import es.danisales.datastructures.Picker;
 
 public interface Target<RET> extends Picker<RET> {
 	RET pickDart(long dart);

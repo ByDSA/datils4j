@@ -7,15 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ListAdapter<T> implements List<T> {
+public class ListProxy<T> implements List<T> {
     private final List<T> listAdapter;
 
-    protected ListAdapter(List<T> listAdapter) {
+	protected ListProxy(List<T> listAdapter) {
         this.listAdapter = listAdapter;
     }
 
-    public static <T> ListAdapter of(List<T> l) {
-        return new ListAdapter<>(l);
+	public static <T> ListProxy of(List<T> l) {
+		return new ListProxy<>(l);
 	}
 
 	@Override

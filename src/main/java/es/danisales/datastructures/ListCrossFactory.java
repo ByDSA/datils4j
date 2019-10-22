@@ -8,22 +8,20 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-public abstract class InOutConversion<OUT, IN> implements Set<OUT> {
+public abstract class ListCrossFactory<IN, OUT> implements List<OUT> {
     private final List<IN> interalList = new ArrayList<>();
     private final List<OUT> externalList = new ArrayList<>();
-    private final Map<IN, OUT> intertalToExternalMap = new HashMap<>();
+    private final Map<IN, OUT> internalToExternalMap = new HashMap<>();
     private final Map<OUT, IN> externalToInternalMap = new HashMap<>();
 
     @Override
     public int size() {
-        return interalList.size();
+        return externalList.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return interalList.isEmpty();
+        return externalList.isEmpty();
     }
 
     @Override
@@ -31,13 +29,68 @@ public abstract class InOutConversion<OUT, IN> implements Set<OUT> {
         return externalList.contains(o);
     }
 
-    protected OUT get(int i) {
-        checkArgument(i >= 0);
+    @Override
+    public OUT get(int i) {
         return externalList.get(i);
     }
 
-    protected int indexOf(OUT o) {
+    protected IN getInternal(int i) {
+        return interalList.get(i);
+    }
+
+    @Override
+    public OUT set(int index, OUT element) {
+        IN in = createInternal(element);
+        interalList.set(index, in);
+        crossReference(element, in);
+        return externalList.set(index, element);
+    }
+
+    private void crossReference(OUT external, IN internal) {
+        internalToExternalMap.put(internal, external);
+        externalToInternalMap.put(external, internal);
+    }
+
+    @Override
+    public void add(int index, OUT element) {
+        externalList.add(index, element);
+        IN in = createInternal(element);
+        interalList.add(index, in);
+        crossReference(element, in);
+    }
+
+    @Override
+    public OUT remove(int index) {
+        interalList.remove(index);
+        return externalList.remove(index);
+    }
+
+    @Override
+    public int indexOf(Object o) {
         return externalList.indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return externalList.lastIndexOf(o);
+    }
+
+    @Override
+    @NonNull
+    public ListIterator<OUT> listIterator() {
+        return externalList.listIterator();
+    }
+
+    @Override
+    @NonNull
+    public ListIterator<OUT> listIterator(int index) {
+        return externalList.listIterator(index);
+    }
+
+    @Override
+    @NonNull
+    public List<OUT> subList(int fromIndex, int toIndex) {
+        return externalList.subList(fromIndex, toIndex);
     }
 
     @Override
@@ -68,28 +121,63 @@ public abstract class InOutConversion<OUT, IN> implements Set<OUT> {
 
     protected abstract IN createInternal(OUT out);
 
+    protected abstract OUT createExternal(IN in);
+
     @Override
-    public boolean add(@Nullable OUT ret) {
+    public boolean add(OUT ret) {
         externalList.add(ret);
         IN in = createInternal(ret);
         interalList.add(in);
-        intertalToExternalMap.put(in, ret);
-        externalToInternalMap.put(ret, in);
+        crossReference(ret, in);
+        return true;
+    }
+
+    protected boolean addInternal(IN in) {
+        interalList.add(in);
+        OUT out = createExternal(in);
+        externalList.add(out);
+        crossReference(out, in);
         return true;
     }
 
     @Override
     public boolean remove(@Nullable Object o) {
-        boolean removed = externalList.remove(o);
+        OUT oCasted = castOut(o);
+        boolean removed = externalList.remove(oCasted);
         if (!removed)
             return false;
 
-        IN in = externalToInternalMap.get(o);
+        IN in = externalToInternalMap.get(oCasted);
         interalList.remove(in);
-        externalToInternalMap.remove(o);
-        intertalToExternalMap.remove(in);
+        deleteCrossReference(in, oCasted);
 
         return true;
+    }
+
+    protected boolean removeInteral(@Nullable IN in) {
+        boolean removed = interalList.remove(in);
+        if (!removed)
+            return false;
+
+        OUT out = internalToExternalMap.get(in);
+        externalList.remove(out);
+        deleteCrossReference(in, out);
+
+        return true;
+    }
+
+    private void deleteCrossReference(IN in, OUT out) {
+        externalToInternalMap.remove(out);
+        internalToExternalMap.remove(in);
+    }
+
+    @SuppressWarnings("unchecked")
+    private OUT castOut(Object o) {
+        try {
+            return (OUT) o;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -103,6 +191,15 @@ public abstract class InOutConversion<OUT, IN> implements Set<OUT> {
         Objects.requireNonNull(c);
         for (OUT r : c)
             add(r);
+        return true;
+    }
+
+    @Override
+    public boolean addAll(int index, @NonNull Collection<? extends OUT> c) {
+        Objects.requireNonNull(c);
+
+        for (OUT r : c)
+            add(index++, r);
         return true;
     }
 
@@ -151,7 +248,7 @@ public abstract class InOutConversion<OUT, IN> implements Set<OUT> {
         interalList.clear();
         externalList.clear();
         externalToInternalMap.clear();
-        intertalToExternalMap.clear();
+        internalToExternalMap.clear();
     }
 
     @Override

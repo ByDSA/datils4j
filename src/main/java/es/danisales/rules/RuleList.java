@@ -1,6 +1,6 @@
 package es.danisales.rules;
 
-import es.danisales.datastructures.ListAdapter;
+import es.danisales.datastructures.ListProxy;
 import es.danisales.utils.building.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class RuleList extends ListAdapter<Rule> implements Rule, List<Rule> {
+public class RuleList extends ListProxy<Rule> implements Rule, List<Rule> {
     private final boolean whenEmptyValue;
 
     private RuleList(Builder builder) {
@@ -71,6 +71,7 @@ public class RuleList extends ListAdapter<Rule> implements Rule, List<Rule> {
             return self();
         }
 
+        @SuppressWarnings("WeakerAccess")
         public Builder setWhenEmptyValue(boolean whenEmptyValue1) {
             checkNotInstantiated();
             whenEmptyValue = whenEmptyValue1;
@@ -79,14 +80,14 @@ public class RuleList extends ListAdapter<Rule> implements Rule, List<Rule> {
         }
 
         @Override
-        protected RuleList buildOnce() {
+        protected @NonNull RuleList buildOnce() {
             checkNotNull(list);
             checkNotNull(whenEmptyValue);
             return new RuleList(self());
         }
 
         @Override
-        protected Builder self() {
+        protected @NonNull Builder self() {
             return this;
         }
     }

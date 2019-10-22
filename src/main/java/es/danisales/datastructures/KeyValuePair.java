@@ -1,23 +1,26 @@
-package es.danisales.utils.datastructures;
+package es.danisales.datastructures;
 
 import es.danisales.others.Keyable;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
-public class Pair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
+public class KeyValuePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
     private K key;
     private V value;
 
-    public Pair(K key, V value) {
+    public KeyValuePair(K key, V value) {
         this.key = key;
         this.value = value;
     }
 
+    @Override
     public K getKey() {
         return key;
     }
 
+    @Override
     public V getValue() {
         return value;
     }
@@ -44,10 +47,10 @@ public class Pair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof Pair) {
-            Pair pair = (Pair) o;
-            if (key != null ? !key.equals(pair.key) : pair.key != null) return false;
-            return value != null ? value.equals(pair.value) : pair.value == null;
+        if (o instanceof KeyValuePair) {
+            KeyValuePair pair = (KeyValuePair) o;
+            if (!Objects.equals(key, pair.key)) return false;
+            return Objects.equals(value, pair.value);
         }
         return false;
     }

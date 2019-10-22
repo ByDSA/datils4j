@@ -1,5 +1,7 @@
 package es.danisales.utils.building;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -11,9 +13,9 @@ public abstract class OnceBuilder<SELF extends OnceBuilder<SELF, INSTANCE>, INST
         return Objects.requireNonNull(instance, "Instance not built");
     }
 
-    protected abstract INSTANCE buildOnce();
+    protected abstract @NonNull INSTANCE buildOnce();
 
-    public final INSTANCE build() {
+    public final @NonNull INSTANCE build() {
         checkNotInstantiated();
         instance = buildOnce();
         return instance;

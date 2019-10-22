@@ -1,12 +1,15 @@
 package es.danisales.random.target;
 
-import es.danisales.datastructures.InOutConversion;
+import es.danisales.datastructures.ListCrossFactory;
 import es.danisales.random.RandomMode;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.security.SecureRandom;
 import java.util.Random;
 
-abstract class RandomPickerImp<RET> extends InOutConversion<RET, SimpleTargetBean<RET>> implements RandomPicker<RET> {
+import static com.google.common.base.Preconditions.checkState;
+
+abstract class RandomPickerImp<RET> extends ListCrossFactory<SimpleTargetBean<RET>, RET> implements RandomPicker<RET> {
     private Random rand;
 
     RandomPickerImp(RandomPickerBuilder builder) {
@@ -14,15 +17,20 @@ abstract class RandomPickerImp<RET> extends InOutConversion<RET, SimpleTargetBea
     }
 
     @Override
-    public SimpleTargetBean<RET> createInternal(RET ret) {
-        return new SimpleTargetBean<>(ret);
+    public SimpleTargetBean<RET> createInternal(RET out) {
+        return new SimpleTargetBean<>(out);
+    }
+
+    @Override
+    public RET createExternal(SimpleTargetBean<RET> in) {
+        return in.get();
     }
 
     @SuppressWarnings("unused")
-    public void setRandomMode(RandomMode randomMode) {
+    public void setRandomMode(@NonNull RandomMode randomMode) {
         switch (randomMode) {
             case Normal:
-                if (rand instanceof SecureRandom)
+                if (!(rand instanceof SecureRandom))
                     rand = new Random();
                 break;
             case Secure:
@@ -32,22 +40,21 @@ abstract class RandomPickerImp<RET> extends InOutConversion<RET, SimpleTargetBea
         }
     }
 
-    long randUntil(long max) {
-        return (rand.nextLong() & Long.MAX_VALUE) % max;
+    void checkNotEmpty() {
+        checkState(size() != 0);
     }
 
-    void checkNotEmpty() {
-        if (size() == 0)
-            throw new IllegalStateException("PackTarget vacío");
+    long randUntil(long max) {
+        checkState(rand != null);
+        return (rand.nextLong() & Long.MAX_VALUE) % max;
     }
 
     @Override
     public RET pick() {
-        checkNotEmpty();
+        checkState(size() != 0, "PackTarget vacío");
 
         long dart = randUntil(size());
 
-        RET t = pickDart(dart);
-        return t;
+        return pickDart(dart);
     }
 }

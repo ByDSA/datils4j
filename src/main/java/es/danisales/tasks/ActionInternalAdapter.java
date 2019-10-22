@@ -379,14 +379,14 @@ class ActionInternalAdapter<A extends Action> implements Action {
         }
 
         @Override
-        public ActionInternalAdapter<A> buildOnce() {
+        public @NonNull ActionInternalAdapter<A> buildOnce() {
             checkArgument(instance == null, "Just one instantiation");
             instance = new ActionInternalAdapter<>(this);
             return instance;
         }
 
         @Override
-        protected Builder<A> self() {
+        protected @NonNull Builder<A> self() {
             return this;
         }
     }

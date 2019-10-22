@@ -1,4 +1,4 @@
-package es.danisales.utils.datastructures;
+package es.danisales.datastructures;
 
 import java.util.ArrayList;
 import java.util.List;

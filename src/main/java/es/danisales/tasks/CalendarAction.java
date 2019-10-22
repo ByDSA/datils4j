@@ -214,12 +214,12 @@ public class CalendarAction extends ActionAdapter implements CalendarInterface {
 		}
 
 		@Override
-		protected CalendarAction buildOnce() {
+        protected @NonNull CalendarAction buildOnce() {
 			return new CalendarAction(mode, function);
 		}
 
 		@Override
-		protected CalendarTaskBuilder self() {
+        protected @NonNull CalendarTaskBuilder self() {
 			return this;
 		}
 	}

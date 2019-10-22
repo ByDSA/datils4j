@@ -7,13 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ListAdapterThreadSafe<T> extends ListAdapter<T> {
-    protected ListAdapterThreadSafe(List<T> listAdapter) {
+public class ListProxyThreadSafe<T> extends ListProxy<T> {
+    protected ListProxyThreadSafe(List<T> listAdapter) {
         super(listAdapter);
     }
 
-    public static <T> ListAdapterThreadSafe of(List<T> l) {
-        return new ListAdapterThreadSafe<>(l);
+    public static <T> ListProxyThreadSafe of(List<T> l) {
+        return new ListProxyThreadSafe<>(l);
     }
 
     @Override

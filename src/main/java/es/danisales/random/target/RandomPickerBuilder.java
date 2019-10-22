@@ -2,6 +2,7 @@ package es.danisales.random.target;
 
 import es.danisales.random.RandomMode;
 import es.danisales.utils.building.Builder;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +16,7 @@ public class RandomPickerBuilder<T> extends Builder {
     RandomPickerBuilder() {
     } // Sólo se puede llamar desde RandomPicker.builder()
 
-    public RandomPicker<T> build() {
+    public @NonNull RandomPicker<T> build() {
         RandomPicker<T> ret;
         if (isRemoveOnPick)
             if (isSurfaceVariable)
@@ -36,19 +37,19 @@ public class RandomPickerBuilder<T> extends Builder {
     }
 
     @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
-    public RandomPickerBuilder<T> removeOnPick() {
+    public @NonNull RandomPickerBuilder<T> removeOnPick() {
         isRemoveOnPick = true;
 
         return self();
     }
 
-    public RandomPickerBuilder<T> surfaceVariable() {
+    public @NonNull RandomPickerBuilder<T> surfaceVariable() {
         isSurfaceVariable = true;
 
         return self();
     }
 
-    public RandomPickerBuilder<T> from(Collection<T> list) {
+    public @NonNull RandomPickerBuilder<T> from(Collection<T> list) {
         if (fromList == null)
             fromList = new ArrayList<>();
 
@@ -57,11 +58,12 @@ public class RandomPickerBuilder<T> extends Builder {
         return self();
     }
 
-    protected RandomPickerBuilder<T> self() {
+    protected @NonNull RandomPickerBuilder<T> self() {
         return this;
     }
 
-    public RandomPickerBuilder<T> setRandomMode(RandomMode randomMode) {
+    @SuppressWarnings("WeakerAccess")
+    public @NonNull RandomPickerBuilder<T> setRandomMode(RandomMode randomMode) {
         this.randomMode = randomMode;
 
         return self();

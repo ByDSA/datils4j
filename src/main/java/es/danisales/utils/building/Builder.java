@@ -1,7 +1,9 @@
 package es.danisales.utils.building;
 
-public abstract class Builder<SELF extends Builder<SELF, INSTANCE>, INSTANCE> {
-    public abstract INSTANCE build();
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-    protected abstract SELF self();
+public abstract class Builder<SELF extends Builder<SELF, INSTANCE>, INSTANCE> {
+    public abstract @NonNull INSTANCE build();
+
+    protected abstract @NonNull SELF self();
 }
