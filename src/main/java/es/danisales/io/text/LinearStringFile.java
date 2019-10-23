@@ -29,6 +29,7 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     public boolean append(List<L> f) {
         Path path = toPath();
         try {
+            lines.addAll(f);
             StringBuilder sb = joinLinesFrom(f);
 
             Files.write(
@@ -45,7 +46,6 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
         StringBuilder sb = new StringBuilder();
         for (L l : data) {
             sb.append(l);
-            lines.add(l);
             if (lineSeparator != null)
                 sb.append(lineSeparator);
         }
