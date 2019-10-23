@@ -1,19 +1,17 @@
 package es.danisales.io.text.csv;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import es.danisales.datastructures.ListMap;
 import es.danisales.io.text.TextFile;
 import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
 
 import java.io.File;
-import java.util.Map;
 
 public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> implements Iterable<L> {
     private String separator = ";";
 
-    private ListMap<ID, L> listMap = new ListMap<>();
+    private ListMap<ID, L> _listMap = new ListMap<>();
 
     @SuppressWarnings("WeakerAccess")
     public CsvFile(File file) {
@@ -21,7 +19,7 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> imp
 	}
 
 	public L get(ID id) {
-        return listMap.getByKey(id);
+        return _listMap.getByKey(id);
 	}
 
 	@Override
@@ -32,7 +30,7 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> imp
         try {
             L l = readLine(o);
             if (l != null) {
-                listMap.put(l.getKey(), l);
+                _listMap.put(l.getKey(), l);
             }
 
             return l;
@@ -51,11 +49,11 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> imp
 
     @SuppressWarnings("unused")
     public ImmutableList<L> lines() {
-        return ImmutableList.copyOf(listMap.values());
+        return ImmutableList.copyOf(_listMap.values());
     }
 
     @SuppressWarnings("unused")
-    public ImmutableSet<Map.Entry<ID, L>> entrySet() {
-        return ImmutableSet.copyOf(listMap.entrySet());
+    public ListMap<ID, L> listMap() {
+        return _listMap;
     }
 }
