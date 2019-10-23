@@ -1,18 +1,18 @@
 package es.danisales.log.string;
 
-import es.danisales.io.text.TextFile;
+import es.danisales.io.text.LinearStringFile;
 import es.danisales.log.Log;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("unused")
-public abstract class TextLog<L extends CharSequence> extends TextFile<L> implements Log<L> {
+public abstract class TextLog<L extends CharSequence> extends LinearStringFile<L> implements Log<L> {
 	private CopyOnWriteArrayList<L> _buffer;
 
-	public TextLog(File file) {
-		super(file);
+	public TextLog(Path path) {
+		super(path);
 
 		_buffer = new CopyOnWriteArrayList<>();
 	}

@@ -6,8 +6,9 @@ import es.danisales.io.binary.types.MapBin;
 import es.danisales.log.string.Logging;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,8 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 	private Map<String, Object> map;
 	private MapBin mapBin;
 
-	public Settings(File file) {
-		super(file);
+	public Settings(Path path) {
+		super(path);
 		map = new HashMap<>();
 	}
 
@@ -38,7 +39,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 
 	private static void loadIfNotExists() {
 		if (_settings == null) {
-			_settings = new Settings(new File(defaultSettingsPath));
+			_settings = new Settings(Paths.get(defaultSettingsPath));
 			_settings.load();
 		}
 	}

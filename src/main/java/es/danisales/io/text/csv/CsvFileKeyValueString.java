@@ -1,11 +1,11 @@
 package es.danisales.io.text.csv;
 
-import java.io.File;
+import java.nio.file.Path;
 
 @SuppressWarnings("unused")
 public class CsvFileKeyValueString extends CsvFile<String, KeyValueLine<String, String>> {
-    public CsvFileKeyValueString(File file) {
-        super(file);
+    public CsvFileKeyValueString(Path path) {
+        super(path);
     }
 
     @Override

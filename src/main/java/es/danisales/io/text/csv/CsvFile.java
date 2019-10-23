@@ -2,20 +2,20 @@ package es.danisales.io.text.csv;
 
 import com.google.common.collect.ImmutableList;
 import es.danisales.datastructures.ListMap;
-import es.danisales.io.text.TextFile;
+import es.danisales.io.text.LinearStringFile;
 import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
 
-import java.io.File;
+import java.nio.file.Path;
 
-public abstract class CsvFile<ID, L extends Keyable<ID>> extends TextFile<L> implements Iterable<L> {
+public abstract class CsvFile<ID, L extends Keyable<ID>> extends LinearStringFile<L> implements Iterable<L> {
     private String separator = ";";
 
     private ListMap<ID, L> _listMap = new ListMap<>();
 
     @SuppressWarnings("WeakerAccess")
-    public CsvFile(File file) {
-        super(file);
+    public CsvFile(Path path) {
+        super(path);
 	}
 
 	public L get(ID id) {

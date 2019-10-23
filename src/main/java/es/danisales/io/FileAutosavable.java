@@ -5,6 +5,7 @@ import es.danisales.tasks.ActionList;
 import es.danisales.tasks.LoopTask;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class FileAutosavable extends File {
@@ -13,8 +14,8 @@ public abstract class FileAutosavable extends File {
     private AtomicBoolean _dirty = new AtomicBoolean(false);
     private AtomicBoolean _autosaving = new AtomicBoolean(false);
 
-	public FileAutosavable(File file) {
-		super(file.toString());
+	public FileAutosavable(Path path) {
+		super(path.toString());
 	}
 
 	public final String filename() {
