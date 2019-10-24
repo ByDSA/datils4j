@@ -1,6 +1,6 @@
 package es.danisales.io.search;
 
-import es.danisales.io.text.LinearStringFile;
+import es.danisales.io.text.TextFile;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -41,12 +41,7 @@ public class DeleterTest {
             createFile(zeroFilesFolder, "zero3");
             createFile(zeroFilesFolder, "zero4");
             File nonEmptyFolder = createFolder(emptyTestFolder, "nonEmpty");
-            LinearStringFile<String> txtFile = new LinearStringFile<String>(Paths.get(nonEmptyFolder.getPath() + "/txt")) {
-                @Override
-                protected String stringToLine(long i, String l) {
-                    return null;
-                }
-            };
+            TextFile txtFile = new TextFile(Paths.get(nonEmptyFolder.getPath() + "/txt"));
             txtFile.append("aaa");
 
             File emptyFolder = emptyTestFolder;
