@@ -7,6 +7,7 @@ import es.danisales.log.string.Logging;
 import es.danisales.others.Keyable;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class CsvFile<ID, L extends Keyable<ID>> extends LinearStringFile<L> implements Iterable<L> {
     private String separator = ";";
@@ -40,7 +41,24 @@ public abstract class CsvFile<ID, L extends Keyable<ID>> extends LinearStringFil
         }
 	}
 
-	protected abstract L readLine(String[] e);
+    @Override
+    protected String lineToString(long i, L l) {
+        StringBuilder sb = new StringBuilder();
+        List<String> params = saveLine(l);
+        boolean first = true;
+        for (String str : params) {
+            if (first) {
+                first = false;
+            } else
+                sb.append(separator);
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+
+    protected abstract L readLine(String[] e);
+
+    protected abstract List<String> saveLine(L l);
 
     @SuppressWarnings("unused")
     public void setSeparator(String s) {

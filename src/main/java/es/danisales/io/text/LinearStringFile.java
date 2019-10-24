@@ -67,8 +67,9 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
         Path path = toPath();
         try {
             List<String> linesStr = new ArrayList<>();
+            int i = 0;
             for (L l : lines) {
-                linesStr.add(l.toString());
+                linesStr.add(lineToString(i++, l));
             }
 
             Files.write(path, linesStr, encoding);
@@ -106,6 +107,8 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     }
 
     abstract protected L stringToLine(long i, String l);
+
+    abstract protected String lineToString(long i, L l);
 
     @Override
     public boolean append(L f) {
