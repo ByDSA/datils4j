@@ -1,4 +1,4 @@
-package es.danisales.m3u;
+package es.danisales.multimedia.m3u;
 
 import es.danisales.io.text.LinearStringFile;
 
