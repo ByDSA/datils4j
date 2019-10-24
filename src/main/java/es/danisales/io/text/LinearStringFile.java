@@ -44,8 +44,9 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
 
     private StringBuilder joinLinesFrom(List<L> data) {
         StringBuilder sb = new StringBuilder();
+        int i = 0;
         for (L l : data) {
-            sb.append(l);
+            sb.append(lineToString(i++, l));
             if (lineSeparator != null)
                 sb.append(lineSeparator);
         }
