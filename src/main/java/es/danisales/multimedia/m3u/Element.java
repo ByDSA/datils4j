@@ -1,21 +1,14 @@
 package es.danisales.multimedia.m3u;
 
 import es.danisales.io.text.TextRender;
-import es.danisales.others.Keyable;
 
 import java.util.Objects;
 
-public class Element implements Keyable<String>, TextRender {
-    public String id;
+public class Element implements TextRender {
     public String title = "TITLE";
     public String path = "";
     public float startTime = -1, stopTime = -1;
     public int length = -1;
-
-    @Override
-    public String getKey() {
-        return id;
-    }
 
     @Override
     public String renderText() {
@@ -54,8 +47,7 @@ public class Element implements Keyable<String>, TextRender {
 
         Element casted = (Element) o;
 
-        return Objects.equals(id, casted.id)
-                && Objects.equals(title, casted.title)
+        return Objects.equals(title, casted.title)
                 && Objects.equals(path, casted.path)
                 && startTime == casted.startTime
                 && stopTime == casted.stopTime
