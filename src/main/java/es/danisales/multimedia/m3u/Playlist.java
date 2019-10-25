@@ -4,18 +4,18 @@ import es.danisales.io.text.LinearStringFile;
 
 import java.nio.file.Path;
 
-public class PlayList extends LinearStringFile<Element> {
+public class Playlist extends LinearStringFile<Element> {
     private boolean isLoading;
     private Element lastReadLine;
 
-    public PlayList(Path path) {
+    public Playlist(Path path) {
         super(path);
     }
 
     @Override
     final protected Element stringToLine(long i, String l) {
         if (!isLoading)
-            throw new RuntimeException("Can't to be called stringToLine if not loading");
+            throw new RuntimeException("Can't be called stringToLine if not loading");
 
         Element ret = null;
         StringBuilder sb = new StringBuilder(l);
