@@ -35,7 +35,6 @@ public class Element implements TextRender {
         }
 
         sb.append(path);
-        sb.append("\r\n");
 
         return sb.toString();
     }
