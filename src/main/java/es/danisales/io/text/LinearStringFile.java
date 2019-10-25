@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-public abstract class LinearStringFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L> {
+public abstract class LinearStringFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L>, TextRender {
     Charset encoding = StandardCharsets.UTF_8;
     List<L> lines = new ArrayList<>();
     private String lineSeparator = "\n";
@@ -54,12 +54,12 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
         return sb;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public StringBuilder joinLinesBuffer() {
+    private StringBuilder joinLinesBuffer() {
         return joinLinesFrom(lines);
     }
 
-    public String joinLines() {
+    @Override
+    public String renderText() {
         return joinLinesBuffer().toString();
     }
 
