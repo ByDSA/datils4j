@@ -19,14 +19,12 @@ final public class Finder {
     private ReturnMode returnMode = ReturnMode.Misc;
     private Comparator<File> sorter;
 
-    @SuppressWarnings("WeakerAccess")
     public Finder nonRecursively() {
         recursively = false;
 
         return self();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Finder recursively() {
         recursively = true;
 
@@ -78,7 +76,6 @@ final public class Finder {
         return ret;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public @NonNull List<File> find() {
         if (recursively == null)
             throw new IllegalStateException("Recursively not defined");
@@ -154,14 +151,12 @@ final public class Finder {
         return true;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Finder onlyFiles() {
         setReturnMode(ReturnMode.Files);
 
         return self();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Finder onlyFolders() {
         setReturnMode(ReturnMode.Folders);
 
