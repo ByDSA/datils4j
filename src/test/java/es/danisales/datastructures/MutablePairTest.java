@@ -1,5 +1,6 @@
 package es.danisales.datastructures;
 
+import javafx.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -244,6 +245,25 @@ public class MutablePairTest {
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
+        }
+    }
+
+    public static class PairCompatibility {
+        @Test
+        public void getInmutable() {
+            MutablePair<String, Integer> mutablePair = new MutablePair<>("aa", 11);
+            Pair<String, Integer> pair = new Pair<>("aa", 11);
+
+            assertEquals(pair, mutablePair.getInmutable());
+        }
+
+        @Test
+        public void pairToMutable() {
+            MutablePair<String, Integer> mutablePair = new MutablePair<>("aa", 11);
+            Pair<String, Integer> pair = new Pair<>("aa", 11);
+            MutablePair<String, Integer> mutablePair2 = MutablePair.from(pair);
+
+            assertEquals(mutablePair, mutablePair2);
         }
     }
 }

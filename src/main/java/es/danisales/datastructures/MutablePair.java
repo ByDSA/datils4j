@@ -1,6 +1,7 @@
 package es.danisales.datastructures;
 
 import es.danisales.others.Keyable;
+import javafx.util.Pair;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -13,6 +14,10 @@ public class MutablePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K,
     public MutablePair(K key, V value) {
         this.key = key;
         this.value = value;
+    }
+
+    public static <K, V> MutablePair<K, V> from(Pair<K, V> pair) {
+        return new MutablePair<>(pair.getKey(), pair.getValue());
     }
 
     @Override
@@ -53,6 +58,11 @@ public class MutablePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K,
             return Objects.equals(value, pair.value);
         }
         return false;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public Pair<K, V> getInmutable() {
+        return new Pair<>(key, value);
     }
 }
 
