@@ -1,12 +1,12 @@
 package es.danisales.process;
 
-import es.danisales.utils.building.Builder;
+import es.danisales.utils.building.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProcessActionBuilder extends Builder {
+public class ProcessActionBuilder extends OnceBuilder<ProcessActionBuilder, ProcessAction> {
     private static final Map<String[], ProcessAction> registeredProcessAction = new ConcurrentHashMap<>();
 
     List<String> args = new ArrayList<>();
@@ -34,19 +34,10 @@ public class ProcessActionBuilder extends Builder {
         return self();
     }
 
+    @NonNull
     @Override
-    public @NonNull ProcessAction build() {
-        ProcessAction ret = registeredProcessAction.get(args);
-
-        if (ret == null)
-            ret = new ProcessActionImp(this);
-
-        return ret;
-    }
-
-    @Override
-    protected @NonNull ProcessActionBuilder self() {
-        return this;
+    protected ProcessAction buildOnce() {
+        return new ProcessActionImp(this);
     }
 
     @NonNull List<String> getParams() {
@@ -55,5 +46,11 @@ public class ProcessActionBuilder extends Builder {
             return args.subList(1, sizeArgs - 1);
         else
             return Collections.emptyList();
+    }
+
+    @NonNull
+    @Override
+    protected ProcessActionBuilder self() {
+        return this;
     }
 }
