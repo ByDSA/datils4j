@@ -6,11 +6,13 @@ import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public interface ProcessAction extends Action {
     static @NonNull ProcessAction from(@NonNull String... params) {
-        return new ProcessActionBuilder().addArg(params).build();
+        return new ProcessActionBuilder().addArg(Arrays.asList(params)).build();
     }
 
     static @NonNull ProcessAction from(@NonNull List<String> params) {
@@ -18,7 +20,7 @@ public interface ProcessAction extends Action {
     }
 
     static @NonNull ProcessAction from(@NonNull String fname, @NonNull List<String> params) {
-        return new ProcessActionBuilder().addArg(fname).addArg(params).build();
+        return new ProcessActionBuilder().addArg(Collections.singletonList(fname)).addArg(params).build();
     }
 
     static ProcessActionBuilder builder() {
