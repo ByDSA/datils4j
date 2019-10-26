@@ -1,6 +1,6 @@
-package es.danisales.io.finder;
+package es.danisales.io;
 
-import es.danisales.io.Deleter;
+import es.danisales.io.finder.Finder;
 import es.danisales.io.text.TextFile;
 import org.junit.Rule;
 import org.junit.Test;
