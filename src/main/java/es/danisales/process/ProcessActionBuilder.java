@@ -3,10 +3,7 @@ package es.danisales.process;
 import es.danisales.utils.building.OnceBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessActionBuilder extends OnceBuilder<ProcessActionBuilder, ProcessAction> {
@@ -21,14 +18,18 @@ public class ProcessActionBuilder extends OnceBuilder<ProcessActionBuilder, Proc
         registeredProcessAction.put(p.paramsWithName, p);
     }
 
+    public @NonNull ProcessActionBuilder addArgs(@NonNull String... newArgs) {
+        return addArgs(Arrays.asList(newArgs));
+    }
+
     @SuppressWarnings("WeakerAccess")
-    public @NonNull ProcessActionBuilder addArg(@NonNull List<String> newArgs) {
+    public @NonNull ProcessActionBuilder addArgs(@NonNull List<String> newArgs) {
         args.addAll(newArgs);
 
         return self();
     }
 
-    public @NonNull ProcessActionBuilder addArg(int pos, @NonNull List<String> newArgs) {
+    public @NonNull ProcessActionBuilder addArgs(int pos, @NonNull List<String> newArgs) {
         args.addAll(pos, newArgs);
 
         return self();
