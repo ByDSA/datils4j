@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public abstract class LinearStringFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L>, TextRender {
-    Charset encoding = StandardCharsets.UTF_8;
+    protected Charset encoding = StandardCharsets.UTF_8;
     List<L> lines = new ArrayList<>();
     private String lineSeparator = "\n";
 
@@ -40,6 +40,10 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public void setEncoding(Charset encoding) {
+        this.encoding = encoding;
     }
 
     private StringBuilder joinLinesFrom(List<L> data) {

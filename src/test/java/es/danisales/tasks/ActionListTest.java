@@ -102,7 +102,7 @@ public class ActionListTest {
         }
         al.run();
         assertNotEquals(20, ai.get());
-        sleep(100);
+        sleep(150);
         assertNotEquals("No llama a las subacciones", 0, ai.get());
         assertEquals(20, ai.get());
     }

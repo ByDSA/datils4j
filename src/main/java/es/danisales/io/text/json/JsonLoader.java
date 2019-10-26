@@ -24,7 +24,7 @@ public class JsonLoader {
                 return null;
             }
         }
-        String json = file.joinLines();
+        String json = file.renderText();
         final Gson gson = new Gson();
         return gson.fromJson(json, tClass);
     }
