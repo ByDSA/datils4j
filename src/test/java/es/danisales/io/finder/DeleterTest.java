@@ -1,5 +1,6 @@
-package es.danisales.io.search;
+package es.danisales.io.finder;
 
+import es.danisales.io.Deleter;
 import es.danisales.io.text.TextFile;
 import org.junit.Rule;
 import org.junit.Test;

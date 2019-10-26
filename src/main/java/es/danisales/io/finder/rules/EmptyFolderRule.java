@@ -1,4 +1,4 @@
-package es.danisales.io.search.rules;
+package es.danisales.io.finder.rules;
 
 import java.io.File;
 

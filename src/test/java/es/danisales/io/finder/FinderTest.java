@@ -1,4 +1,4 @@
-package es.danisales.io.search;
+package es.danisales.io.finder;
 
 import org.junit.Rule;
 import org.junit.Test;

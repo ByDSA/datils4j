@@ -1,8 +1,7 @@
-package es.danisales.io.search;
+package es.danisales.io;
 
-import es.danisales.io.FileUtils;
-import es.danisales.io.search.rules.EmptyFileRule;
-import es.danisales.io.search.rules.EmptyFolderRule;
+import es.danisales.io.finder.rules.EmptyFileRule;
+import es.danisales.io.finder.rules.EmptyFolderRule;
 
 import java.io.File;
 import java.util.ArrayList;

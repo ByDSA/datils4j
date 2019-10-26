@@ -1,9 +1,10 @@
-package es.danisales.io.search;
+package es.danisales.io.finder;
 
+import es.danisales.io.Deleter;
 import es.danisales.io.FileUtils;
-import es.danisales.io.search.rules.EmptyFolderRule;
-import es.danisales.io.search.rules.ExtensionRule;
-import es.danisales.io.search.rules.FinderRule;
+import es.danisales.io.finder.rules.EmptyFolderRule;
+import es.danisales.io.finder.rules.ExtensionRule;
+import es.danisales.io.finder.rules.FinderRule;
 
 import java.io.File;
 import java.util.ArrayList;
