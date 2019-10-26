@@ -6,11 +6,11 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
-public class KeyValuePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
+public class MutablePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K, V> {
     private K key;
     private V value;
 
-    public KeyValuePair(K key, V value) {
+    public MutablePair(K key, V value) {
         this.key = key;
         this.value = value;
     }
@@ -47,8 +47,8 @@ public class KeyValuePair<K, V> implements Serializable, Keyable<K>, Map.Entry<K
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof KeyValuePair) {
-            KeyValuePair pair = (KeyValuePair) o;
+        if (o instanceof MutablePair) {
+            MutablePair pair = (MutablePair) o;
             if (!Objects.equals(key, pair.key)) return false;
             return Objects.equals(value, pair.value);
         }

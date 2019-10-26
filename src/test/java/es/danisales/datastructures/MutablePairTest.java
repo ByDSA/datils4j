@@ -10,13 +10,13 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class KeyValuePairTest {
+public class MutablePairTest {
     public static class NormalValues {
         private Map.Entry<String, Integer> keyValuePair;
 
         @Before
         public void init() {
-            keyValuePair = new KeyValuePair<>("1", 1);
+            keyValuePair = new MutablePair<>("1", 1);
         }
 
         @Test
@@ -37,7 +37,7 @@ public class KeyValuePairTest {
 
         @Test
         public void equals() {
-            assertEquals(new KeyValuePair<>("1", 1), keyValuePair);
+            assertEquals(new MutablePair<>("1", 1), keyValuePair);
         }
 
         @Test
@@ -50,7 +50,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKeyM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", -43);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", -43);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -58,7 +58,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKey1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", 8);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", 8);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -66,7 +66,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKey0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("1", 7);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("1", 7);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
@@ -74,7 +74,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValueM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", 2);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", 2);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -82,7 +82,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValue1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("0", 2);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("0", 2);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -90,7 +90,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValue0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("rwer", 1);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("rwer", 1);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
@@ -102,7 +102,7 @@ public class KeyValuePairTest {
 
         @Before
         public void init() {
-            keyValuePair = new KeyValuePair<>(null, 1);
+            keyValuePair = new MutablePair<>(null, 1);
         }
 
         @Test
@@ -112,7 +112,7 @@ public class KeyValuePairTest {
 
         @Test
         public void equals() {
-            assertEquals(new KeyValuePair<>(null, 1), keyValuePair);
+            assertEquals(new MutablePair<>(null, 1), keyValuePair);
         }
 
         @Test
@@ -125,7 +125,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByKeyM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("0", -43);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("0", -43);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -133,7 +133,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByKey1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", 8);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", 8);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -141,7 +141,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByKey0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>(null, 7);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>(null, 7);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
@@ -149,7 +149,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValueM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>(null, 2);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>(null, 2);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -157,7 +157,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValue1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>(null, 2);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>(null, 2);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -165,7 +165,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByValue0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("1", 1);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("1", 1);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
@@ -177,7 +177,7 @@ public class KeyValuePairTest {
 
         @Before
         public void init() {
-            keyValuePair = new KeyValuePair<>("1", null);
+            keyValuePair = new MutablePair<>("1", null);
         }
 
         @Test
@@ -187,7 +187,7 @@ public class KeyValuePairTest {
 
         @Test
         public void equals() {
-            assertEquals(new KeyValuePair<>("1", null), keyValuePair);
+            assertEquals(new MutablePair<>("1", null), keyValuePair);
         }
 
         @Test
@@ -200,7 +200,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKeyM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", 0);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", 0);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -208,7 +208,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKey1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", 3);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", 3);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -216,7 +216,7 @@ public class KeyValuePairTest {
 
         @Test
         public void compareByKey0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("1", null);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("1", null);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByKey();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);
@@ -224,7 +224,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByValueM1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("2", null);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("2", null);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(-1, compare);
@@ -232,7 +232,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByValue1() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("0", null);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("0", null);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair2, keyValuePair);
             assertEquals(1, compare);
@@ -240,7 +240,7 @@ public class KeyValuePairTest {
 
         @Test(expected = NullPointerException.class)
         public void compareByValue0() {
-            Map.Entry<String, Integer> keyValuePair2 = new KeyValuePair<>("1", 1);
+            Map.Entry<String, Integer> keyValuePair2 = new MutablePair<>("1", 1);
             Comparator<Map.Entry<String, Integer>> comparator = Map.Entry.comparingByValue();
             int compare = comparator.compare(keyValuePair, keyValuePair2);
             assertEquals(0, compare);

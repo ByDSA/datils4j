@@ -14,7 +14,7 @@ public class ListMap<ID, T> extends ListProxy<Map.Entry<ID, T>> {
     }
 
     public boolean contains(ID key, T value) {
-        return contains(new KeyValuePair<>(key, value));
+        return contains(new MutablePair<>(key, value));
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -62,7 +62,7 @@ public class ListMap<ID, T> extends ListProxy<Map.Entry<ID, T>> {
             oldValue = entry.getValue();
             entry.setValue(t);
         } else {
-            Map.Entry<ID, T> entry = new KeyValuePair<>(id, t);
+            Map.Entry<ID, T> entry = new MutablePair<>(id, t);
             _entrySet.add(entry);
             _values.add(entry.getValue());
             mapKeyPosition.put(entry.getKey(), size());

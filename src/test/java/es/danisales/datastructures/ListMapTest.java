@@ -87,11 +87,11 @@ public class ListMapTest {
             assertEquals((Integer) 3, listMap.mapKeyPosition.get("2x4"));
             assertEquals((Integer) 4, listMap.mapKeyPosition.get("1+1"));
 
-            assertEquals(new KeyValuePair<>("2x1", 2), listMap.get(0));
-            assertEquals(new KeyValuePair<>("2x2", 4), listMap.get(1));
-            assertEquals(new KeyValuePair<>("2x3", 6), listMap.get(2));
-            assertEquals(new KeyValuePair<>("2x4", 8), listMap.get(3));
-            assertEquals(new KeyValuePair<>("1+1", 2), listMap.get(4));
+            assertEquals(new MutablePair<>("2x1", 2), listMap.get(0));
+            assertEquals(new MutablePair<>("2x2", 4), listMap.get(1));
+            assertEquals(new MutablePair<>("2x3", 6), listMap.get(2));
+            assertEquals(new MutablePair<>("2x4", 8), listMap.get(3));
+            assertEquals(new MutablePair<>("1+1", 2), listMap.get(4));
         }
 
         @Test
@@ -304,12 +304,12 @@ public class ListMapTest {
 
         @Test
         public void lastIndexOf() {
-            assertEquals(4, listMap.lastIndexOf(new KeyValuePair<>("1+1", 2)));
+            assertEquals(4, listMap.lastIndexOf(new MutablePair<>("1+1", 2)));
         }
 
         @Test
         public void lastIndexOfNotFound() {
-            assertEquals(-1, listMap.lastIndexOf(new KeyValuePair<>("1+2", 3)));
+            assertEquals(-1, listMap.lastIndexOf(new MutablePair<>("1+2", 3)));
         }
 
         @Test
@@ -328,7 +328,7 @@ public class ListMapTest {
 
         @Test
         public void addExistingEntry() {
-            listMap.add(new KeyValuePair<>("2x1", 2));
+            listMap.add(new MutablePair<>("2x1", 2));
             assertEquals(5, listMap.size());
             assertEquals(5, listMap.mapKeyPosition.size());
         }
@@ -369,7 +369,7 @@ public class ListMapTest {
 
             @Test
             public void next() {
-                assertEquals(new KeyValuePair<>("2x1", 2), listMapIterator.next());
+                assertEquals(new MutablePair<>("2x1", 2), listMapIterator.next());
             }
 
             @Test(expected = NoSuchElementException.class)
@@ -384,13 +384,13 @@ public class ListMapTest {
 
             @Test
             public void add() {
-                listMapIterator.add(new KeyValuePair<>("2+2", 4));
-                assertEquals(new KeyValuePair<>("2+2", 4), listMap.get(0));
+                listMapIterator.add(new MutablePair<>("2+2", 4));
+                assertEquals(new MutablePair<>("2+2", 4), listMap.get(0));
             }
 
             @Test(expected = IllegalStateException.class)
             public void set() {
-                listMapIterator.set(new KeyValuePair<>("2", 2));
+                listMapIterator.set(new MutablePair<>("2", 2));
             }
         }
 
@@ -441,21 +441,21 @@ public class ListMapTest {
             public void remove() {
                 listMapIterator.remove();
                 assertEquals(4, listMap.size());
-                assertEquals(new KeyValuePair<>("2x2", 4), listMap.get(0));
+                assertEquals(new MutablePair<>("2x2", 4), listMap.get(0));
             }
 
             @Test
             public void add() {
-                listMapIterator.add(new KeyValuePair<>("2+2", 4));
+                listMapIterator.add(new MutablePair<>("2+2", 4));
                 assertEquals(6, listMap.size());
-                assertEquals(new KeyValuePair<>("2+2", 4), listMap.get(1));
+                assertEquals(new MutablePair<>("2+2", 4), listMap.get(1));
             }
 
             @Test
             public void set() {
-                listMapIterator.set(new KeyValuePair<>("2", 2));
+                listMapIterator.set(new MutablePair<>("2", 2));
                 assertEquals(5, listMap.size());
-                assertEquals(new KeyValuePair<>("2", 2), listMap.get(0));
+                assertEquals(new MutablePair<>("2", 2), listMap.get(0));
             }
         }
 
@@ -500,28 +500,28 @@ public class ListMapTest {
 
             @Test
             public void previous() {
-                assertEquals(new KeyValuePair<>("1+1", 2), listMapIterator.previous());
+                assertEquals(new MutablePair<>("1+1", 2), listMapIterator.previous());
             }
 
             @Test
             public void remove() {
                 listMapIterator.remove();
                 assertEquals(4, listMap.size());
-                assertEquals(new KeyValuePair<>("2x4", 8), listMap.get(listMap.size() - 1));
+                assertEquals(new MutablePair<>("2x4", 8), listMap.get(listMap.size() - 1));
             }
 
             @Test
             public void add() {
-                listMapIterator.add(new KeyValuePair<>("2+2", 4));
+                listMapIterator.add(new MutablePair<>("2+2", 4));
                 assertEquals(6, listMap.size());
-                assertEquals(new KeyValuePair<>("2+2", 4), listMap.get(listMap.size() - 1));
+                assertEquals(new MutablePair<>("2+2", 4), listMap.get(listMap.size() - 1));
             }
 
             @Test
             public void set() {
-                listMapIterator.set(new KeyValuePair<>("2", 2));
+                listMapIterator.set(new MutablePair<>("2", 2));
                 assertEquals(5, listMap.size());
-                assertEquals(new KeyValuePair<>("2", 2), listMap.get(listMap.size() - 1));
+                assertEquals(new MutablePair<>("2", 2), listMap.get(listMap.size() - 1));
             }
         }
     }
