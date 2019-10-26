@@ -18,7 +18,6 @@ public class Deleter {
         return self();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public boolean delete() {
         if (files == null)
             throw new IllegalStateException("Any files was not assigned");
@@ -44,7 +43,6 @@ public class Deleter {
         return self();
     }
 
-    @SuppressWarnings("WeakerAccess")
     public Deleter emptyParents() {
         return addAfterEach((File f) -> {
             File parent = f.getParentFile();
@@ -53,7 +51,7 @@ public class Deleter {
         });
     }
 
-    @SuppressWarnings({"ConstantConditions", "WeakerAccess"})
+    @SuppressWarnings({"ConstantConditions"})
     public Deleter emptyFileParents() {
         return addAfterEach((File f) -> {
             File parent = f.getParentFile();

@@ -5,6 +5,7 @@ import es.danisales.io.FileUtils;
 import es.danisales.io.finder.rules.EmptyFolderRule;
 import es.danisales.io.finder.rules.ExtensionRule;
 import es.danisales.io.finder.rules.FinderRule;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ final public class Finder {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public List<File> find() {
+    public @NonNull List<File> find() {
         if (recursively == null)
             throw new IllegalStateException("Recursively not defined");
 
