@@ -12,15 +12,15 @@ import java.util.List;
 
 public interface ProcessAction extends Action {
     static @NonNull ProcessAction from(@NonNull String... params) {
-        return new ProcessActionBuilder().addArg(Arrays.asList(params)).build();
+        return new ProcessActionBuilder().addArgs(Arrays.asList(params)).build();
     }
 
     static @NonNull ProcessAction from(@NonNull List<String> params) {
-        return new ProcessActionBuilder().addArg(params).build();
+        return new ProcessActionBuilder().addArgs(params).build();
     }
 
     static @NonNull ProcessAction from(@NonNull String fname, @NonNull List<String> params) {
-        return new ProcessActionBuilder().addArg(Collections.singletonList(fname)).addArg(params).build();
+        return new ProcessActionBuilder().addArgs(Collections.singletonList(fname)).addArgs(params).build();
     }
 
     static ProcessActionBuilder builder() {
