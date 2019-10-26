@@ -1,5 +1,6 @@
 package es.danisales.io.finder;
 
+import es.danisales.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -59,6 +60,7 @@ public class FinderTest {
                 .from(temporaryFolder.getRoot())
                 .byExtension("txt")
                 .nonRecursively()
+                .sort(FileUtils.Comparators.fullpathComparator)
                 .find();
 
         assertEquals(3, foundFiles.size());
@@ -75,6 +77,7 @@ public class FinderTest {
                 .from(temporaryFolder.getRoot())
                 .byExtension("txt")
                 .recursively()
+                .sort(FileUtils.Comparators.fullpathComparator)
                 .find();
 
         assertEquals(8, foundFiles.size());
@@ -97,6 +100,7 @@ public class FinderTest {
                 .byExtension("txt")
                 .nonRecursively()
                 .addRule((File f) -> !f.getName().startsWith("a"))
+                .sort(FileUtils.Comparators.fullpathComparator)
                 .find();
 
         assertEquals(2, foundFiles.size());
@@ -114,6 +118,7 @@ public class FinderTest {
                 .nonRecursively()
                 .addRule((File f) -> f.getName().startsWith("sub"))
                 .onlyFiles()
+                .sort(FileUtils.Comparators.fullpathComparator)
                 .find();
 
         assertEquals(1, foundFiles.size());
@@ -130,6 +135,7 @@ public class FinderTest {
                 .recursively()
                 .addRule((File f) -> f.getName().startsWith("sub"))
                 .onlyFolders()
+                .sort(FileUtils.Comparators.fullpathComparator)
                 .find();
 
 
