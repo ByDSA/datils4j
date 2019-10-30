@@ -2,6 +2,7 @@ package es.danisales.datastructures;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -12,13 +13,19 @@ public class SetUtils {
 	private SetUtils() {
 	} // noninstantiable
 
+    @SuppressWarnings("WeakerAccess")
     public static <E extends Enum<E>> EnumSet<E> concat(@NonNull List<EnumSet<E>> sets) {
         checkArgument(sets.size() > 0);
 
         EnumSet<E> ret = EnumSet.copyOf(sets.get(0));
         for (int i = 1; i < sets.size(); i++)
             ret.addAll(sets.get(i));
-		
-		return ret;
-	}
+
+        return ret;
+    }
+
+    @SafeVarargs
+    public static <E extends Enum<E>> EnumSet<E> concat(@NonNull EnumSet<E>... sets) {
+        return concat(Arrays.asList(sets));
+    }
 }
