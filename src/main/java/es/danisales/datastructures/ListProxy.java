@@ -10,13 +10,9 @@ import java.util.ListIterator;
 public class ListProxy<T> implements List<T> {
     private final List<T> listAdapter;
 
-	protected ListProxy(List<T> listAdapter) {
+    public ListProxy(List<T> listAdapter) {
         this.listAdapter = listAdapter;
     }
-
-	public static <T> ListProxy of(List<T> l) {
-		return new ListProxy<>(l);
-	}
 
 	@Override
 	public boolean add(T e) {
@@ -35,7 +31,7 @@ public class ListProxy<T> implements List<T> {
 
 	@Override
     public boolean addAll(int index, @NonNull Collection<? extends T> c) {
-        return listAdapter.addAll(c);
+        return listAdapter.addAll(index, c);
 	}
 
 	@Override

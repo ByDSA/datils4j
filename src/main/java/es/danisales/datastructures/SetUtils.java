@@ -2,9 +2,7 @@ package es.danisales.datastructures;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -27,5 +25,15 @@ public class SetUtils {
     @SafeVarargs
     public static <E extends Enum<E>> EnumSet<E> concat(@NonNull EnumSet<E>... sets) {
         return concat(Arrays.asList(sets));
+    }
+
+    @SafeVarargs
+    public static <T> Set<T> concatImmutable(Set<T>... sets) {
+        Set<T> result = new HashSet<>();
+
+        for (Set<T> l : sets)
+            result.addAll(l);
+
+        return Collections.unmodifiableSet(result);
     }
 }

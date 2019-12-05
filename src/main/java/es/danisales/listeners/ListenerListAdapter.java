@@ -1,7 +1,7 @@
 package es.danisales.listeners;
 
 import es.danisales.datastructures.ListProxy;
-import es.danisales.datastructures.ListProxyThreadSafe;
+import es.danisales.datastructures.ListProxyConcurrent;
 import es.danisales.tasks.Action;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -14,9 +14,9 @@ abstract class ListenerListAdapter<T> implements ListenerList<T> {
     @SuppressWarnings("unchecked")
     ListenerListAdapter(Action.Mode mode, Safety safety) {
         if (safety == Safety.NonThreadSafe)
-            listAdapter = ListProxy.of(new ArrayList<T>());
+            listAdapter = new ListProxy(new ArrayList<T>());
         else if (safety == Safety.ThreadSafe)
-            listAdapter = ListProxyThreadSafe.of(new ArrayList<T>());
+            listAdapter = new ListProxyConcurrent(new ArrayList<T>());
         else
             throw new IllegalArgumentException();
 

@@ -1,6 +1,7 @@
 package es.danisales.net;
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class ClientRaw {
 			Socket socket = new Socket(host, 80);
 
 			BufferedWriter out = new BufferedWriter(
-				new OutputStreamWriter(socket.getOutputStream(), "UTF8"));
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 			BufferedReader in = new BufferedReader(
 				new InputStreamReader(socket.getInputStream()));
 

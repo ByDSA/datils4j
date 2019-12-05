@@ -7,13 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class ListProxyThreadSafe<T> extends ListProxy<T> {
-    protected ListProxyThreadSafe(List<T> listAdapter) {
+public class ListProxyConcurrent<T> extends ListProxy<T> {
+    public ListProxyConcurrent(List<T> listAdapter) {
         super(listAdapter);
-    }
-
-    public static <T> ListProxyThreadSafe of(List<T> l) {
-        return new ListProxyThreadSafe<>(l);
     }
 
     @Override
@@ -33,7 +29,7 @@ public class ListProxyThreadSafe<T> extends ListProxy<T> {
 
     @Override
     public synchronized boolean addAll(int index, @NonNull Collection<? extends T> c) {
-        return super.addAll(c);
+        return super.addAll(index, c);
     }
 
     @Override
