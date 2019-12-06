@@ -133,4 +133,24 @@ public class ListProxyConcurrent<T> extends ListProxy<T> {
     public synchronized <TT> TT[] toArray(@NonNull TT[] a) {
         return super.toArray(a);
     }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ListProxyConcurrent))
+            return false;
+
+        ListProxyConcurrent listProxyConcurrent = (ListProxyConcurrent) o;
+
+        return listAdapter.equals(listProxyConcurrent.listAdapter);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class ListProxy<T> implements List<T> {
-    private final List<T> listAdapter;
+    @SuppressWarnings("WeakerAccess")
+    protected final List<T> listAdapter;
 
     public ListProxy(List<T> listAdapter) {
         this.listAdapter = listAdapter;
@@ -134,5 +135,25 @@ public class ListProxy<T> implements List<T> {
     @NonNull
     public <TT> TT[] toArray(@NonNull TT[] a) {
         return listAdapter.toArray(a);
+    }
+
+    @Override
+    public int hashCode() {
+        return listAdapter.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ListProxy))
+            return false;
+
+        ListProxy listProxy = (ListProxy) o;
+
+        return listAdapter.equals(listProxy.listAdapter);
+    }
+
+    @Override
+    public String toString() {
+        return listAdapter.toString();
     }
 }
