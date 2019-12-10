@@ -18,7 +18,8 @@ import java.util.function.Function;
 
 public abstract class LinearStringFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L>, TextRender {
     Charset encoding = StandardCharsets.UTF_8;
-    List<L> lines = new ArrayList<>();
+    @SuppressWarnings("WeakerAccess")
+    protected List<L> lines = new ArrayList<>();
     private String lineSeparator = "\n";
 
     public LinearStringFile(Path path) {
