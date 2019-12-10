@@ -22,7 +22,8 @@ public class Playlist extends LinearStringFile<Element> {
         if (l.startsWith("#EXTINF:")) {
             sb.delete(0, "#EXTINF:".length());
             ret = new Element();
-            readTitle(ret, sb);
+            lastReadLine = ret;
+            readTitle(lastReadLine, sb);
         } else if (l.startsWith("#EXTVLCOPT:")) {
             sb.delete(0, "#EXTVLCOPT:".length());
             String sbStr = sb.toString();
@@ -33,7 +34,9 @@ public class Playlist extends LinearStringFile<Element> {
                 sb.delete(0, "stop-time=".length());
                 lastReadLine.stopTime = Integer.valueOf(sb.toString());
             }
-        } else {
+        } else if (l.startsWith("#EXTM3U"))
+            return null;
+        else {
             readPathfile(lastReadLine, sb);
         }
 
