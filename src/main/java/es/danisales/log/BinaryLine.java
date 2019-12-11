@@ -7,7 +7,8 @@ import es.danisales.io.binary.types.auto.AutoBin;
 import java.util.Date;
 import java.util.function.Supplier;
 
-public abstract class BinaryLine<A extends Supplier<Integer>> implements AutoBin, Supplier<Integer> {
+public abstract class BinaryLine<A extends Supplier<Integer>>
+        implements AutoBin, Supplier<Integer> {
 	@SuppressWarnings({"FieldCanBeLocal","unused"})
 	private DateBin date;
 	private IntegerBin actionCode;

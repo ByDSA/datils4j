@@ -16,7 +16,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-public abstract class LinearStringFile<L> extends FileAutosavable implements FileAppendable<L>, FileReadable, List<L>, TextRender {
+public abstract class LinearStringFile<L>
+        extends FileAutosavable
+        implements FileAppendable<L>, FileReadable, Iterable<L>, TextRender {
     Charset encoding = StandardCharsets.UTF_8;
     @SuppressWarnings("WeakerAccess")
     protected List<L> lines = new ArrayList<>();
@@ -27,20 +29,19 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     }
 
     @Override
-    public boolean append(List<L> f) {
+    public void appendAll(List<L> f) throws IOException {
         Path path = toPath();
-        try {
-            lines.addAll(f);
-            StringBuilder sb = joinLinesFrom(f);
+        lines.addAll(f);
+        StringBuilder sb = joinLinesFrom(f);
 
-            Files.write(
-                    path,
-                    sb.toString().getBytes(),
-                    StandardOpenOption.APPEND);
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+        Files.write(
+                path,
+                sb.toString().getBytes(),
+                StandardOpenOption.APPEND);
+    }
+
+    public Lines getLines() {
+        return new Lines();
     }
 
     public void setEncoding(Charset encoding) {
@@ -69,39 +70,37 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     }
 
     @Override
-    public boolean save() {
+    public void save() {
         Path path = toPath();
-        try {
-            List<String> linesStr = new ArrayList<>();
-            int i = 0;
-            for (L l : lines) {
-                linesStr.add(lineToString(i++, l));
-            }
+        List<String> linesStr = new ArrayList<>();
+        int i = 0;
+        for (L l : lines) {
+            linesStr.add(lineToString(i++, l));
+        }
 
+        try {
             Files.write(path, linesStr, encoding);
-            return true;
         } catch (IOException e) {
-            return false;
+            callOnIOExceptionListeners(e);
         }
     }
 
-    private boolean readLargeTextFile(Function<String, Boolean> fReadLine) {
+    private void readLargeTextFile(Function<String, Boolean> fReadLine) {
         Path path = toPath();
         try (Scanner scanner = new Scanner(path, encoding.name())) {
             while (scanner.hasNextLine()) {
                 if (!fReadLine.apply(scanner.nextLine()))
-                    return true;
+                    return;
             }
-            return true;
         } catch (IOException e) {
-            return false;
+            callOnIOExceptionListeners(e);
         }
     }
 
     @Override
-    public boolean load() {
+    public void load() {
         final AtomicLong i = new AtomicLong(0);
-        return readLargeTextFile(
+        readLargeTextFile(
                 lineStr -> {
                     L l = stringToLine(i.getAndIncrement(), lineStr);
                     if (l != null)
@@ -117,31 +116,20 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     abstract protected String lineToString(long i, L l);
 
     @Override
-    public boolean append(L f) {
-        return add(f);
-    }
-
-    @Override
-    public boolean add(L f) {
+    public void append(L f) throws IOException {
         createParents();
 
         lines.add(f);
 
-        try {
-            byte[] bytes = (f.toString() + lineSeparator).getBytes();
-            Files.write(
-                    toPath(),
-                    bytes,
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+        byte[] bytes = (f.toString() + lineSeparator).getBytes();
+        Files.write(
+                toPath(),
+                bytes,
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void saveIfAutosave() {
+        createParents();
         save();
     }
 
@@ -150,151 +138,146 @@ public abstract class LinearStringFile<L> extends FileAutosavable implements Fil
     }
 
     @Override
-    public void add(int index, L f) {
-        createParents();
-
-        lines.add(index, f);
-
-        saveIfAutosave();
+    public @NonNull Iterator<L> iterator() {
+        return getLines().iterator();
     }
 
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public boolean addAll(@NonNull Collection<? extends L> c) {
-        boolean a = true;
-        for (L l : c)
-            a &= add(l);
-        return a;
-    }
+    public class Lines implements List<L> {
+        @Override
+        public int size() {
+            return lines.size();
+        }
 
-    @Override
-    public boolean addAll(int index, @NonNull Collection<? extends L> c) {
-        createParents();
+        @Override
+        public boolean isEmpty() {
+            return lines.isEmpty();
+        }
 
-        boolean ret = lines.addAll(index, c);
+        @Override
+        public boolean contains(Object o) {
+            return lines.contains(o);
+        }
 
-        saveIfAutosave();
+        @Override
+        public @NonNull Iterator<L> iterator() {
+            return lines.iterator();
+        }
 
-        return ret;
-    }
+        @Override
+        public @NonNull Object[] toArray() {
+            return lines.toArray();
+        }
 
-    @Override
-    public void clear() {
-        lines.clear();
-        saveIfAutosave();
-    }
+        @SuppressWarnings("SuspiciousToArrayCall")
+        @Override
+        @NonNull
+        public <T> T[] toArray(@NonNull T[] a) {
+            return lines.toArray(a);
+        }
 
-    @Override
-    public boolean contains(Object o) {
-        return lines.contains(o);
-    }
+        private boolean autosaveIfTrue(boolean ret) {
+            if (ret)
+                saveIfAutosave();
 
-    @Override
-    public boolean containsAll(@NonNull Collection<?> c) {
-        return lines.containsAll(c);
-    }
+            return ret;
+        }
 
-    @Override
-    public L get(int index) {
-        return lines.get(index);
-    }
+        @Override
+        public boolean add(L l) {
+            return autosaveIfTrue(lines.add(l));
+        }
 
-    @Override
-    public int indexOf(Object o) {
-        return lines.indexOf(o);
-    }
+        @Override
+        public boolean remove(Object o) {
+            return autosaveIfTrue(lines.remove(o));
+        }
 
-    @Override
-    public boolean isEmpty() {
-        return lines.isEmpty();
-    }
+        @Override
+        public boolean containsAll(@NonNull Collection<?> c) {
+            return lines.containsAll(c);
+        }
 
-    @Override
-    @NonNull
-    public Iterator<L> iterator() {
-        return lines.iterator();
-    }
+        @Override
+        public boolean addAll(@NonNull Collection<? extends L> c) {
+            return autosaveIfTrue(lines.addAll(c));
+        }
 
-    @Override
-    public int lastIndexOf(Object o) {
-        return lines.lastIndexOf(o);
-    }
+        @Override
+        public boolean addAll(int index, @NonNull Collection<? extends L> c) {
+            return autosaveIfTrue(lines.addAll(index, c));
+        }
 
-    @Override
-    @NonNull
-    public ListIterator<L> listIterator() {
-        return lines.listIterator();
-    }
+        @Override
+        public boolean removeAll(@NonNull Collection<?> c) {
+            return autosaveIfTrue(lines.removeAll(c));
+        }
 
-    @Override
-    @NonNull
-    public ListIterator<L> listIterator(int index) {
-        return lines.listIterator(index);
-    }
+        @Override
+        public boolean retainAll(@NonNull Collection<?> c) {
+            return autosaveIfTrue(lines.retainAll(c));
+        }
 
-    @Override
-    public boolean remove(Object o) {
-        boolean ret = lines.remove(o);
+        @Override
+        public void clear() {
+            boolean canDoAutosaving = !isEmpty();
+            lines.clear();
 
-        if (ret)
+            if (canDoAutosaving)
+                saveIfAutosave();
+        }
+
+        @Override
+        public L get(int index) {
+            return lines.get(index);
+        }
+
+        @Override
+        public L set(int index, L element) {
+            L old = lines.set(index, element);
+            if (old != element)
+                saveIfAutosave();
+
+            return old;
+        }
+
+        @Override
+        public void add(int index, L element) {
+            lines.add(index, element);
             saveIfAutosave();
+        }
 
-        return ret;
-    }
+        @Override
+        public L remove(int index) {
+            L old = lines.remove(index);
+            if (old != null)
+                saveIfAutosave();
 
-    @Override
-    public L remove(int index) {
-        L ret = lines.remove(index);
+            return old;
+        }
 
-        if (ret != null)
-            saveIfAutosave();
+        @Override
+        public int indexOf(Object o) {
+            return lines.indexOf(o);
+        }
 
-        return ret;
-    }
+        @Override
+        public int lastIndexOf(Object o) {
+            return lines.lastIndexOf(o);
+        }
 
-    @Override
-    public boolean removeAll(@NonNull Collection<?> c) {
-        boolean ret = lines.removeAll(c);
+        @Override
+        public @NonNull ListIterator<L> listIterator() {
+            return lines.listIterator();
+        }
 
-        if (ret)
-            saveIfAutosave();
+        @Override
+        public @NonNull ListIterator<L> listIterator(int index) {
+            return lines.listIterator(index);
+        }
 
-        return ret;
-    }
-
-    @Override
-    public boolean retainAll(@NonNull Collection<?> c) {
-        return lines.retainAll(c);
-    }
-
-    @Override
-    public L set(int index, L element) {
-        L ret = lines.set(index, element);
-        saveIfAutosave();
-        return ret;
-    }
-
-    @Override
-    public int size() {
-        return lines.size();
-    }
-
-    @Override
-    @NonNull
-    public List<L> subList(int fromIndex, int toIndex) {
-        return lines.subList(fromIndex, toIndex);
-    }
-
-    @Override
-    @NonNull
-    public Object[] toArray() {
-        return lines.toArray();
-    }
-
-    @SuppressWarnings("SuspiciousToArrayCall")
-    @Override
-    @NonNull
-    public <T> T[] toArray(@NonNull T[] a) {
-        return lines.toArray(a);
+        @Override
+        public @NonNull List<L> subList(int fromIndex, int toIndex) {
+            return lines.subList(fromIndex, toIndex);
+        }
     }
 }

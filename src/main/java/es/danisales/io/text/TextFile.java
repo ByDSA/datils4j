@@ -20,13 +20,12 @@ public class TextFile extends LinearStringFile<String> {
     }
 
 	@Override
-	public boolean save() {
+	public void save() {
 		Path path = toPath();
 		try {
 			Files.write(path, lines, encoding);
-			return true;
 		} catch ( IOException e ) {
-			return false;
+			callOnIOExceptionListeners(e);
 		}
 	}
 }

@@ -68,13 +68,11 @@ public class Playlist extends LinearStringFile<Element> {
     }
 
     @Override
-    public boolean load() {
+    public void load() {
         lastReadLine = null;
         isLoading = true;
-        boolean ret = super.load();
+        super.load();
         isLoading = false;
         lastReadLine = null;
-
-        return ret;
     }
 }

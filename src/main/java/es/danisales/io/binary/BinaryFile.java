@@ -14,12 +14,14 @@ import java.nio.file.Path;
 /**
  * A readable/writable es.danisales.io.binary.types File
  */
-public abstract class BinaryFile extends FileAutosavable implements Binary, FileReadable {	
+public abstract class BinaryFile
+        extends FileAutosavable
+        implements Binary, FileReadable {
 
 	/**
 	 * Instantiates a new file es.danisales.io.binary.types.
 	 *
-     * @param path
+     * @param path path
 	 */
     public BinaryFile(Path path) {
         super(path);
@@ -29,15 +31,13 @@ public abstract class BinaryFile extends FileAutosavable implements Binary, File
 	 * @see es.danisales.io.FileSavable#save()
 	 */
 	@Override
-	public boolean save() {
+    public void save() {
 		try {
 			Logging.info( "write: " + toPath().toAbsolutePath() );
             FileUtils.mkdirsParent(this);
 			Files.write( toPath(), getBytes());
-			return true;
 		} catch ( IOException e ) {
-			e.printStackTrace();
-			return false;
+            callOnIOExceptionListeners(e);
 		}
 	}
 
@@ -45,14 +45,14 @@ public abstract class BinaryFile extends FileAutosavable implements Binary, File
 	 * @see es.danisales.io.FileReadable#load()
 	 */
 	@Override
-	public boolean load() {
+    public void load() {
 		ByteBuffer buff;
 		try {
 			buff = ByteBuffer.wrap( Files.readAllBytes(toPath()) );
 		} catch ( IOException e ) {
-			return false;
+            callOnIOExceptionListeners(e);
+            return;
 		}
 		read(buff);
-		return true;
 	}
 }

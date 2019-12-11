@@ -65,7 +65,7 @@ public class Settings extends BinaryFile implements Map<String, Object> {
 				int kLength = in.readInt();
 				StringBuilder sb = new StringBuilder();
 				for(int j = 0; j < kLength; j++)
-					sb.append( in.readChar() );
+					sb.appendAll( in.readChar() );
 
 				string key = sb.toString();
 				types getValue = in.readObject();

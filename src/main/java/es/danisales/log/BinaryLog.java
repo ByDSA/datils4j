@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
-@SuppressWarnings("unused")
-public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>> extends BinaryFile implements Log<L>, FileReadable, FileAppendable<L> {
+public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>>
+		extends BinaryFile
+		implements Log<L>, FileReadable, FileAppendable<L> {
 	private CopyOnWriteArrayList<L> _buffer;
 	private List<L> lines;
 
@@ -30,34 +31,31 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>> ext
 	}
 
 	@Override
-	public boolean append(L f) {
+	public void append(L f) {
 		try {
-			Logging.info( "append: " +this );
+			Logging.info("appendAll: " + this);
 			Files.write( toPath(),  f.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
-			return true;
 		} catch ( IOException e ) {
-			return false;
+			callOnIOExceptionListeners(e);
 		}
 	}
 
 	@Override
-	public boolean append(List<L> f) {
+	public void appendAll(List<L> f) {
 		ByteBuffer buff = ByteBuffer.allocate(Binary.sizeBytes( f ));
 		for(L l : f)
 			buff.put( l.getBytes() );
 		try {
-			Logging.info( "append list: " + this );
+			Logging.info("appendAll list: " + this);
 			Files.write( toPath(), buff.array(), StandardOpenOption.CREATE, StandardOpenOption.APPEND );
-			return true;
 		} catch ( IOException e ) {
-			return false;
+			callOnIOExceptionListeners(e);
 		}
 	}
 
 	@Override
-	public boolean load() {
-		Logging.fatalError();
-		return false;
+	public void load() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
