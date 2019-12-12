@@ -4,6 +4,7 @@ import es.danisales.io.binary.types.Bin;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -106,8 +107,34 @@ public class BinDecoderTest {
                 .get();
         byteBuffer.position(0);
         assertEquals(3, byteBuffer.getInt());
-        assertEquals(2.5f, byteBuffer.getFloat(), 01.f);
-        assertEquals(12.5f, byteBuffer.getFloat(), 01.f);
+        assertEquals(2.5f, byteBuffer.getFloat(), .1f);
+        assertEquals(12.5f, byteBuffer.getFloat(), .1f);
+    }
+
+    @Test
+    public void map() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + 10 * (Integer.BYTES + Integer.BYTES));
+        byteBuffer.putInt(10);
+        for (int i = 1; i <= 10; i++) {
+            byteBuffer.putInt(i);
+            byteBuffer.putInt(i * 2);
+        }
+        byteBuffer.position(0);
+
+        BinDecoder.DecoderSettings decoderSettings = new BinDecoder.DecoderSettings();
+        decoderSettings.put("keyClass", Integer.class);
+        decoderSettings.put("valueClass", Integer.class);
+
+        @SuppressWarnings("unchecked")
+        Map<Integer, Integer> map = (Map<Integer, Integer>) BinDecoder.builder(Map.class)
+                .from(byteBuffer)
+                .setSettings(decoderSettings)
+                .get();
+
+        assertEquals(10, map.size());
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            assertEquals(entry.getKey() * 2, (int) entry.getValue());
+        }
     }
 
     @SuppressWarnings("unused")
@@ -134,5 +161,25 @@ public class BinDecoderTest {
 
         float notParsedFloat;
         int notParsedInt;
+    }
+
+    @Test
+    public void string() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(7);
+        byteBuffer.put((byte) 49);
+        byteBuffer.put((byte) 50);
+        byteBuffer.put((byte) 51);
+        byteBuffer.put((byte) 52);
+        byteBuffer.put((byte) 53);
+        byteBuffer.put((byte) 54);
+        byteBuffer.put((byte) 0);
+
+        byteBuffer.position(0);
+
+        String str = BinDecoder.builder(String.class)
+                .from(byteBuffer)
+                .get();
+
+        assertEquals("123456", str);
     }
 }

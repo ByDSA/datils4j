@@ -2,8 +2,8 @@ package es.danisales.log;
 
 import es.danisales.io.FileAppendable;
 import es.danisales.io.FileReadable;
+import es.danisales.io.binary.BinEncoder;
 import es.danisales.io.binary.BinaryFile;
-import es.danisales.io.binary.types.Binary;
 import es.danisales.log.string.Logging;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>>
 
 	@Override
 	public void appendAll(List<L> f) {
-		ByteBuffer buff = ByteBuffer.allocate(Binary.sizeBytes( f ));
+        ByteBuffer buff = ByteBuffer.allocate(BinEncoder.getBinarySizeOf(f));
 		for(L l : f)
 			buff.put( l.getBytes() );
 		try {
@@ -60,13 +60,16 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>>
 
 	@Override
 	public int sizeBytes() {
-		return Binary.sizeBytes( lines );
+        return BinEncoder.getBinarySizeOf(lines);
 	}
 
 	@Override
 	public void write(ByteBuffer buff) {
 		for(L l : lines)
-			l.write( buff );
+            BinEncoder.builder()
+                    .from(l)
+                    .to(buff)
+                    .get();
 	}
 
 	@Override
