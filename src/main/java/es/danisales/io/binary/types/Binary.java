@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * Class which implements this interface could be turned into a byte array.
  */
@@ -30,36 +29,10 @@ public interface Binary extends Serializable {
     }
 
 	/**
-	 * Turns the object information into a byte array.
-	 * 
-	 * @return byte array
-	 */
-	default byte[] getBytes() {
-		ByteBuffer buff = ByteBuffer.allocate( sizeBytes() );
-		write(buff);
-
-		return buff.array();
-	}
-
-	/**
-	 * Writes into buffer buff the contained data in the object.
-	 *
-	 * @param buff Buffer in which es.danisales.io.binary.types data will be added
-	 */
-	void write(ByteBuffer buff);
-
-	/**
-	 * Reads from buffer buff the es.danisales.io.binary.types data and stores it into the object.
-	 *
-	 * @param buff Buffer from which es.danisales.io.binary.types data will be read
-	 */
-	void read(ByteBuffer buff);
-
-	/**
 	 * Gets n bytes from a buffer at its current seek.
 	 *
 	 * @param buff the buff
-     * @param N number from bytes to get
+     * @param N number from bytes from get
 	 * @return the got bytes
 	 */
 	static byte[] getNBytes(ByteBuffer buff, final int N) {
@@ -82,13 +55,6 @@ public interface Binary extends Serializable {
             buff.put(b.getBytes());
     }
 
-    /**
-     * Size in bytes from es.danisales.io.binary.types data composed in function getBytes.
-     *
-     * @return size
-     */
-    int sizeBytes();
-
 	static Object getId(Class<? extends Binary> c) {
 		try {
 			Field myField = c.getDeclaredField(ID_VARNAME);
@@ -107,12 +73,12 @@ public interface Binary extends Serializable {
 		else if (ID_TYPE == IdTypeEnum.Short)
 			buff.putShort( (short)id);
 	}
-	
+
 	static <B extends Binary> void writeId(B b, ByteBuffer buff) {
 		writeId(b.getClass(), buff);
 	}
-	
-	static Class readId( ByteBuffer buff ) {
+
+    static Class readId( ByteBuffer buff ) {
 		long id = -1;
 		if (ID_TYPE == IdTypeEnum.Long)
 			id = buff.getLong();
@@ -121,48 +87,81 @@ public interface Binary extends Serializable {
 		else if (ID_TYPE == IdTypeEnum.Short)
 			id = buff.getShort();
 		return getClass(id);
-	}
-	
+    }
+
+    static Class getClass(long id) {
+        return classes.get(id);
+    }
+
+    static Class<? extends TypeBin> getBinaryClass(Class c) {
+        return c2b.get(c);
+    }
+
+    static int idSizeBytes() {
+        if (ID_TYPE == IdTypeEnum.Long)
+            return Long.BYTES;
+        else if (ID_TYPE == IdTypeEnum.Integer)
+            return Integer.BYTES;
+        else if (ID_TYPE == IdTypeEnum.Short)
+            return Short.BYTES;
+        else
+            return 0;
+    }
+
+    static Binary toBinary(byte[] bytes) {
+        return new Binary() {
+
+            @Override
+            public int sizeBytes() {
+                return bytes.length;
+            }
+
+            @Override
+            public void write(ByteBuffer buff) {
+                buff.put(bytes);
+            }
+
+            @Override
+            public void read(ByteBuffer buff) {
+                // TODO Auto-generated method stub
+            }
+
+        };
+    }
+
+    /**
+     * Turns the object information into a byte array.
+     *
+     * @return byte array
+     */
+    default byte[] getBytes() {
+        ByteBuffer buff = ByteBuffer.allocate(sizeBytes());
+        write(buff);
+
+        return buff.array();
+    }
+
+    /**
+     * Writes into buffer buff the contained data in the object.
+     *
+     * @param buff Buffer in which es.danisales.io.binary.types data will be added
+     */
+    void write(ByteBuffer buff);
+
+    /**
+     * Reads from buffer buff the es.danisales.io.binary.types data and stores it into the object.
+     *
+     * @param buff Buffer from which es.danisales.io.binary.types data will be read
+     */
+    void read(ByteBuffer buff);
+
+    /**
+     * Size in bytes from es.danisales.io.binary.types data composed in function getBytes.
+     *
+     * @return size
+     */
+    int sizeBytes();
 	Map<Long, Class> classes = new HashMap<>();
-	Map<Class<Object>, Class<TypeBin>> c2b = new HashMap<>();
-	
-	static Class getClass(long id) {
-		return classes.get( id );
-	}
-	
-	static Class<? extends TypeBin> getBinaryClass(Class c) {
-		return c2b.get( c );
-	}
 
-	static int idSizeBytes() {
-		if (ID_TYPE == IdTypeEnum.Long)
-			return 8; // Long.BYTES in Java 8
-		else if (ID_TYPE == IdTypeEnum.Integer)
-			return 4; // Integer.BYTES in Java 8
-		else if (ID_TYPE == IdTypeEnum.Short)
-			return 2; // Short.BYTES in Java 8
-		else
-			return 0;
-	}
-	
-	static Binary toBinary(byte[] bytes) {
-		return new Binary() {
-
-			@Override
-			public int sizeBytes() {
-				return bytes.length;
-			}
-
-			@Override
-			public void write(ByteBuffer buff) {
-				buff.put( bytes );
-			}
-
-			@Override
-			public void read(ByteBuffer buff) {
-				// TODO Auto-generated method stub
-			}
-			
-		};
-	}
+    Map<Class<Object>, Class<TypeBin>> c2b = new HashMap<>();
 }

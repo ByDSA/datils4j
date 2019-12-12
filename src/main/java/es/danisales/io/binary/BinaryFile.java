@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A readable/writable es.danisales.io.binary.types File
+ * A readable/writable binary file
  */
 public abstract class BinaryFile
         extends FileAutosavable
