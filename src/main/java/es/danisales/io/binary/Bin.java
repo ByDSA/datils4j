@@ -1,4 +1,4 @@
-package es.danisales.io.binary.types;
+package es.danisales.io.binary;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

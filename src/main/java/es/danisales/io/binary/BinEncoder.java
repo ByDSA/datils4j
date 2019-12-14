@@ -1,50 +1,39 @@
 package es.danisales.io.binary;
 
-import es.danisales.io.binary.types.Bin;
 import es.danisales.utils.PrimitiveTypes;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public final class BinEncoder {
+public final class BinEncoder<T> {
     private static Map<Class, BiConsumer<?, EncoderSettings>> mapEncoder = new HashMap<>();
-    private static Map<Class, BiFunction<?, EncoderSettings, Integer>> mapSize = new HashMap<>();
 
     static {
-        mapEncoder.put(Integer.class, (Integer self, EncoderSettings settings) -> settings.byteBuffer.putInt(self));
-        mapSize.put(Integer.class, (Integer i, EncoderSettings settings) -> Integer.BYTES);
-        mapEncoder.put(int.class, (Integer self, EncoderSettings settings) -> settings.byteBuffer.putInt(self));
-        mapSize.put(int.class, (Integer i, EncoderSettings settings) -> Integer.BYTES);
+        mapEncoder.put(Integer.class, (Integer self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
+        mapEncoder.put(int.class, (Integer self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
 
-        mapEncoder.put(Double.class, (Double self, EncoderSettings settings) -> settings.byteBuffer.putDouble(self));
-        mapSize.put(Double.class, (Double i, EncoderSettings settings) -> Double.BYTES);
-        mapEncoder.put(double.class, (Double self, EncoderSettings settings) -> settings.byteBuffer.putDouble(self));
-        mapSize.put(double.class, (Double i, EncoderSettings settings) -> Double.BYTES);
+        mapEncoder.put(Double.class, (Double self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
+        mapEncoder.put(double.class, (Double self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
 
-        mapEncoder.put(Float.class, (Float self, EncoderSettings settings) -> settings.byteBuffer.putFloat(self));
-        mapSize.put(Float.class, (Float i, EncoderSettings settings) -> Float.BYTES);
-        mapEncoder.put(float.class, (Float self, EncoderSettings settings) -> settings.byteBuffer.putFloat(self));
-        mapSize.put(float.class, (Float i, EncoderSettings settings) -> Float.BYTES);
+        mapEncoder.put(Float.class, (Float self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
+        mapEncoder.put(float.class, (Float self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
 
-        mapEncoder.put(Byte.class, (Byte self, EncoderSettings settings) -> settings.byteBuffer.put(self));
-        mapSize.put(Byte.class, (Byte i, EncoderSettings settings) -> Byte.BYTES);
-        mapEncoder.put(byte.class, (Byte self, EncoderSettings settings) -> settings.byteBuffer.put(self));
-        mapSize.put(byte.class, (Byte i, EncoderSettings settings) -> Byte.BYTES);
+        mapEncoder.put(Byte.class, (Byte self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
+        mapEncoder.put(byte.class, (Byte self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self));
 
         mapEncoder.put(boolean[].class, (boolean[] self, EncoderSettings settings) -> {
             int n = -1;
-            byte[] encodedBytes = new byte[getBinarySizeOf(self)];
+            byte[] encodedBytes = new byte[BinSize.getBinarySizeOf(self)];
             for (boolean b : self) {
                 n++;
                 if (!b)
@@ -77,15 +66,7 @@ public final class BinEncoder {
                         break;
                 }
             }
-            settings.byteBuffer.put(encodedBytes);
-        });
-        mapSize.put(boolean[].class, (boolean[] self, EncoderSettings settings) -> {
-            int s = self.length;
-            return s == 0 ? 0 : s / 8 + 1;
-        });
-        mapSize.put(Boolean[].class, (Boolean[] self, EncoderSettings settings) -> {
-            int s = self.length;
-            return s == 0 ? 0 : s / 8 + 1;
+            writeSecure(settings.dataOutputStream, encodedBytes);
         });
         mapEncoder.put(Boolean[].class, (Boolean[] self, EncoderSettings settings) -> {
             boolean[] self2 = PrimitiveTypes.getPrimitiveArrayFrom(self);
@@ -96,18 +77,18 @@ public final class BinEncoder {
         });
 
         BiConsumer<Map<?, ?>, EncoderSettings> encoderMapFunction = (Map<?, ?> self, EncoderSettings settings) -> {
-            settings.byteBuffer.putInt(self.size());
+            writeSecure(settings.dataOutputStream, self.size());
 
             for (Map.Entry<?, ?> e : self.entrySet()) {
-                builder()
+                BinData.encoder()
                         .from(e.getKey())
-                        .to(settings.byteBuffer)
-                        .get();
+                        .to(settings)
+                        .putIntoStream();
 
-                builder()
+                BinData.encoder()
                         .from(e.getValue())
-                        .to(settings.byteBuffer)
-                        .get();
+                        .to(settings)
+                        .putIntoStream();
             }
         };
 
@@ -115,93 +96,102 @@ public final class BinEncoder {
         mapEncoder.put(HashMap.class, encoderMapFunction);
         mapEncoder.put(ConcurrentHashMap.class, encoderMapFunction);
 
-        BiFunction<Map<?, ?>, EncoderSettings, Integer> sizeMapFunction = (Map<?, ?> self, EncoderSettings settings) -> {
-            int s = Integer.BYTES;
-            for (Map.Entry<?, ?> e : self.entrySet()) {
-                s += getBinarySizeOf(e.getKey());
-                s += getBinarySizeOf(e.getValue());
-            }
-
-            return s;
-        };
-
-        mapSize.put(Map.class, sizeMapFunction);
-        mapSize.put(HashMap.class, sizeMapFunction);
-        mapSize.put(ConcurrentHashMap.class, sizeMapFunction);
-
         mapEncoder.put(String.class, (String self, EncoderSettings settings) -> {
             Charset charset = (Charset) settings.get("charset");
             if (charset == null)
                 charset = Charset.defaultCharset();
 
-            settings.byteBuffer.put(self.getBytes(charset));
-            settings.byteBuffer.put((byte) 0);
+
+            writeSecure(settings.dataOutputStream, self.getBytes(charset));
+            writeSecure(settings.dataOutputStream, (byte) 0);
         });
 
-        mapSize.put(String.class, (String self, EncoderSettings settings) -> {
-            Charset charset = (Charset) settingsGet(settings, "charset");
-            if (charset == null)
-                charset = Charset.defaultCharset();
-
-            return self.getBytes(charset).length + 1;
+        mapEncoder.put(ArrayList.class, (ArrayList self, EncoderSettings settings) -> {
+            writeSecure(settings.dataOutputStream, self.size());
+            for (Object o : self) {
+                BinData.encoder()
+                        .from(o)
+                        .to(settings)
+                        .getBytes();
+            }
         });
+
+        mapEncoder.put(GregorianCalendar.class, (GregorianCalendar self, EncoderSettings settings) -> writeSecure(settings.dataOutputStream, self.getTimeInMillis()));
     }
 
-    private static @Nullable Object settingsGet(EncoderSettings settings, String key) {
-        if (settings == null)
-            return null;
-
-        return settings.get(key);
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, byte[] bs) {
+        try {
+            byteArrayOutputStream.write(bs);
+        } catch (IOException ignored) {
+        }
     }
 
-    private BinEncoder() {
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, int i) {
+        try {
+            byteArrayOutputStream.writeInt(i);
+        } catch (IOException ignored) {
+        }
     }
+
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, long i) {
+        try {
+            byteArrayOutputStream.writeLong(i);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, byte b) {
+        try {
+            byteArrayOutputStream.writeByte(b);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, double d) {
+        try {
+            byteArrayOutputStream.writeDouble(d);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void writeSecure(DataOutputStream byteArrayOutputStream, float f) {
+        try {
+            byteArrayOutputStream.writeFloat(f);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private T fromObject;
 
     public static void register(Class<?> tClass, BiConsumer<?, EncoderSettings> consumer) {
         mapEncoder.put(tClass, consumer);
     }
 
-    public static void registerSize(Class<?> tClass, BiFunction<?, EncoderSettings, Integer> function) {
-        mapSize.put(tClass, function);
+    private EncoderSettings settings = new EncoderSettings();
+
+    @SuppressWarnings({"WeakerAccess", "unchecked"})
+    public static @Nullable <T> BiConsumer<T, EncoderSettings> getEncondingFunction(Class<T> tClass) {
+        return (BiConsumer<T, EncoderSettings>) mapEncoder.get(tClass);
     }
 
-    @SuppressWarnings({"unchecked"})
-    public static <T> int getBinarySizeOf(T o, EncoderSettings settings) {
-        Class<T> tClass = (Class<T>) o.getClass();
-        BiFunction<T, EncoderSettings, Integer> function = (BiFunction<T, EncoderSettings, Integer>) mapSize.get(tClass);
-        if (function != null)
-            return function.apply(o, settings);
+    @SuppressWarnings("WeakerAccess")
+    public static class EncoderSettings extends HashMap<String, Object> {
+        DataOutputStream dataOutputStream;
+        ByteArrayOutputStream byteArrayOutputStream;
 
-        int s = binarySizeFromBinAnnotation(o);
-        if (s >= 0)
-            return s;
-        else
-            throw new BinarySizeUndefinedException(tClass);
-    }
-
-    public static <T> int getBinarySizeOf(T o) {
-        return getBinarySizeOf(o, null);
-    }
-
-    private static int binarySizeFromBinAnnotation(Object fromObject) {
-        int s = 0;
-        boolean done = false;
-        Class<?> clazz = fromObject.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true);
-            if (field.isAnnotationPresent(Bin.class)) {
-                try {
-                    s += getBinarySizeOf(field.get(fromObject));
-                    done = true;
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
+        public EncoderSettings() {
         }
 
-        if (!done)
-            return -1;
-        return s;
+        @SuppressWarnings("SameParameterValue")
+        static @Nullable Object getOrNull(@Nullable EncoderSettings settings, @NonNull String key) {
+            if (settings == null)
+                return null;
+
+            return settings.get(key);
+        }
+    }
+
+    BinEncoder() {
     }
 
     private static boolean encodeFromBinAnnotation(Object fromObject, EncoderSettings settings) {
@@ -211,10 +201,10 @@ public final class BinEncoder {
             field.setAccessible(true);
             if (field.isAnnotationPresent(Bin.class)) {
                 try {
-                    BinEncoder.builder()
+                    BinData.encoder()
                             .from(field.get(fromObject))
-                            .to(settings.byteBuffer)
-                            .get();
+                            .to(settings.dataOutputStream, settings.byteArrayOutputStream)
+                            .putIntoStream();
                     done = true;
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -225,64 +215,56 @@ public final class BinEncoder {
         return done;
     }
 
-    public static @Nullable <T> BiConsumer<T, EncoderSettings> getEncondingFunction(Class<T> tClass) {
-        return (BiConsumer<T, EncoderSettings>) mapEncoder.get(tClass);
+    public BinEncoder<T> from(@NonNull T o) {
+        fromObject = Objects.requireNonNull(o);
+
+        return this;
     }
 
-    public static class EncoderSettings extends HashMap<String, Object> {
-        ByteBuffer byteBuffer;
+    public BinEncoder<T> to(@NonNull DataOutputStream dataOutputStream, @NonNull ByteArrayOutputStream byteArrayOutputStream) {
+        settings.byteArrayOutputStream = Objects.requireNonNull(byteArrayOutputStream);
+        settings.dataOutputStream = Objects.requireNonNull(dataOutputStream);
 
-        public EncoderSettings() {
-        }
+        return this;
     }
 
-
-    public static <T> Getter<T> builder() {
-        return new Getter<T>();
+    public byte[] getBytes() {
+        checkState(
+                settings.dataOutputStream == null
+                        && settings.byteArrayOutputStream == null
+                        || settings.dataOutputStream != null
+                        && settings.byteArrayOutputStream != null
+        );
+        if (settings.byteArrayOutputStream == null) {
+            settings.byteArrayOutputStream = new ByteArrayOutputStream();
+            settings.dataOutputStream = new DataOutputStream(settings.byteArrayOutputStream);
+        }
+        putIntoStream();
+        return settings.byteArrayOutputStream.toByteArray();
     }
 
-    public static class Getter<T> {
-        private T fromObject;
-        private EncoderSettings settings = new EncoderSettings();
-
-        private Getter() {
-        }
-
-        public Getter<T> from(@NonNull T o) {
-            fromObject = Objects.requireNonNull(o);
-
-            return this;
-        }
-
-        public Getter<T> to(@NonNull ByteBuffer byteBuffer) {
-            settings.byteBuffer = Objects.requireNonNull(byteBuffer);
-
-            return this;
-        }
-
+    public void putIntoStream() {
+        checkState(settings.byteArrayOutputStream != null);
+        checkState(settings.dataOutputStream != null);
         @SuppressWarnings("unchecked")
-        public void get() {
-            checkState(settings.byteBuffer != null);
-
-            Class<T> tClass = (Class<T>) fromObject.getClass();
-            BiConsumer<T, EncoderSettings> consumer = getEncondingFunction(tClass);
-            if (consumer == null) {
-                if (!encodeFromBinAnnotation(fromObject, settings))
-                    throw new EncoderNotFoundException(tClass);
-            } else
-                consumer.accept(fromObject, settings);
+        Class<T> tClass = (Class<T>) fromObject.getClass();
+        BiConsumer<T, EncoderSettings> encondingFunction = getEncondingFunction(tClass);
+        if (encondingFunction == null) {
+            if (!encodeFromBinAnnotation(fromObject, settings))
+                throw new EncoderNotFoundException(tClass);
+        } else {
+            encondingFunction.accept(fromObject, settings);
         }
     }
 
-    public static class EncoderNotFoundException extends RuntimeException {
-        public EncoderNotFoundException(Class tClass) {
+    private BinEncoder<T> to(EncoderSettings settings) {
+        return to(settings.dataOutputStream, settings.byteArrayOutputStream);
+    }
+
+    static class EncoderNotFoundException extends RuntimeException {
+        EncoderNotFoundException(Class tClass) {
             super(tClass.getName());
         }
     }
 
-    public static class BinarySizeUndefinedException extends RuntimeException {
-        public BinarySizeUndefinedException(Class tClass) {
-            super(tClass.getName());
-        }
-    }
 }
