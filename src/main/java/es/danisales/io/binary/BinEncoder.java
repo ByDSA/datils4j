@@ -161,7 +161,7 @@ public final class BinEncoder<T> {
         }
     }
 
-    private T fromObject;
+    private Object[] fromArray;
 
     public static void register(Class<?> tClass, BiConsumer<?, EncoderSettings> consumer) {
         mapEncoder.put(tClass, consumer);
@@ -206,7 +206,13 @@ public final class BinEncoder<T> {
     }
 
     public BinEncoder<T> from(@NonNull T o) {
-        fromObject = Objects.requireNonNull(o);
+        fromArray = new Object[]{Objects.requireNonNull(o)};
+
+        return this;
+    }
+
+    public BinEncoder<T> fromArray(@NonNull Object[] array) {
+        fromArray = Objects.requireNonNull(array);
 
         return this;
     }
@@ -233,14 +239,16 @@ public final class BinEncoder<T> {
     public void putIntoStream() {
         checkState(settings.byteArrayOutputStream != null);
         checkState(settings.dataOutputStream != null);
-        @SuppressWarnings("unchecked")
-        Class<T> tClass = (Class<T>) fromObject.getClass();
-        BiConsumer<T, EncoderSettings> encondingFunction = getEncondingFunction(tClass);
-        if (encondingFunction == null) {
-            if (!encodeFromBinAnnotation(fromObject, settings))
-                throw new EncoderNotFoundException(tClass);
-        } else {
-            encondingFunction.accept(fromObject, settings);
+        for (Object fromObject : fromArray) {
+            Class tClass = fromObject.getClass();
+            @SuppressWarnings("unchecked")
+            BiConsumer<Object, EncoderSettings> encondingFunction = (BiConsumer<Object, EncoderSettings>) getEncondingFunction(tClass);
+            if (encondingFunction == null) {
+                if (!encodeFromBinAnnotation(fromObject, settings))
+                    throw new EncoderNotFoundException(tClass);
+            } else {
+                encondingFunction.accept(fromObject, settings);
+            }
         }
     }
 
@@ -274,5 +282,4 @@ public final class BinEncoder<T> {
             super(tClass.getName());
         }
     }
-
 }
