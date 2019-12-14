@@ -34,7 +34,7 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>>
 		for (L line : lines) {
 			byte[] encoded = BinData.encoder()
 					.from(line)
-					.to(dataOutputStream, byteArrayOutputStream)
+					.toStream(dataOutputStream, byteArrayOutputStream)
 					.getBytes();
 			try {
 				dataOutputStream.write(encoded);
@@ -71,7 +71,7 @@ public class BinaryLog<A extends Supplier<Integer>, L extends BinaryLine<A>>
 		for(L l : f)
 			BinData.encoder()
 					.from(l)
-					.to(dataOutputStream, byteArrayOutputStream)
+					.toStream(dataOutputStream, byteArrayOutputStream)
 					.putIntoStream();
 		try {
 			Logging.info("appendAll list: " + this);

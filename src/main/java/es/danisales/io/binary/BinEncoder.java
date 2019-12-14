@@ -82,12 +82,12 @@ public final class BinEncoder<T> {
             for (Map.Entry<?, ?> e : self.entrySet()) {
                 BinData.encoder()
                         .from(e.getKey())
-                        .to(settings)
+                        .toStream(settings)
                         .putIntoStream();
 
                 BinData.encoder()
                         .from(e.getValue())
-                        .to(settings)
+                        .toStream(settings)
                         .putIntoStream();
             }
         };
@@ -111,7 +111,7 @@ public final class BinEncoder<T> {
             for (Object o : self) {
                 BinData.encoder()
                         .from(o)
-                        .to(settings)
+                        .toStream(settings)
                         .getBytes();
             }
         });
@@ -174,26 +174,6 @@ public final class BinEncoder<T> {
         return (BiConsumer<T, EncoderSettings>) mapEncoder.get(tClass);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static class EncoderSettings extends HashMap<String, Object> {
-        DataOutputStream dataOutputStream;
-        ByteArrayOutputStream byteArrayOutputStream;
-
-        public EncoderSettings() {
-        }
-
-        @SuppressWarnings("SameParameterValue")
-        static @Nullable Object getOrNull(@Nullable EncoderSettings settings, @NonNull String key) {
-            if (settings == null)
-                return null;
-
-            return settings.get(key);
-        }
-    }
-
-    BinEncoder() {
-    }
-
     private static boolean encodeFromBinAnnotation(Object fromObject, EncoderSettings settings) {
         boolean done = false;
         Class<?> clazz = fromObject.getClass();
@@ -203,7 +183,7 @@ public final class BinEncoder<T> {
                 try {
                     BinData.encoder()
                             .from(field.get(fromObject))
-                            .to(settings.dataOutputStream, settings.byteArrayOutputStream)
+                            .toStream(settings.dataOutputStream, settings.byteArrayOutputStream)
                             .putIntoStream();
                     done = true;
                 } catch (IllegalAccessException e) {
@@ -215,17 +195,24 @@ public final class BinEncoder<T> {
         return done;
     }
 
+    BinEncoder() {
+    }
+
+    public BinEncoder<T> toStream(@NonNull DataOutputStream dataOutputStream, @NonNull ByteArrayOutputStream byteArrayOutputStream) {
+        settings.byteArrayOutputStream = Objects.requireNonNull(byteArrayOutputStream);
+        settings.dataOutputStream = Objects.requireNonNull(dataOutputStream);
+
+        return this;
+    }
+
     public BinEncoder<T> from(@NonNull T o) {
         fromObject = Objects.requireNonNull(o);
 
         return this;
     }
 
-    public BinEncoder<T> to(@NonNull DataOutputStream dataOutputStream, @NonNull ByteArrayOutputStream byteArrayOutputStream) {
-        settings.byteArrayOutputStream = Objects.requireNonNull(byteArrayOutputStream);
-        settings.dataOutputStream = Objects.requireNonNull(dataOutputStream);
-
-        return this;
+    private BinEncoder<T> toStream(EncoderSettings settings) {
+        return toStream(settings.dataOutputStream, settings.byteArrayOutputStream);
     }
 
     public byte[] getBytes() {
@@ -257,8 +244,29 @@ public final class BinEncoder<T> {
         }
     }
 
-    private BinEncoder<T> to(EncoderSettings settings) {
-        return to(settings.dataOutputStream, settings.byteArrayOutputStream);
+    @SuppressWarnings("WeakerAccess")
+    public static class EncoderSettings extends HashMap<String, Object> {
+        DataOutputStream dataOutputStream;
+        ByteArrayOutputStream byteArrayOutputStream;
+
+        public EncoderSettings() {
+        }
+
+        @SuppressWarnings("SameParameterValue")
+        static @Nullable Object getOrNull(@Nullable EncoderSettings settings, @NonNull String key) {
+            if (settings == null)
+                return null;
+
+            return settings.get(key);
+        }
+
+        public DataOutputStream getDataOutputStream() {
+            return dataOutputStream;
+        }
+
+        public ByteArrayOutputStream getByteArrayOutputStream() {
+            return byteArrayOutputStream;
+        }
     }
 
     static class EncoderNotFoundException extends RuntimeException {
