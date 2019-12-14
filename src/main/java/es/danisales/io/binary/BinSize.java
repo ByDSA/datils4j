@@ -81,7 +81,7 @@ public final class BinSize {
             throw new BinarySizeUndefinedException(tClass);
     }
 
-    public static void registerSize(Class<?> tClass, BiFunction<?, BinEncoder.EncoderSettings, Integer> function) {
+    public static void register(Class<?> tClass, BiFunction<?, BinEncoder.EncoderSettings, Integer> function) {
         mapSize.put(tClass, function);
     }
 
