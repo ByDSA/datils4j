@@ -10,15 +10,18 @@ import java.util.Arrays;
 
 @SuppressWarnings("unused")
 public class Hash {
-    private byte[] hash;
+    private final byte[] hash;
 
     private Hash(byte[] hash) {
         this.hash = hash;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static Hash from(byte[] hash) {
         return new Hash(hash);
+    }
+
+    public byte[] getBytes() {
+        return hash;
     }
 
     /** File **/
