@@ -161,11 +161,11 @@ public final class BinEncoder<T> {
         }
     }
 
-    private Object[] fromArray;
-
     public static void register(Class<?> tClass, BiConsumer<?, EncoderSettings> consumer) {
         mapEncoder.put(tClass, consumer);
     }
+
+    private Object[] fromArray;
 
     private EncoderSettings settings = new EncoderSettings();
 
