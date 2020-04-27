@@ -15,6 +15,7 @@ public class TimeUtils {
     private TimeUtils() {
     } // noninstantiable
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean isBetweenDayOfMonth(@NonNull LocalDateTime localDateTime, Range<Integer> range) {
         checkDayOfMonth(range);
         int n = localDateTime.getDayOfMonth();
@@ -27,6 +28,7 @@ public class TimeUtils {
         checkArgument(range.upperEndpoint() >= 1 && range.upperEndpoint() <= 31);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean isBetweenDayOfWeek(@NonNull LocalDateTime localDateTime, Range<DayOfWeek> range) {
         DayOfWeek localDateTimeDayOfWeek = localDateTime.getDayOfWeek();
         return range.contains(localDateTimeDayOfWeek);
@@ -37,6 +39,7 @@ public class TimeUtils {
         return range.contains(n);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean isBetween(LocalTime n, Range<LocalTime> range) {
         return range.contains(n);
     }
@@ -68,7 +71,6 @@ public class TimeUtils {
             return TimeUtils.isBetweenDayOfWeek(now(), range);
         }
 
-        @SuppressWarnings("WeakerAccess")
         public static LocalDateTime now() {
             return fake != null ? fake : LocalDateTime.now();
         }
@@ -95,7 +97,7 @@ public class TimeUtils {
         @SuppressWarnings("WeakerAccess")
         public static String stringFrom(LocalDateTime localDateTime) {
             String year = zerosLeft(localDateTime.getYear(), 4);
-            String month = zerosLeft(localDateTime.getMonthValue() + 1, 2);
+            String month = zerosLeft(localDateTime.getMonthValue(), 2);
             String day = zerosLeft(localDateTime.getDayOfMonth(), 2);
             String hour = zerosLeft(localDateTime.getHour(), 2);
             String min = zerosLeft(localDateTime.getMinute(), 2);
